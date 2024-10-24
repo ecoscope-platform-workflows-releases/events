@@ -1,6 +1,6 @@
 # [generated]
 # by = { compiler = "ecoscope-workflows-core", version = "9999" }
-# from-spec-sha256 = "643d239161219e7c904abd28bd05cad82077f35ecd9be771115b88e0730aa8cc"
+# from-spec-sha256 = "4b3deebd4cdee2f94b35f46873c4c44f7c6e8410d8ea2b6f47b1ab8fef07b587"
 
 [project]
 name = "ecoscope-workflows-events-workflow"
@@ -30,11 +30,11 @@ version = "*"
 version = "*"
 
 [dependencies.ecoscope-workflows-core]
-version = "==v0.0.10"
+version = "==v0.0.11"
 channel = "https://repo.prefix.dev/ecoscope-workflows/"
 
 [dependencies.ecoscope-workflows-ext-ecoscope]
-version = "==v0.0.10"
+version = "==v0.0.11"
 channel = "https://repo.prefix.dev/ecoscope-workflows/"
 
 [feature.test.dependencies.pytest]
