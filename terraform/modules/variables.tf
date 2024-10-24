@@ -65,3 +65,7 @@ variable "service_url" {
 variable "workflows_services_custom_audience" {
   type = string
 }
+
+variable "workflows_results_bucket" {
+  type = string
+}
