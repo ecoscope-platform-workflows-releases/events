@@ -32,6 +32,11 @@ resource "google_cloud_run_v2_service" "default" {
         cpu_idle          = true
         startup_cpu_boost = true
       }
+
+      env {
+        name  = "WORKFLOW_RESULTS_ROOT_PATH"
+        value = var.workflows_results_bucket
+      }
     }
   }
   depends_on = [

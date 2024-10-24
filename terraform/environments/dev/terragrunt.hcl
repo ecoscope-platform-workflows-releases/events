@@ -14,4 +14,5 @@ inputs = {
   network_name                       = "ecoscope-dev"
   service_url                        = "events.dev.ecoscope.io"
   workflows_services_custom_audience = "ecoscope-workflows-services-dev"
+  workflows_results_bucket           = "ecoscope-workflows-results-dev"
 }
