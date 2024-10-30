@@ -1,6 +1,6 @@
 # [generated]
 # by = { compiler = "ecoscope-workflows-core", version = "9999" }
-# from-spec-sha256 = "4b3deebd4cdee2f94b35f46873c4c44f7c6e8410d8ea2b6f47b1ab8fef07b587"
+# from-spec-sha256 = "1ca8a3ca290aba41008930a857cfc9af3542ab3a322056bd2a7bc26045b192e8"
 
 # ruff: noqa: E402
 
@@ -15,6 +15,7 @@ import warnings  # 🧪
 from ecoscope_workflows_core.testing import create_task_magicmock  # 🧪
 
 
+from ecoscope_workflows_core.tasks.config import set_workflow_details
 from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_core.tasks.filter import set_time_range
 
@@ -47,6 +48,12 @@ def main(params: Params):
     warnings.warn("This test script should not be used in production!")  # 🧪
 
     params_dict = json.loads(params.model_dump_json(exclude_unset=True))
+
+    workflow_details = (
+        set_workflow_details.validate()
+        .partial(**params_dict["workflow_details"])
+        .call()
+    )
 
     groupers = set_groupers.validate().partial(**params_dict["groupers"]).call()
 
@@ -304,6 +311,7 @@ def main(params: Params):
     events_dashboard = (
         gather_dashboard.validate()
         .partial(
+            details=workflow_details,
             widgets=[
                 events_map_widget,
                 events_bar_chart_widget,
