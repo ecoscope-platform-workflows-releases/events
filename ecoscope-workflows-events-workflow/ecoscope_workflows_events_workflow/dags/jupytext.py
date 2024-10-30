@@ -1,6 +1,6 @@
 # [generated]
 # by = { compiler = "ecoscope-workflows-core", version = "9999" }
-# from-spec-sha256 = "4b3deebd4cdee2f94b35f46873c4c44f7c6e8410d8ea2b6f47b1ab8fef07b587"
+# from-spec-sha256 = "1ca8a3ca290aba41008930a857cfc9af3542ab3a322056bd2a7bc26045b192e8"
 
 
 # ruff: noqa: E402
@@ -13,6 +13,7 @@
 # ## Imports
 
 import os
+from ecoscope_workflows_core.tasks.config import set_workflow_details
 from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_core.tasks.filter import set_time_range
 from ecoscope_workflows_ext_ecoscope.tasks.io import get_events
@@ -33,6 +34,25 @@ from ecoscope_workflows_core.tasks.groupby import split_groups
 from ecoscope_workflows_core.tasks.results import merge_widget_views
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_pie_chart
 from ecoscope_workflows_core.tasks.results import gather_dashboard
+
+# %% [markdown]
+# ## Set Workflow Details
+
+# %%
+# parameters
+
+workflow_details_params = dict(
+    name=...,
+    description=...,
+    image_url=...,
+)
+
+# %%
+# call the task
+
+
+workflow_details = set_workflow_details.partial(**workflow_details_params).call()
+
 
 # %% [markdown]
 # ## Set Groupers
@@ -795,16 +815,14 @@ grouped_fd_map_widget_merge = merge_widget_views.partial(
 # %%
 # parameters
 
-events_dashboard_params = dict(
-    title=...,
-    description=...,
-)
+events_dashboard_params = dict()
 
 # %%
 # call the task
 
 
 events_dashboard = gather_dashboard.partial(
+    details=workflow_details,
     widgets=[
         events_map_widget,
         events_bar_chart_widget,
