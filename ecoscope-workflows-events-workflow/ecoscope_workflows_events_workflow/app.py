@@ -1,6 +1,6 @@
 # [generated]
 # by = { compiler = "ecoscope-workflows-core", version = "9999" }
-# from-spec-sha256 = "1ca8a3ca290aba41008930a857cfc9af3542ab3a322056bd2a7bc26045b192e8"
+# from-spec-sha256 = "8b1c29b30f1da1384fa5123edb976ad2cd110fffd5ee8f5295013ab6bbdcb3ea"
 
 
 import json
@@ -25,7 +25,7 @@ from .params import Params
 app = FastAPI(
     title="events",
     debug=True,
-    version="1ca8a3c",
+    version="8b1c29b",
 )
 app.add_middleware(
     CORSMiddleware,
@@ -112,8 +112,8 @@ def run(
 
 
 @app.get("/rjsf", status_code=200)
-def params_jsonschema():
-    with Path(__file__).parent.joinpath("params-jsonschema.json").open() as f:
+def rjsf():
+    with Path(__file__).parent.joinpath("rjsf.json").open() as f:
         return json.load(f)
 
 
