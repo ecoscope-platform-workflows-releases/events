@@ -35,6 +35,8 @@ workflow:
     task: add_temporal_index
     partial:
       df: ${{ workflow.filter_events.return }}
+      time_col: "time"
+      groupers: ${{ workflow.groupers.return }}
 
   # Colormap events
   - name: Events Colormap
@@ -46,9 +48,15 @@ workflow:
   # Combined Events map layer
   - name: Create map layer from Events
     id: events_map_layer
-    task: create_map_layer
+    task: create_point_layer
     partial:
       geodataframe: ${{ workflow.events_colormap.return }}
+      layer_style:
+        fill_color_column: "event_type_colormap"
+        get_radius: 5
+      legend:
+        label_column: "event_type"
+        color_column: "event_type_colormap"
   - name: Draw Ecomap from Time Density
     id: events_ecomap
     task: draw_ecomap
@@ -73,6 +81,13 @@ workflow:
     task: draw_time_series_bar_chart
     partial:
       dataframe: ${{ workflow.events_colormap.return }}
+      x_axis: "time"
+      y_axis: "event_type"
+      category: "event_type"
+      agg_function: "count"
+      color_column: "event_type_colormap"
+      plot_style:
+        xperiodalignment: "middle"
   - name: Persist Bar Chart as Text
     id: events_bar_chart_html_url
     task: persist_text
@@ -104,9 +119,13 @@ workflow:
       df: ${{ workflow.events_feature_density.return }}
   - name: Create map layer from Feature Density
     id: fd_map_layer
-    task: create_map_layer
+    task: create_polygon_layer
     partial:
       geodataframe: ${{ workflow.fd_colormap.return }}
+      layer_style:
+        fill_color_column: "density_colormap"
+        get_line_width: 0
+        opacity: 0.4
   - name: Draw Ecomap from Feature Density
     id: fd_ecomap
     task: draw_ecomap
@@ -136,7 +155,11 @@ workflow:
   # Grouped Events Map
   - name: Create map layer from grouped Events
     id: grouped_events_map_layer
-    task: create_map_layer
+    task: create_point_layer
+    partial:
+      layer_style:
+        fill_color_column: "event_type_colormap"
+        get_radius: 5
     mapvalues:
       argnames: geodataframe
       argvalues: ${{ workflow.split_event_groups.return }}
@@ -170,6 +193,11 @@ workflow:
   - name: Draw Pie Chart for Events
     id: grouped_events_pie_chart
     task: draw_pie_chart
+    partial:
+      value_column: "event_type"
+      color_column: "event_type_colormap"
+      plot_style:
+        textinfo: "value"
     mapvalues:
       argnames: dataframe
       argvalues: ${{ workflow.split_event_groups.return }}
@@ -210,7 +238,12 @@ workflow:
       argvalues: ${{ workflow.grouped_events_feature_density.return }}
   - name: Create map layer from Feature Density
     id: grouped_fd_map_layer
-    task: create_map_layer
+    task: create_polygon_layer
+    partial:
+      layer_style:
+        fill_color_column: "density_colormap"
+        get_line_width: 0
+        opacity: 0.4
     mapvalues:
       argnames: geodataframe
       argvalues: ${{ workflow.grouped_fd_colormap.return}}
