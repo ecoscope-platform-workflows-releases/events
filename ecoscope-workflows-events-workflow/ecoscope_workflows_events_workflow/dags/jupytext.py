@@ -1,6 +1,6 @@
 # [generated]
 # by = { compiler = "ecoscope-workflows-core", version = "9999" }
-# from-spec-sha256 = "8b1c29b30f1da1384fa5123edb976ad2cd110fffd5ee8f5295013ab6bbdcb3ea"
+# from-spec-sha256 = "6581c63822e13f69ae1b49518ecca8fd71c6ab4f149fa76fd14fcc3fd3ca48e7"
 
 
 # ruff: noqa: E402
@@ -22,7 +22,7 @@ from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
 )
 from ecoscope_workflows_core.tasks.transformation import add_temporal_index
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import apply_color_map
-from ecoscope_workflows_ext_ecoscope.tasks.results import create_map_layer
+from ecoscope_workflows_ext_ecoscope.tasks.results import create_point_layer
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_ecomap
 from ecoscope_workflows_core.tasks.io import persist_text
 from ecoscope_workflows_core.tasks.results import create_map_widget_single_view
@@ -30,6 +30,7 @@ from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_c
 from ecoscope_workflows_core.tasks.results import create_plot_widget_single_view
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import create_meshgrid
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import calculate_feature_density
+from ecoscope_workflows_ext_ecoscope.tasks.results import create_polygon_layer
 from ecoscope_workflows_core.tasks.groupby import split_groups
 from ecoscope_workflows_core.tasks.results import merge_widget_views
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_pie_chart
@@ -141,9 +142,6 @@ filter_events = apply_reloc_coord_filter.partial(
 # parameters
 
 events_add_temporal_index_params = dict(
-    index_name=...,
-    time_col=...,
-    directive=...,
     cast_to_datetime=...,
     format=...,
 )
@@ -153,7 +151,10 @@ events_add_temporal_index_params = dict(
 
 
 events_add_temporal_index = add_temporal_index.partial(
-    df=filter_events, **events_add_temporal_index_params
+    df=filter_events,
+    time_col="time",
+    groupers=groupers,
+    **events_add_temporal_index_params,
 ).call()
 
 
@@ -184,17 +185,17 @@ events_colormap = apply_color_map.partial(
 # %%
 # parameters
 
-events_map_layer_params = dict(
-    layer_style=...,
-    legend=...,
-)
+events_map_layer_params = dict()
 
 # %%
 # call the task
 
 
-events_map_layer = create_map_layer.partial(
-    geodataframe=events_colormap, **events_map_layer_params
+events_map_layer = create_point_layer.partial(
+    geodataframe=events_colormap,
+    layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
+    legend={"label_column": "event_type", "color_column": "event_type_colormap"},
+    **events_map_layer_params,
 ).call()
 
 
@@ -269,14 +270,8 @@ events_map_widget = create_map_widget_single_view.partial(
 # parameters
 
 events_bar_chart_params = dict(
-    x_axis=...,
-    y_axis=...,
-    category=...,
-    agg_function=...,
     time_interval=...,
-    color_column=...,
     grouped_styles=...,
-    plot_style=...,
     layout_style=...,
 )
 
@@ -285,7 +280,14 @@ events_bar_chart_params = dict(
 
 
 events_bar_chart = draw_time_series_bar_chart.partial(
-    dataframe=events_colormap, **events_bar_chart_params
+    dataframe=events_colormap,
+    x_axis="time",
+    y_axis="event_type",
+    category="event_type",
+    agg_function="count",
+    color_column="event_type_colormap",
+    plot_style={"xperiodalignment": "middle"},
+    **events_bar_chart_params,
 ).call()
 
 
@@ -400,7 +402,6 @@ fd_colormap = apply_color_map.partial(
 # parameters
 
 fd_map_layer_params = dict(
-    layer_style=...,
     legend=...,
 )
 
@@ -408,8 +409,14 @@ fd_map_layer_params = dict(
 # call the task
 
 
-fd_map_layer = create_map_layer.partial(
-    geodataframe=fd_colormap, **fd_map_layer_params
+fd_map_layer = create_polygon_layer.partial(
+    geodataframe=fd_colormap,
+    layer_style={
+        "fill_color_column": "density_colormap",
+        "get_line_width": 0,
+        "opacity": 0.4,
+    },
+    **fd_map_layer_params,
 ).call()
 
 
@@ -499,7 +506,6 @@ split_event_groups = split_groups.partial(
 # parameters
 
 grouped_events_map_layer_params = dict(
-    layer_style=...,
     legend=...,
 )
 
@@ -507,8 +513,9 @@ grouped_events_map_layer_params = dict(
 # call the task
 
 
-grouped_events_map_layer = create_map_layer.partial(
-    **grouped_events_map_layer_params
+grouped_events_map_layer = create_point_layer.partial(
+    layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
+    **grouped_events_map_layer_params,
 ).mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
 
 
@@ -598,10 +605,7 @@ grouped_events_map_widget_merge = merge_widget_views.partial(
 # parameters
 
 grouped_events_pie_chart_params = dict(
-    value_column=...,
     label_column=...,
-    color_column=...,
-    plot_style=...,
     layout_style=...,
 )
 
@@ -610,7 +614,10 @@ grouped_events_pie_chart_params = dict(
 
 
 grouped_events_pie_chart = draw_pie_chart.partial(
-    **grouped_events_pie_chart_params
+    value_column="event_type",
+    color_column="event_type_colormap",
+    plot_style={"textinfo": "value"},
+    **grouped_events_pie_chart_params,
 ).mapvalues(argnames=["dataframe"], argvalues=split_event_groups)
 
 
@@ -717,7 +724,6 @@ grouped_fd_colormap = apply_color_map.partial(**grouped_fd_colormap_params).mapv
 # parameters
 
 grouped_fd_map_layer_params = dict(
-    layer_style=...,
     legend=...,
 )
 
@@ -725,8 +731,13 @@ grouped_fd_map_layer_params = dict(
 # call the task
 
 
-grouped_fd_map_layer = create_map_layer.partial(
-    **grouped_fd_map_layer_params
+grouped_fd_map_layer = create_polygon_layer.partial(
+    layer_style={
+        "fill_color_column": "density_colormap",
+        "get_line_width": 0,
+        "opacity": 0.4,
+    },
+    **grouped_fd_map_layer_params,
 ).mapvalues(argnames=["geodataframe"], argvalues=grouped_fd_colormap)
 
 

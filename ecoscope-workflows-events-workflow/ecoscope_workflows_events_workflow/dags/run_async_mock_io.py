@@ -1,6 +1,6 @@
 # [generated]
 # by = { compiler = "ecoscope-workflows-core", version = "9999" }
-# from-spec-sha256 = "8b1c29b30f1da1384fa5123edb976ad2cd110fffd5ee8f5295013ab6bbdcb3ea"
+# from-spec-sha256 = "6581c63822e13f69ae1b49518ecca8fd71c6ab4f149fa76fd14fcc3fd3ca48e7"
 
 # ruff: noqa: E402
 
@@ -30,7 +30,7 @@ from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
 )
 from ecoscope_workflows_core.tasks.transformation import add_temporal_index
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import apply_color_map
-from ecoscope_workflows_ext_ecoscope.tasks.results import create_map_layer
+from ecoscope_workflows_ext_ecoscope.tasks.results import create_point_layer
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_ecomap
 from ecoscope_workflows_core.tasks.io import persist_text
 from ecoscope_workflows_core.tasks.results import create_map_widget_single_view
@@ -38,6 +38,7 @@ from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_c
 from ecoscope_workflows_core.tasks.results import create_plot_widget_single_view
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import create_meshgrid
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import calculate_feature_density
+from ecoscope_workflows_ext_ecoscope.tasks.results import create_polygon_layer
 from ecoscope_workflows_core.tasks.groupby import split_groups
 from ecoscope_workflows_core.tasks.results import merge_widget_views
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_pie_chart
@@ -57,7 +58,7 @@ def main(params: Params):
         "time_range": [],
         "get_events_data": ["time_range"],
         "filter_events": ["get_events_data"],
-        "events_add_temporal_index": ["filter_events"],
+        "events_add_temporal_index": ["filter_events", "groupers"],
         "events_colormap": ["events_add_temporal_index"],
         "events_map_layer": ["events_colormap"],
         "events_ecomap": ["events_map_layer"],
@@ -106,17 +107,17 @@ def main(params: Params):
     nodes = {
         "workflow_details": Node(
             async_task=set_workflow_details.validate().set_executor("lithops"),
-            partial=params_dict["workflow_details"],
+            partial=(params_dict.get("workflow_details") or {}),
             method="call",
         ),
         "groupers": Node(
             async_task=set_groupers.validate().set_executor("lithops"),
-            partial=params_dict["groupers"],
+            partial=(params_dict.get("groupers") or {}),
             method="call",
         ),
         "time_range": Node(
             async_task=set_time_range.validate().set_executor("lithops"),
-            partial=params_dict["time_range"],
+            partial=(params_dict.get("time_range") or {}),
             method="call",
         ),
         "get_events_data": Node(
@@ -124,7 +125,7 @@ def main(params: Params):
             partial={
                 "time_range": DependsOn("time_range"),
             }
-            | params_dict["get_events_data"],
+            | (params_dict.get("get_events_data") or {}),
             method="call",
         ),
         "filter_events": Node(
@@ -132,15 +133,17 @@ def main(params: Params):
             partial={
                 "df": DependsOn("get_events_data"),
             }
-            | params_dict["filter_events"],
+            | (params_dict.get("filter_events") or {}),
             method="call",
         ),
         "events_add_temporal_index": Node(
             async_task=add_temporal_index.validate().set_executor("lithops"),
             partial={
                 "df": DependsOn("filter_events"),
+                "time_col": "time",
+                "groupers": DependsOn("groupers"),
             }
-            | params_dict["events_add_temporal_index"],
+            | (params_dict.get("events_add_temporal_index") or {}),
             method="call",
         ),
         "events_colormap": Node(
@@ -148,15 +151,23 @@ def main(params: Params):
             partial={
                 "df": DependsOn("events_add_temporal_index"),
             }
-            | params_dict["events_colormap"],
+            | (params_dict.get("events_colormap") or {}),
             method="call",
         ),
         "events_map_layer": Node(
-            async_task=create_map_layer.validate().set_executor("lithops"),
+            async_task=create_point_layer.validate().set_executor("lithops"),
             partial={
                 "geodataframe": DependsOn("events_colormap"),
+                "layer_style": {
+                    "fill_color_column": "event_type_colormap",
+                    "get_radius": 5,
+                },
+                "legend": {
+                    "label_column": "event_type",
+                    "color_column": "event_type_colormap",
+                },
             }
-            | params_dict["events_map_layer"],
+            | (params_dict.get("events_map_layer") or {}),
             method="call",
         ),
         "events_ecomap": Node(
@@ -164,7 +175,7 @@ def main(params: Params):
             partial={
                 "geo_layers": DependsOn("events_map_layer"),
             }
-            | params_dict["events_ecomap"],
+            | (params_dict.get("events_ecomap") or {}),
             method="call",
         ),
         "events_ecomap_html_url": Node(
@@ -173,7 +184,7 @@ def main(params: Params):
                 "text": DependsOn("events_ecomap"),
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             }
-            | params_dict["events_ecomap_html_url"],
+            | (params_dict.get("events_ecomap_html_url") or {}),
             method="call",
         ),
         "events_map_widget": Node(
@@ -181,15 +192,21 @@ def main(params: Params):
             partial={
                 "data": DependsOn("events_ecomap_html_url"),
             }
-            | params_dict["events_map_widget"],
+            | (params_dict.get("events_map_widget") or {}),
             method="call",
         ),
         "events_bar_chart": Node(
             async_task=draw_time_series_bar_chart.validate().set_executor("lithops"),
             partial={
                 "dataframe": DependsOn("events_colormap"),
+                "x_axis": "time",
+                "y_axis": "event_type",
+                "category": "event_type",
+                "agg_function": "count",
+                "color_column": "event_type_colormap",
+                "plot_style": {"xperiodalignment": "middle"},
             }
-            | params_dict["events_bar_chart"],
+            | (params_dict.get("events_bar_chart") or {}),
             method="call",
         ),
         "events_bar_chart_html_url": Node(
@@ -198,7 +215,7 @@ def main(params: Params):
                 "text": DependsOn("events_bar_chart"),
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             }
-            | params_dict["events_bar_chart_html_url"],
+            | (params_dict.get("events_bar_chart_html_url") or {}),
             method="call",
         ),
         "events_bar_chart_widget": Node(
@@ -208,7 +225,7 @@ def main(params: Params):
             partial={
                 "data": DependsOn("events_bar_chart_html_url"),
             }
-            | params_dict["events_bar_chart_widget"],
+            | (params_dict.get("events_bar_chart_widget") or {}),
             method="call",
         ),
         "events_meshgrid": Node(
@@ -216,7 +233,7 @@ def main(params: Params):
             partial={
                 "aoi": DependsOn("events_add_temporal_index"),
             }
-            | params_dict["events_meshgrid"],
+            | (params_dict.get("events_meshgrid") or {}),
             method="call",
         ),
         "events_feature_density": Node(
@@ -225,7 +242,7 @@ def main(params: Params):
                 "geodataframe": DependsOn("events_add_temporal_index"),
                 "meshgrid": DependsOn("events_meshgrid"),
             }
-            | params_dict["events_feature_density"],
+            | (params_dict.get("events_feature_density") or {}),
             method="call",
         ),
         "fd_colormap": Node(
@@ -233,15 +250,20 @@ def main(params: Params):
             partial={
                 "df": DependsOn("events_feature_density"),
             }
-            | params_dict["fd_colormap"],
+            | (params_dict.get("fd_colormap") or {}),
             method="call",
         ),
         "fd_map_layer": Node(
-            async_task=create_map_layer.validate().set_executor("lithops"),
+            async_task=create_polygon_layer.validate().set_executor("lithops"),
             partial={
                 "geodataframe": DependsOn("fd_colormap"),
+                "layer_style": {
+                    "fill_color_column": "density_colormap",
+                    "get_line_width": 0,
+                    "opacity": 0.4,
+                },
             }
-            | params_dict["fd_map_layer"],
+            | (params_dict.get("fd_map_layer") or {}),
             method="call",
         ),
         "fd_ecomap": Node(
@@ -249,7 +271,7 @@ def main(params: Params):
             partial={
                 "geo_layers": DependsOn("fd_map_layer"),
             }
-            | params_dict["fd_ecomap"],
+            | (params_dict.get("fd_ecomap") or {}),
             method="call",
         ),
         "fd_ecomap_html_url": Node(
@@ -258,7 +280,7 @@ def main(params: Params):
                 "text": DependsOn("fd_ecomap"),
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             }
-            | params_dict["fd_ecomap_html_url"],
+            | (params_dict.get("fd_ecomap_html_url") or {}),
             method="call",
         ),
         "fd_map_widget": Node(
@@ -266,7 +288,7 @@ def main(params: Params):
             partial={
                 "data": DependsOn("fd_ecomap_html_url"),
             }
-            | params_dict["fd_map_widget"],
+            | (params_dict.get("fd_map_widget") or {}),
             method="call",
         ),
         "split_event_groups": Node(
@@ -275,12 +297,18 @@ def main(params: Params):
                 "df": DependsOn("events_colormap"),
                 "groupers": DependsOn("groupers"),
             }
-            | params_dict["split_event_groups"],
+            | (params_dict.get("split_event_groups") or {}),
             method="call",
         ),
         "grouped_events_map_layer": Node(
-            async_task=create_map_layer.validate().set_executor("lithops"),
-            partial=params_dict["grouped_events_map_layer"],
+            async_task=create_point_layer.validate().set_executor("lithops"),
+            partial={
+                "layer_style": {
+                    "fill_color_column": "event_type_colormap",
+                    "get_radius": 5,
+                },
+            }
+            | (params_dict.get("grouped_events_map_layer") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["geodataframe"],
@@ -289,7 +317,7 @@ def main(params: Params):
         ),
         "grouped_events_ecomap": Node(
             async_task=draw_ecomap.validate().set_executor("lithops"),
-            partial=params_dict["grouped_events_ecomap"],
+            partial=(params_dict.get("grouped_events_ecomap") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["geo_layers"],
@@ -301,7 +329,7 @@ def main(params: Params):
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             }
-            | params_dict["grouped_events_ecomap_html_url"],
+            | (params_dict.get("grouped_events_ecomap_html_url") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["text"],
@@ -310,7 +338,7 @@ def main(params: Params):
         ),
         "grouped_events_map_widget": Node(
             async_task=create_map_widget_single_view.validate().set_executor("lithops"),
-            partial=params_dict["grouped_events_map_widget"],
+            partial=(params_dict.get("grouped_events_map_widget") or {}),
             method="map",
             kwargs={
                 "argnames": ["view", "data"],
@@ -322,12 +350,17 @@ def main(params: Params):
             partial={
                 "widgets": DependsOn("grouped_events_map_widget"),
             }
-            | params_dict["grouped_events_map_widget_merge"],
+            | (params_dict.get("grouped_events_map_widget_merge") or {}),
             method="call",
         ),
         "grouped_events_pie_chart": Node(
             async_task=draw_pie_chart.validate().set_executor("lithops"),
-            partial=params_dict["grouped_events_pie_chart"],
+            partial={
+                "value_column": "event_type",
+                "color_column": "event_type_colormap",
+                "plot_style": {"textinfo": "value"},
+            }
+            | (params_dict.get("grouped_events_pie_chart") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["dataframe"],
@@ -339,7 +372,7 @@ def main(params: Params):
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             }
-            | params_dict["grouped_pie_chart_html_urls"],
+            | (params_dict.get("grouped_pie_chart_html_urls") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["text"],
@@ -350,7 +383,7 @@ def main(params: Params):
             async_task=create_plot_widget_single_view.validate().set_executor(
                 "lithops"
             ),
-            partial=params_dict["grouped_events_pie_chart_widgets"],
+            partial=(params_dict.get("grouped_events_pie_chart_widgets") or {}),
             method="map",
             kwargs={
                 "argnames": ["view", "data"],
@@ -362,7 +395,7 @@ def main(params: Params):
             partial={
                 "widgets": DependsOn("grouped_events_pie_chart_widgets"),
             }
-            | params_dict["grouped_events_pie_widget_merge"],
+            | (params_dict.get("grouped_events_pie_widget_merge") or {}),
             method="call",
         ),
         "grouped_events_feature_density": Node(
@@ -370,7 +403,7 @@ def main(params: Params):
             partial={
                 "meshgrid": DependsOn("events_meshgrid"),
             }
-            | params_dict["grouped_events_feature_density"],
+            | (params_dict.get("grouped_events_feature_density") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["geodataframe"],
@@ -379,7 +412,7 @@ def main(params: Params):
         ),
         "grouped_fd_colormap": Node(
             async_task=apply_color_map.validate().set_executor("lithops"),
-            partial=params_dict["grouped_fd_colormap"],
+            partial=(params_dict.get("grouped_fd_colormap") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["df"],
@@ -387,8 +420,15 @@ def main(params: Params):
             },
         ),
         "grouped_fd_map_layer": Node(
-            async_task=create_map_layer.validate().set_executor("lithops"),
-            partial=params_dict["grouped_fd_map_layer"],
+            async_task=create_polygon_layer.validate().set_executor("lithops"),
+            partial={
+                "layer_style": {
+                    "fill_color_column": "density_colormap",
+                    "get_line_width": 0,
+                    "opacity": 0.4,
+                },
+            }
+            | (params_dict.get("grouped_fd_map_layer") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["geodataframe"],
@@ -397,7 +437,7 @@ def main(params: Params):
         ),
         "grouped_fd_ecomap": Node(
             async_task=draw_ecomap.validate().set_executor("lithops"),
-            partial=params_dict["grouped_fd_ecomap"],
+            partial=(params_dict.get("grouped_fd_ecomap") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["geo_layers"],
@@ -409,7 +449,7 @@ def main(params: Params):
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             }
-            | params_dict["grouped_fd_ecomap_html_url"],
+            | (params_dict.get("grouped_fd_ecomap_html_url") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["text"],
@@ -418,7 +458,7 @@ def main(params: Params):
         ),
         "grouped_fd_map_widget": Node(
             async_task=create_map_widget_single_view.validate().set_executor("lithops"),
-            partial=params_dict["grouped_fd_map_widget"],
+            partial=(params_dict.get("grouped_fd_map_widget") or {}),
             method="map",
             kwargs={
                 "argnames": ["view", "data"],
@@ -430,7 +470,7 @@ def main(params: Params):
             partial={
                 "widgets": DependsOn("grouped_fd_map_widget"),
             }
-            | params_dict["grouped_fd_map_widget_merge"],
+            | (params_dict.get("grouped_fd_map_widget_merge") or {}),
             method="call",
         ),
         "events_dashboard": Node(
@@ -450,7 +490,7 @@ def main(params: Params):
                 "groupers": DependsOn("groupers"),
                 "time_range": DependsOn("time_range"),
             }
-            | params_dict["events_dashboard"],
+            | (params_dict.get("events_dashboard") or {}),
             method="call",
         ),
     }
