@@ -1,6 +1,6 @@
 # [generated]
 # by = { compiler = "ecoscope-workflows-core", version = "9999" }
-# from-spec-sha256 = "6581c63822e13f69ae1b49518ecca8fd71c6ab4f149fa76fd14fcc3fd3ca48e7"
+# from-spec-sha256 = "096a6fa43734c88c56ead5ca4b242709db7cb7efe284dd34ee2ea141952fc0f4"
 
 
 # ruff: noqa: E402
@@ -14,6 +14,7 @@
 
 import os
 from ecoscope_workflows_core.tasks.config import set_workflow_details
+from ecoscope_workflows_core.tasks.io import set_connection
 from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_core.tasks.filter import set_time_range
 from ecoscope_workflows_ext_ecoscope.tasks.io import get_events
@@ -53,6 +54,23 @@ workflow_details_params = dict(
 
 
 workflow_details = set_workflow_details.partial(**workflow_details_params).call()
+
+
+# %% [markdown]
+# ## Select EarthRanger Connection
+
+# %%
+# parameters
+
+er_client_name_params = dict(
+    name=...,
+)
+
+# %%
+# call the task
+
+
+er_client_name = set_connection.partial(**er_client_name_params).call()
 
 
 # %% [markdown]
@@ -98,9 +116,7 @@ time_range = set_time_range.partial(**time_range_params).call()
 # parameters
 
 get_events_data_params = dict(
-    client=...,
     event_types=...,
-    event_columns=...,
 )
 
 # %%
@@ -108,7 +124,10 @@ get_events_data_params = dict(
 
 
 get_events_data = get_events.partial(
-    time_range=time_range, **get_events_data_params
+    client=er_client_name,
+    time_range=time_range,
+    event_columns=["id", "time", "event_type", "geometry"],
+    **get_events_data_params,
 ).call()
 
 
@@ -164,18 +183,18 @@ events_add_temporal_index = add_temporal_index.partial(
 # %%
 # parameters
 
-events_colormap_params = dict(
-    input_column_name=...,
-    colormap=...,
-    output_column_name=...,
-)
+events_colormap_params = dict()
 
 # %%
 # call the task
 
 
 events_colormap = apply_color_map.partial(
-    df=events_add_temporal_index, **events_colormap_params
+    df=events_add_temporal_index,
+    input_column_name="event_type",
+    colormap="tab20b",
+    output_column_name="event_type_colormap",
+    **events_colormap_params,
 ).call()
 
 
@@ -206,11 +225,7 @@ events_map_layer = create_point_layer.partial(
 # parameters
 
 events_ecomap_params = dict(
-    tile_layers=...,
-    static=...,
     title=...,
-    north_arrow_style=...,
-    legend_style=...,
 )
 
 # %%
@@ -218,7 +233,12 @@ events_ecomap_params = dict(
 
 
 events_ecomap = draw_ecomap.partial(
-    geo_layers=events_map_layer, **events_ecomap_params
+    geo_layers=events_map_layer,
+    tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
+    north_arrow_style={"placement": "top-left"},
+    legend_style={"placement": "bottom-right"},
+    static=False,
+    **events_ecomap_params,
 ).call()
 
 
@@ -250,7 +270,6 @@ events_ecomap_html_url = persist_text.partial(
 # parameters
 
 events_map_widget_params = dict(
-    title=...,
     view=...,
 )
 
@@ -259,7 +278,7 @@ events_map_widget_params = dict(
 
 
 events_map_widget = create_map_widget_single_view.partial(
-    data=events_ecomap_html_url, **events_map_widget_params
+    data=events_ecomap_html_url, title="Events Map", **events_map_widget_params
 ).call()
 
 
@@ -319,7 +338,6 @@ events_bar_chart_html_url = persist_text.partial(
 # parameters
 
 events_bar_chart_widget_params = dict(
-    title=...,
     view=...,
 )
 
@@ -328,7 +346,9 @@ events_bar_chart_widget_params = dict(
 
 
 events_bar_chart_widget = create_plot_widget_single_view.partial(
-    data=events_bar_chart_html_url, **events_bar_chart_widget_params
+    data=events_bar_chart_html_url,
+    title="Events Bar Chart",
+    **events_bar_chart_widget_params,
 ).call()
 
 
@@ -359,9 +379,7 @@ events_meshgrid = create_meshgrid.partial(
 # %%
 # parameters
 
-events_feature_density_params = dict(
-    geometry_type=...,
-)
+events_feature_density_params = dict()
 
 # %%
 # call the task
@@ -370,6 +388,7 @@ events_feature_density_params = dict(
 events_feature_density = calculate_feature_density.partial(
     geodataframe=events_add_temporal_index,
     meshgrid=events_meshgrid,
+    geometry_type="point",
     **events_feature_density_params,
 ).call()
 
@@ -380,18 +399,18 @@ events_feature_density = calculate_feature_density.partial(
 # %%
 # parameters
 
-fd_colormap_params = dict(
-    input_column_name=...,
-    colormap=...,
-    output_column_name=...,
-)
+fd_colormap_params = dict()
 
 # %%
 # call the task
 
 
 fd_colormap = apply_color_map.partial(
-    df=events_feature_density, **fd_colormap_params
+    df=events_feature_density,
+    input_column_name="density",
+    colormap="RdYlGn_r",
+    output_column_name="density_colormap",
+    **fd_colormap_params,
 ).call()
 
 
@@ -427,18 +446,21 @@ fd_map_layer = create_polygon_layer.partial(
 # parameters
 
 fd_ecomap_params = dict(
-    tile_layers=...,
-    static=...,
     title=...,
-    north_arrow_style=...,
-    legend_style=...,
 )
 
 # %%
 # call the task
 
 
-fd_ecomap = draw_ecomap.partial(geo_layers=fd_map_layer, **fd_ecomap_params).call()
+fd_ecomap = draw_ecomap.partial(
+    geo_layers=fd_map_layer,
+    tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
+    north_arrow_style={"placement": "top-left"},
+    legend_style={"placement": "bottom-right"},
+    static=False,
+    **fd_ecomap_params,
+).call()
 
 
 # %% [markdown]
@@ -469,7 +491,6 @@ fd_ecomap_html_url = persist_text.partial(
 # parameters
 
 fd_map_widget_params = dict(
-    title=...,
     view=...,
 )
 
@@ -478,7 +499,7 @@ fd_map_widget_params = dict(
 
 
 fd_map_widget = create_map_widget_single_view.partial(
-    data=fd_ecomap_html_url, **fd_map_widget_params
+    data=fd_ecomap_html_url, title="Density Map", **fd_map_widget_params
 ).call()
 
 
@@ -526,20 +547,20 @@ grouped_events_map_layer = create_point_layer.partial(
 # parameters
 
 grouped_events_ecomap_params = dict(
-    tile_layers=...,
-    static=...,
     title=...,
-    north_arrow_style=...,
-    legend_style=...,
 )
 
 # %%
 # call the task
 
 
-grouped_events_ecomap = draw_ecomap.partial(**grouped_events_ecomap_params).mapvalues(
-    argnames=["geo_layers"], argvalues=grouped_events_map_layer
-)
+grouped_events_ecomap = draw_ecomap.partial(
+    tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
+    north_arrow_style={"placement": "top-left"},
+    legend_style={"placement": "bottom-right"},
+    static=False,
+    **grouped_events_ecomap_params,
+).mapvalues(argnames=["geo_layers"], argvalues=grouped_events_map_layer)
 
 
 # %% [markdown]
@@ -568,16 +589,14 @@ grouped_events_ecomap_html_url = persist_text.partial(
 # %%
 # parameters
 
-grouped_events_map_widget_params = dict(
-    title=...,
-)
+grouped_events_map_widget_params = dict()
 
 # %%
 # call the task
 
 
 grouped_events_map_widget = create_map_widget_single_view.partial(
-    **grouped_events_map_widget_params
+    title="Grouped Events Map", **grouped_events_map_widget_params
 ).map(argnames=["view", "data"], argvalues=grouped_events_ecomap_html_url)
 
 
@@ -647,16 +666,14 @@ grouped_pie_chart_html_urls = persist_text.partial(
 # %%
 # parameters
 
-grouped_events_pie_chart_widgets_params = dict(
-    title=...,
-)
+grouped_events_pie_chart_widgets_params = dict()
 
 # %%
 # call the task
 
 
 grouped_events_pie_chart_widgets = create_plot_widget_single_view.partial(
-    **grouped_events_pie_chart_widgets_params
+    title="Events Pie Chart", **grouped_events_pie_chart_widgets_params
 ).map(argnames=["view", "data"], argvalues=grouped_pie_chart_html_urls)
 
 
@@ -683,16 +700,16 @@ grouped_events_pie_widget_merge = merge_widget_views.partial(
 # %%
 # parameters
 
-grouped_events_feature_density_params = dict(
-    geometry_type=...,
-)
+grouped_events_feature_density_params = dict()
 
 # %%
 # call the task
 
 
 grouped_events_feature_density = calculate_feature_density.partial(
-    meshgrid=events_meshgrid, **grouped_events_feature_density_params
+    meshgrid=events_meshgrid,
+    geometry_type="point",
+    **grouped_events_feature_density_params,
 ).mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
 
 
@@ -702,19 +719,18 @@ grouped_events_feature_density = calculate_feature_density.partial(
 # %%
 # parameters
 
-grouped_fd_colormap_params = dict(
-    input_column_name=...,
-    colormap=...,
-    output_column_name=...,
-)
+grouped_fd_colormap_params = dict()
 
 # %%
 # call the task
 
 
-grouped_fd_colormap = apply_color_map.partial(**grouped_fd_colormap_params).mapvalues(
-    argnames=["df"], argvalues=grouped_events_feature_density
-)
+grouped_fd_colormap = apply_color_map.partial(
+    input_column_name="density",
+    colormap="RdYlGn_r",
+    output_column_name="density_colormap",
+    **grouped_fd_colormap_params,
+).mapvalues(argnames=["df"], argvalues=grouped_events_feature_density)
 
 
 # %% [markdown]
@@ -748,20 +764,20 @@ grouped_fd_map_layer = create_polygon_layer.partial(
 # parameters
 
 grouped_fd_ecomap_params = dict(
-    tile_layers=...,
-    static=...,
     title=...,
-    north_arrow_style=...,
-    legend_style=...,
 )
 
 # %%
 # call the task
 
 
-grouped_fd_ecomap = draw_ecomap.partial(**grouped_fd_ecomap_params).mapvalues(
-    argnames=["geo_layers"], argvalues=grouped_fd_map_layer
-)
+grouped_fd_ecomap = draw_ecomap.partial(
+    tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
+    north_arrow_style={"placement": "top-left"},
+    legend_style={"placement": "bottom-right"},
+    static=False,
+    **grouped_fd_ecomap_params,
+).mapvalues(argnames=["geo_layers"], argvalues=grouped_fd_map_layer)
 
 
 # %% [markdown]
@@ -790,16 +806,14 @@ grouped_fd_ecomap_html_url = persist_text.partial(
 # %%
 # parameters
 
-grouped_fd_map_widget_params = dict(
-    title=...,
-)
+grouped_fd_map_widget_params = dict()
 
 # %%
 # call the task
 
 
 grouped_fd_map_widget = create_map_widget_single_view.partial(
-    **grouped_fd_map_widget_params
+    title="Grouped Density Map", **grouped_fd_map_widget_params
 ).map(argnames=["view", "data"], argvalues=grouped_fd_ecomap_html_url)
 
 

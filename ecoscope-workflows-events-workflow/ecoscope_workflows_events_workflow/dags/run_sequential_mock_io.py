@@ -1,6 +1,6 @@
 # [generated]
 # by = { compiler = "ecoscope-workflows-core", version = "9999" }
-# from-spec-sha256 = "6581c63822e13f69ae1b49518ecca8fd71c6ab4f149fa76fd14fcc3fd3ca48e7"
+# from-spec-sha256 = "096a6fa43734c88c56ead5ca4b242709db7cb7efe284dd34ee2ea141952fc0f4"
 
 # ruff: noqa: E402
 
@@ -16,6 +16,7 @@ from ecoscope_workflows_core.testing import create_task_magicmock  # 🧪
 
 
 from ecoscope_workflows_core.tasks.config import set_workflow_details
+from ecoscope_workflows_core.tasks.io import set_connection
 from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_core.tasks.filter import set_time_range
 
@@ -56,6 +57,12 @@ def main(params: Params):
         .call()
     )
 
+    er_client_name = (
+        set_connection.validate()
+        .partial(**(params_dict.get("er_client_name") or {}))
+        .call()
+    )
+
     groupers = (
         set_groupers.validate().partial(**(params_dict.get("groupers") or {})).call()
     )
@@ -68,7 +75,12 @@ def main(params: Params):
 
     get_events_data = (
         get_events.validate()
-        .partial(time_range=time_range, **(params_dict.get("get_events_data") or {}))
+        .partial(
+            client=er_client_name,
+            time_range=time_range,
+            event_columns=["id", "time", "event_type", "geometry"],
+            **(params_dict.get("get_events_data") or {}),
+        )
         .call()
     )
 
@@ -92,7 +104,11 @@ def main(params: Params):
     events_colormap = (
         apply_color_map.validate()
         .partial(
-            df=events_add_temporal_index, **(params_dict.get("events_colormap") or {})
+            df=events_add_temporal_index,
+            input_column_name="event_type",
+            colormap="tab20b",
+            output_column_name="event_type_colormap",
+            **(params_dict.get("events_colormap") or {}),
         )
         .call()
     )
@@ -114,7 +130,12 @@ def main(params: Params):
     events_ecomap = (
         draw_ecomap.validate()
         .partial(
-            geo_layers=events_map_layer, **(params_dict.get("events_ecomap") or {})
+            geo_layers=events_map_layer,
+            tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
+            north_arrow_style={"placement": "top-left"},
+            legend_style={"placement": "bottom-right"},
+            static=False,
+            **(params_dict.get("events_ecomap") or {}),
         )
         .call()
     )
@@ -132,7 +153,9 @@ def main(params: Params):
     events_map_widget = (
         create_map_widget_single_view.validate()
         .partial(
-            data=events_ecomap_html_url, **(params_dict.get("events_map_widget") or {})
+            data=events_ecomap_html_url,
+            title="Events Map",
+            **(params_dict.get("events_map_widget") or {}),
         )
         .call()
     )
@@ -166,6 +189,7 @@ def main(params: Params):
         create_plot_widget_single_view.validate()
         .partial(
             data=events_bar_chart_html_url,
+            title="Events Bar Chart",
             **(params_dict.get("events_bar_chart_widget") or {}),
         )
         .call()
@@ -184,6 +208,7 @@ def main(params: Params):
         .partial(
             geodataframe=events_add_temporal_index,
             meshgrid=events_meshgrid,
+            geometry_type="point",
             **(params_dict.get("events_feature_density") or {}),
         )
         .call()
@@ -191,7 +216,13 @@ def main(params: Params):
 
     fd_colormap = (
         apply_color_map.validate()
-        .partial(df=events_feature_density, **(params_dict.get("fd_colormap") or {}))
+        .partial(
+            df=events_feature_density,
+            input_column_name="density",
+            colormap="RdYlGn_r",
+            output_column_name="density_colormap",
+            **(params_dict.get("fd_colormap") or {}),
+        )
         .call()
     )
 
@@ -211,7 +242,14 @@ def main(params: Params):
 
     fd_ecomap = (
         draw_ecomap.validate()
-        .partial(geo_layers=fd_map_layer, **(params_dict.get("fd_ecomap") or {}))
+        .partial(
+            geo_layers=fd_map_layer,
+            tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
+            north_arrow_style={"placement": "top-left"},
+            legend_style={"placement": "bottom-right"},
+            static=False,
+            **(params_dict.get("fd_ecomap") or {}),
+        )
         .call()
     )
 
@@ -227,7 +265,11 @@ def main(params: Params):
 
     fd_map_widget = (
         create_map_widget_single_view.validate()
-        .partial(data=fd_ecomap_html_url, **(params_dict.get("fd_map_widget") or {}))
+        .partial(
+            data=fd_ecomap_html_url,
+            title="Density Map",
+            **(params_dict.get("fd_map_widget") or {}),
+        )
         .call()
     )
 
@@ -252,7 +294,13 @@ def main(params: Params):
 
     grouped_events_ecomap = (
         draw_ecomap.validate()
-        .partial(**(params_dict.get("grouped_events_ecomap") or {}))
+        .partial(
+            tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
+            north_arrow_style={"placement": "top-left"},
+            legend_style={"placement": "bottom-right"},
+            static=False,
+            **(params_dict.get("grouped_events_ecomap") or {}),
+        )
         .mapvalues(argnames=["geo_layers"], argvalues=grouped_events_map_layer)
     )
 
@@ -267,7 +315,10 @@ def main(params: Params):
 
     grouped_events_map_widget = (
         create_map_widget_single_view.validate()
-        .partial(**(params_dict.get("grouped_events_map_widget") or {}))
+        .partial(
+            title="Grouped Events Map",
+            **(params_dict.get("grouped_events_map_widget") or {}),
+        )
         .map(argnames=["view", "data"], argvalues=grouped_events_ecomap_html_url)
     )
 
@@ -302,7 +353,10 @@ def main(params: Params):
 
     grouped_events_pie_chart_widgets = (
         create_plot_widget_single_view.validate()
-        .partial(**(params_dict.get("grouped_events_pie_chart_widgets") or {}))
+        .partial(
+            title="Events Pie Chart",
+            **(params_dict.get("grouped_events_pie_chart_widgets") or {}),
+        )
         .map(argnames=["view", "data"], argvalues=grouped_pie_chart_html_urls)
     )
 
@@ -319,6 +373,7 @@ def main(params: Params):
         calculate_feature_density.validate()
         .partial(
             meshgrid=events_meshgrid,
+            geometry_type="point",
             **(params_dict.get("grouped_events_feature_density") or {}),
         )
         .mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
@@ -326,7 +381,12 @@ def main(params: Params):
 
     grouped_fd_colormap = (
         apply_color_map.validate()
-        .partial(**(params_dict.get("grouped_fd_colormap") or {}))
+        .partial(
+            input_column_name="density",
+            colormap="RdYlGn_r",
+            output_column_name="density_colormap",
+            **(params_dict.get("grouped_fd_colormap") or {}),
+        )
         .mapvalues(argnames=["df"], argvalues=grouped_events_feature_density)
     )
 
@@ -345,7 +405,13 @@ def main(params: Params):
 
     grouped_fd_ecomap = (
         draw_ecomap.validate()
-        .partial(**(params_dict.get("grouped_fd_ecomap") or {}))
+        .partial(
+            tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
+            north_arrow_style={"placement": "top-left"},
+            legend_style={"placement": "bottom-right"},
+            static=False,
+            **(params_dict.get("grouped_fd_ecomap") or {}),
+        )
         .mapvalues(argnames=["geo_layers"], argvalues=grouped_fd_map_layer)
     )
 
@@ -360,7 +426,10 @@ def main(params: Params):
 
     grouped_fd_map_widget = (
         create_map_widget_single_view.validate()
-        .partial(**(params_dict.get("grouped_fd_map_widget") or {}))
+        .partial(
+            title="Grouped Density Map",
+            **(params_dict.get("grouped_fd_map_widget") or {}),
+        )
         .map(argnames=["view", "data"], argvalues=grouped_fd_ecomap_html_url)
     )
 

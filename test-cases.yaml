@@ -7,13 +7,15 @@ test1:
       name: "Events Dashboard"
       description: "A dashboard for visualizing events."
 
+    er_client_name:
+      name: "mep_dev"
+
     # Parameters for 'Set Groupers' using task `set_groupers`.
     groupers:
       groupers: # (list[ecoscope_workflows.tasks.groupby._groupby.Grouper], FieldInfo(annotation=NoneType, required=True, description='            Index(es) and/or column(s) to group by, along with\n            optional display names and help text.\n            '))
         - index_name: "month"
           display_name: "Month"
           directive: "%B"
-          help_text: "The month in which the event happened."
 
     time_range:
       since: "2015-01-01T00:00:00Z"
@@ -21,7 +23,6 @@ test1:
 
     # Parameters for 'Get Events from EarthRanger' using task `get_events`.
     get_events_data:
-      client: "mep_dev" # (<class 'ecoscope_workflows.connections.EarthRangerClientProtocol'>, BeforeValidator(func=<bound method DataConnection.client_from_named_connection of <class 'ecoscope_workflows.connections.EarthRangerConnection'>>), WithJsonSchema(json_schema={'type': 'string', 'description': 'A named EarthRanger connection.'}, mode=None))
       event_types:
         [
           "hwc_rep",
@@ -31,81 +32,10 @@ test1:
           "fire_rep",
           "injured_animal_rep",
         ]
-      event_columns: ["id", "time", "event_type", "geometry"]
 
-    events_colormap:
-      input_column_name: "event_type" # (<class 'str'>, FieldInfo(annotation=NoneType, required=True, description='The name of the column with categorical values.'))
-      colormap: "tab20b" # (str | list[str], FieldInfo(annotation=NoneType, required=True, description='Either a named mpl.colormap or a list of string hex values.'))
-      output_column_name: "event_type_colormap"
-    # Parameters for 'Draw Ecomap from Time Density' using task `draw_ecomap`.
-    events_ecomap:
-      tile_layers:
-        - name: "SATELLITE"
-        - name: "TERRAIN"
-          opacity: 0.5
-      static: False # (<class 'bool'>, FieldInfo(annotation=NoneType, required=False))
-    # Parameters for 'Create Time Density Map Widget' using task `create_map_widget_single_view`.
-    events_map_widget:
-      title: "Events Map" # (<class 'str'>, FieldInfo(annotation=NoneType, required=True, description='The title of the widget'))
     # Parameters for 'Draw Time Series Bar Chart for Events' using task `draw_time_series_bar_chart`.
     events_bar_chart:
       time_interval: "month" # (typing.Literal['year', 'month', 'week', 'day', 'hour'], FieldInfo(annotation=NoneType, required=True, description='Sets the time interval of the x axis.'))
-    # Parameters for 'Create Plot Widget for Events' using task `create_plot_widget_single_view`.
-    events_bar_chart_widget:
-      title: "Events Bar Chart" # (<class 'str'>, FieldInfo(annotation=NoneType, required=True, description='The title of the widget'))
-    # Parameters for 'Create Events Meshgrid' using task `create_meshgrid`.
-    events_meshgrid:
-      cell_width: 10000 # (<class 'int'>, FieldInfo(annotation=NoneType, required=True, description='The width of a grid cell in meters.'))
-      cell_height: 10000 # (<class 'int'>, FieldInfo(annotation=NoneType, required=True, description='The height of a grid cell in meters.'))
-    # Parameters for 'Events Feature Density' using task `calculate_feature_density`.
-    events_feature_density:
-      geometry_type: "point" # (typing.Literal['point', 'line'], FieldInfo(annotation=NoneType, required=True, description='The geometry type of the provided geodataframe'))
-    # Parameters for 'Feature Density Colormap' using task `apply_color_map`.
-    fd_colormap:
-      input_column_name: "density" # (<class 'str'>, FieldInfo(annotation=NoneType, required=True, description='The name of the column with categorical values.'))
-      colormap: "RdYlGn_r" # (str | list[str], FieldInfo(annotation=NoneType, required=True, description='Either a named mpl.colormap or a list of string hex values.'))
-      output_column_name: "density_colormap"
-    # Parameters for 'Draw Ecomap from Feature Density' using task `draw_ecomap`.
-    fd_ecomap:
-      tile_layers:
-        - name: "SATELLITE"
-        - name: "TERRAIN"
-          opacity: 0.5
-      static: False # (<class 'bool'>, FieldInfo(annotation=NoneType, required=False))
-    # Parameters for 'Create Feature Density Map Widget' using task `create_map_widget_single_view`.
-    fd_map_widget:
-      title: "Density Map" # (<class 'str'>, FieldInfo(annotation=NoneType, required=True, description='The title of the widget'))
-    # Parameters for 'Draw Ecomap from grouped Events' using task `draw_ecomap`.
-    grouped_events_ecomap:
-      tile_layers:
-        - name: "SATELLITE"
-        - name: "TERRAIN"
-          opacity: 0.5
-      static: False # (<class 'bool'>, FieldInfo(annotation=NoneType, required=False))
-    # Parameters for 'Create grouped Events Map Widget' using task `create_map_widget_single_view`.
-    grouped_events_map_widget:
-      title: "Grouped Events Map" # (<class 'str'>, FieldInfo(annotation=NoneType, required=True, description='The title of the widget'))
-    # Parameters for 'Create Plot Widget for Events' using task `create_plot_widget_single_view`.
-    grouped_events_pie_chart_widgets:
-      title: "Events Pie Chart" # (<class 'str'>, FieldInfo(annotation=NoneType, required=True, description='The title of the widget'))
-    # Parameters for 'Grouped Events Feature Density' using task `calculate_feature_density`.
-    grouped_events_feature_density:
-      geometry_type: "point" # (typing.Literal['point', 'line'], FieldInfo(annotation=NoneType, required=True, description='The geometry type of the provided geodataframe'))
-    # Parameters for 'Grouped Feature Density Colormap' using task `apply_color_map`.
-    grouped_fd_colormap:
-      input_column_name: "density" # (<class 'str'>, FieldInfo(annotation=NoneType, required=True, description='The name of the column with categorical values.'))
-      colormap: "RdYlGn_r" # (str | list[str], FieldInfo(annotation=NoneType, required=True, description='Either a named mpl.colormap or a list of string hex values.'))
-      output_column_name: "density_colormap"
-    # Parameters for 'Draw Ecomap from Feature Density' using task `draw_ecomap`.
-    grouped_fd_ecomap:
-      tile_layers:
-        - name: "SATELLITE"
-        - name: "TERRAIN"
-          opacity: 0.5
-      static: False # (<class 'bool'>, FieldInfo(annotation=NoneType, required=False))
-    # Parameters for 'Create Feature Density Map Widget' using task `create_map_widget_single_view`.
-    grouped_fd_map_widget:
-      title: "Grouped Density Map" # (<class 'str'>, FieldInfo(annotation=NoneType, required=True, description='The title of the widget'))
 
   assertions:
     result_stdout_contains:
