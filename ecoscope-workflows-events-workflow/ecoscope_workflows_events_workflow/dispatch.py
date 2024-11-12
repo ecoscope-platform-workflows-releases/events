@@ -1,6 +1,6 @@
 # [generated]
 # by = { compiler = "ecoscope-workflows-core", version = "9999" }
-# from-spec-sha256 = "923eb6c7d8f79265297efa5d95b43635961b1733da23302f0a5776407a0d6cb4"
+# from-spec-sha256 = "519b0792da82e2a3d60c60eb211e62dd19f585efa1db506e4e1d3b720ea1ae9e"
 
 
 from typing import Any
