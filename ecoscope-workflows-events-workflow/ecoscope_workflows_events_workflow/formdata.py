@@ -1,6 +1,6 @@
 # [generated]
 # by = { compiler = "ecoscope-workflows-core", version = "9999" }
-# from-spec-sha256 = "82da9b306a3a8955fbc95d338ab04ff1cfa14fb89d09f79354e23e9285038467"
+# from-spec-sha256 = "940b10bd744eb35c77701383942e8382cab79b1cce9a5b04d8f7501819a6e570"
 
 
 from __future__ import annotations
@@ -109,6 +109,9 @@ class BarLayoutStyle(BaseModel):
     font_style: Optional[str] = Field(None, title="Font Style")
     plot_bgcolor: Optional[str] = Field(None, title="Plot Bgcolor")
     showlegend: Optional[bool] = Field(None, title="Showlegend")
+    title: Optional[str] = Field(None, title="Title")
+    title_x: Optional[confloat(ge=0.0, le=1.0)] = Field(None, title="Title X")
+    title_y: Optional[confloat(ge=0.0, le=1.0)] = Field(None, title="Title Y")
     bargap: Optional[confloat(ge=0.0, le=1.0)] = Field(None, title="Bargap")
     bargroupgap: Optional[confloat(ge=0.0, le=1.0)] = Field(None, title="Bargroupgap")
 
