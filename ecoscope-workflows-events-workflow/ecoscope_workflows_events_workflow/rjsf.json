@@ -235,6 +235,25 @@
           "title": "Showlegend",
           "type": "boolean"
         },
+        "title": {
+          "default": null,
+          "title": "Title",
+          "type": "string"
+        },
+        "title_x": {
+          "default": null,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Title X",
+          "type": "number"
+        },
+        "title_y": {
+          "default": null,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Title Y",
+          "type": "number"
+        },
         "bargap": {
           "default": null,
           "maximum": 1.0,
