@@ -1,7 +1,7 @@
-id: events
+3d: events
 requirements:
   - name: ecoscope-workflows-core
-    version: v0.0.22
+3   version: v0.0.22
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
     version: v0.0.22
