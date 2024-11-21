@@ -1,6 +1,6 @@
 # [generated]
 # by = { compiler = "ecoscope-workflows-core", version = "9999" }
-# from-spec-sha256 = "b82b48f0536b16a381993151aba211c0a1734770e3ea688ae097dcc756e85ff0"
+# from-spec-sha256 = "ab0fe8d27af828622e9e2ee7237e1c87056198e47aca9d007cbf1753deb17bc2"
 
 
 # ruff: noqa: E402
@@ -526,9 +526,7 @@ split_event_groups = split_groups.partial(
 # %%
 # parameters
 
-grouped_events_map_layer_params = dict(
-    legend=...,
-)
+grouped_events_map_layer_params = dict()
 
 # %%
 # call the task
@@ -536,6 +534,7 @@ grouped_events_map_layer_params = dict(
 
 grouped_events_map_layer = create_point_layer.partial(
     layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
+    legend={"label_column": "event_type", "color_column": "event_type_colormap"},
     **grouped_events_map_layer_params,
 ).mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
 
