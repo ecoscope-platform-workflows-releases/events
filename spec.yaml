@@ -196,6 +196,9 @@ workflow:
       layer_style:
         fill_color_column: "event_type_colormap"
         get_radius: 5
+      legend:
+        label_column: "event_type"
+        color_column: "event_type_colormap"
     mapvalues:
       argnames: geodataframe
       argvalues: ${{ workflow.split_event_groups.return }}
