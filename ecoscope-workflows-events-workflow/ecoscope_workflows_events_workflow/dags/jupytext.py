@@ -524,9 +524,7 @@ split_event_groups = split_groups.partial(
 # %%
 # parameters
 
-grouped_events_map_layer_params = dict(
-    legend=...,
-)
+grouped_events_map_layer_params = dict()
 
 # %%
 # call the task
@@ -534,6 +532,7 @@ grouped_events_map_layer_params = dict(
 
 grouped_events_map_layer = create_point_layer.partial(
     layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
+    legend={"label_column": "event_type", "color_column": "event_type_colormap"},
     **grouped_events_map_layer_params,
 ).mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
 

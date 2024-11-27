@@ -285,6 +285,10 @@ def main(params: Params):
         create_point_layer.validate()
         .partial(
             layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
+            legend={
+                "label_column": "event_type",
+                "color_column": "event_type_colormap",
+            },
             **(params_dict.get("grouped_events_map_layer") or {}),
         )
         .mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)

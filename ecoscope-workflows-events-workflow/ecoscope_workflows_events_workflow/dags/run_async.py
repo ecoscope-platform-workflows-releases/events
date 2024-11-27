@@ -321,6 +321,10 @@ def main(params: Params):
                     "fill_color_column": "event_type_colormap",
                     "get_radius": 5,
                 },
+                "legend": {
+                    "label_column": "event_type",
+                    "color_column": "event_type_colormap",
+                },
             }
             | (params_dict.get("grouped_events_map_layer") or {}),
             method="mapvalues",
