@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: v0.0.23
+    version: 0.0.28
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: v0.0.23
+    version: 0.0.28
     channel: https://repo.prefix.dev/ecoscope-workflows/
 workflow:
   - name: Set Workflow Details
@@ -196,6 +196,9 @@ workflow:
       layer_style:
         fill_color_column: "event_type_colormap"
         get_radius: 5
+      legend:
+        label_column: "event_type"
+        color_column: "event_type_colormap"
     mapvalues:
       argnames: geodataframe
       argvalues: ${{ workflow.split_event_groups.return }}
