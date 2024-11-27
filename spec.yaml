@@ -1,39 +1,35 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: "*"
-    channel: file:///tmp/ecoscope-workflows/release/artifacts/
+    version: 0.0.28
+    channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: "*"
-    channel: file:///tmp/ecoscope-workflows/release/artifacts/
-
+    version: 0.0.28
+    channel: https://repo.prefix.dev/ecoscope-workflows/
 workflow:
   - name: Set Workflow Details
     id: workflow_details
     task: set_workflow_details
-
   - name: Select EarthRanger Connection
     id: er_client_name
     task: set_connection
-
-  # set 'global' groupers
   - name: Set Groupers
     id: groupers
     task: set_groupers
-
   - name: Set Time Range Filters
     id: time_range
     task: set_time_range
-
-  # events
   - name: Get Events from EarthRanger
     id: get_events_data
     task: get_events
     partial:
       client: ${{ workflow.er_client_name.return }}
       time_range: ${{ workflow.time_range.return }}
-      event_columns: ["id", "time", "event_type", "geometry"]
-
+      event_columns:
+        - id
+        - time
+        - event_type
+        - geometry
   - name: Apply Relocation Coordinate Filter
     id: filter_events
     task: apply_reloc_coord_filter
@@ -44,31 +40,27 @@ workflow:
     task: add_temporal_index
     partial:
       df: ${{ workflow.filter_events.return }}
-      time_col: "time"
+      time_col: time
       groupers: ${{ workflow.groupers.return }}
-
-  # Colormap events
   - name: Events Colormap
     id: events_colormap
     task: apply_color_map
     partial:
       df: ${{ workflow.events_add_temporal_index.return }}
-      input_column_name: "event_type"
-      colormap: "tab20b"
-      output_column_name: "event_type_colormap"
-
-  # Combined Events map layer
+      input_column_name: event_type
+      colormap: tab20b
+      output_column_name: event_type_colormap
   - name: Create map layer from Events
     id: events_map_layer
     task: create_point_layer
     partial:
       geodataframe: ${{ workflow.events_colormap.return }}
       layer_style:
-        fill_color_column: "event_type_colormap"
+        fill_color_column: event_type_colormap
         get_radius: 5
       legend:
-        label_column: "event_type"
-        color_column: "event_type_colormap"
+        label_column: event_type
+        color_column: event_type_colormap
   - name: Draw Ecomap from Time Density
     id: events_ecomap
     task: draw_ecomap
@@ -76,14 +68,14 @@ workflow:
       geo_layers:
         - ${{ workflow.events_map_layer.return }}
       tile_layers:
-        - name: "TERRAIN"
-        - name: "SATELLITE"
-          opacity: 0.5
+        - name: TERRAIN
+        - name: SATELLITE
+          opacity: 0.500000
       north_arrow_style:
-        placement: "top-left"
+        placement: top-left
       legend_style:
-        placement: "bottom-right"
-      static: False
+        placement: bottom-right
+      static: false
   - name: Persist Ecomap as Text
     id: events_ecomap_html_url
     task: persist_text
@@ -95,21 +87,19 @@ workflow:
     task: create_map_widget_single_view
     partial:
       data: ${{ workflow.events_ecomap_html_url.return }}
-      title: "Events Map"
-
-  # Events time series bar chart
+      title: Events Map
   - name: Draw Time Series Bar Chart for Events
     id: events_bar_chart
     task: draw_time_series_bar_chart
     partial:
       dataframe: ${{ workflow.events_colormap.return }}
-      x_axis: "time"
-      y_axis: "event_type"
-      category: "event_type"
-      agg_function: "count"
-      color_column: "event_type_colormap"
+      x_axis: time
+      y_axis: event_type
+      category: event_type
+      agg_function: count
+      color_column: event_type_colormap
       plot_style:
-        xperiodalignment: "middle"
+        xperiodalignment: middle
   - name: Persist Bar Chart as Text
     id: events_bar_chart_html_url
     task: persist_text
@@ -121,9 +111,7 @@ workflow:
     task: create_plot_widget_single_view
     partial:
       data: ${{ workflow.events_bar_chart_html_url.return }}
-      title: "Events Bar Chart"
-
-  # Events Density map
+      title: Events Bar Chart
   - name: Create Events Meshgrid
     id: events_meshgrid
     task: create_meshgrid
@@ -135,24 +123,24 @@ workflow:
     partial:
       geodataframe: ${{ workflow.events_add_temporal_index.return }}
       meshgrid: ${{ workflow.events_meshgrid.return }}
-      geometry_type: "point"
+      geometry_type: point
   - name: Feature Density Colormap
     id: fd_colormap
     task: apply_color_map
     partial:
       df: ${{ workflow.events_feature_density.return }}
-      input_column_name: "density"
-      colormap: "RdYlGn_r"
-      output_column_name: "density_colormap"
+      input_column_name: density
+      colormap: RdYlGn_r
+      output_column_name: density_colormap
   - name: Create map layer from Feature Density
     id: fd_map_layer
     task: create_polygon_layer
     partial:
       geodataframe: ${{ workflow.fd_colormap.return }}
       layer_style:
-        fill_color_column: "density_colormap"
+        fill_color_column: density_colormap
         get_line_width: 0
-        opacity: 0.4
+        opacity: 0.400000
   - name: Draw Ecomap from Feature Density
     id: fd_ecomap
     task: draw_ecomap
@@ -160,14 +148,14 @@ workflow:
       geo_layers:
         - ${{ workflow.fd_map_layer.return }}
       tile_layers:
-        - name: "TERRAIN"
-        - name: "SATELLITE"
-          opacity: 0.5
+        - name: TERRAIN
+        - name: SATELLITE
+          opacity: 0.500000
       north_arrow_style:
-        placement: "top-left"
+        placement: top-left
       legend_style:
-        placement: "bottom-right"
-      static: False
+        placement: bottom-right
+      static: false
   - name: Persist Feature Density Ecomap as Text
     id: fd_ecomap_html_url
     task: persist_text
@@ -179,27 +167,23 @@ workflow:
     task: create_map_widget_single_view
     partial:
       data: ${{ workflow.fd_ecomap_html_url.return }}
-      title: "Density Map"
-
-  # Grouped outputs
+      title: Density Map
   - name: Split Events by Group
     id: split_event_groups
     task: split_groups
     partial:
       df: ${{ workflow.events_colormap.return }}
       groupers: ${{ workflow.groupers.return }}
-
-  # Grouped Events Map
   - name: Create map layer from grouped Events
     id: grouped_events_map_layer
     task: create_point_layer
     partial:
       layer_style:
-        fill_color_column: "event_type_colormap"
+        fill_color_column: event_type_colormap
         get_radius: 5
       legend:
-        label_column: "event_type"
-        color_column: "event_type_colormap"
+        label_column: event_type
+        color_column: event_type_colormap
     mapvalues:
       argnames: geodataframe
       argvalues: ${{ workflow.split_event_groups.return }}
@@ -208,14 +192,14 @@ workflow:
     task: draw_ecomap
     partial:
       tile_layers:
-        - name: "TERRAIN"
-        - name: "SATELLITE"
-          opacity: 0.5
+        - name: TERRAIN
+        - name: SATELLITE
+          opacity: 0.500000
       north_arrow_style:
-        placement: "top-left"
+        placement: top-left
       legend_style:
-        placement: "bottom-right"
-      static: False
+        placement: bottom-right
+      static: false
     mapvalues:
       argnames: geo_layers
       argvalues: ${{ workflow.grouped_events_map_layer.return }}
@@ -231,25 +215,25 @@ workflow:
     id: grouped_events_map_widget
     task: create_map_widget_single_view
     partial:
-      title: "Grouped Events Map"
+      title: Grouped Events Map
     map:
-      argnames: [view, data]
+      argnames:
+        - view
+        - data
       argvalues: ${{ workflow.grouped_events_ecomap_html_url.return }}
   - name: Merge Events Map Widget Views
     id: grouped_events_map_widget_merge
     task: merge_widget_views
     partial:
       widgets: ${{ workflow.grouped_events_map_widget.return }}
-
-  # Grouped Events Pie Chart
   - name: Draw Pie Chart for Events
     id: grouped_events_pie_chart
     task: draw_pie_chart
     partial:
-      value_column: "event_type"
-      color_column: "event_type_colormap"
+      value_column: event_type
+      color_column: event_type_colormap
       plot_style:
-        textinfo: "value"
+        textinfo: value
     mapvalues:
       argnames: dataframe
       argvalues: ${{ workflow.split_event_groups.return }}
@@ -265,23 +249,23 @@ workflow:
     id: grouped_events_pie_chart_widgets
     task: create_plot_widget_single_view
     partial:
-      title: "Events Pie Chart"
+      title: Events Pie Chart
     map:
-      argnames: [view, data]
+      argnames:
+        - view
+        - data
       argvalues: ${{ workflow.grouped_pie_chart_html_urls.return }}
   - name: Merge Pie Chart Widget Views
     id: grouped_events_pie_widget_merge
     task: merge_widget_views
     partial:
       widgets: ${{ workflow.grouped_events_pie_chart_widgets.return }}
-
-  # Grouped Events Density map
   - name: Grouped Events Feature Density
     id: grouped_events_feature_density
     task: calculate_feature_density
     partial:
       meshgrid: ${{ workflow.events_meshgrid.return }}
-      geometry_type: "point"
+      geometry_type: point
     mapvalues:
       argnames: geodataframe
       argvalues: ${{ workflow.split_event_groups.return }}
@@ -289,9 +273,9 @@ workflow:
     id: grouped_fd_colormap
     task: apply_color_map
     partial:
-      input_column_name: "density"
-      colormap: "RdYlGn_r"
-      output_column_name: "density_colormap"
+      input_column_name: density
+      colormap: RdYlGn_r
+      output_column_name: density_colormap
     mapvalues:
       argnames: df
       argvalues: ${{ workflow.grouped_events_feature_density.return }}
@@ -300,9 +284,9 @@ workflow:
     task: create_polygon_layer
     partial:
       layer_style:
-        fill_color_column: "density_colormap"
+        fill_color_column: density_colormap
         get_line_width: 0
-        opacity: 0.4
+        opacity: 0.400000
     mapvalues:
       argnames: geodataframe
       argvalues: ${{ workflow.grouped_fd_colormap.return}}
@@ -311,14 +295,14 @@ workflow:
     task: draw_ecomap
     partial:
       tile_layers:
-        - name: "TERRAIN"
-        - name: "SATELLITE"
-          opacity: 0.5
+        - name: TERRAIN
+        - name: SATELLITE
+          opacity: 0.500000
       north_arrow_style:
-        placement: "top-left"
+        placement: top-left
       legend_style:
-        placement: "bottom-right"
-      static: False
+        placement: bottom-right
+      static: false
     mapvalues:
       argnames: geo_layers
       argvalues: ${{ workflow.grouped_fd_map_layer.return }}
@@ -334,17 +318,17 @@ workflow:
     id: grouped_fd_map_widget
     task: create_map_widget_single_view
     partial:
-      title: "Grouped Density Map"
+      title: Grouped Density Map
     map:
-      argnames: [view, data]
+      argnames:
+        - view
+        - data
       argvalues: ${{ workflow.grouped_fd_ecomap_html_url.return }}
   - name: Merge Feature Density Widget Views
     id: grouped_fd_map_widget_merge
     task: merge_widget_views
     partial:
       widgets: ${{ workflow.grouped_fd_map_widget.return }}
-
-  # dashboard
   - name: Create Dashboard with Map Widgets
     id: events_dashboard
     task: gather_dashboard
