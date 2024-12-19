@@ -20,6 +20,8 @@ from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_c
 from ecoscope_workflows_core.tasks.results import create_plot_widget_single_view
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import create_meshgrid
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import calculate_feature_density
+from ecoscope_workflows_core.tasks.transformation import sort_values
+from ecoscope_workflows_core.tasks.transformation import map_values_with_unit
 from ecoscope_workflows_ext_ecoscope.tasks.results import create_polygon_layer
 from ecoscope_workflows_core.tasks.groupby import split_groups
 from ecoscope_workflows_core.tasks.results import merge_widget_views
@@ -207,15 +209,41 @@ def main(params: Params):
         .call()
     )
 
+    sort_density_values = (
+        sort_values.validate()
+        .partial(
+            df=fd_colormap,
+            column_name="density",
+            ascending=True,
+            **(params_dict.get("sort_density_values") or {}),
+        )
+        .call()
+    )
+
+    feature_density_format = (
+        map_values_with_unit.validate()
+        .partial(
+            df=sort_density_values,
+            original_unit=None,
+            new_unit=None,
+            input_column_name="density",
+            output_column_name="density",
+            decimal_places=0,
+            **(params_dict.get("feature_density_format") or {}),
+        )
+        .call()
+    )
+
     fd_map_layer = (
         create_polygon_layer.validate()
         .partial(
-            geodataframe=fd_colormap,
+            geodataframe=feature_density_format,
             layer_style={
                 "fill_color_column": "density_colormap",
                 "get_line_width": 0,
                 "opacity": 0.4,
             },
+            legend={"label_column": "density", "color_column": "density_colormap"},
             **(params_dict.get("fd_map_layer") or {}),
         )
         .call()
@@ -227,7 +255,7 @@ def main(params: Params):
             geo_layers=fd_map_layer,
             tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
             north_arrow_style={"placement": "top-left"},
-            legend_style={"placement": "bottom-right"},
+            legend_style={"title": "Number of events", "placement": "bottom-right"},
             static=False,
             **(params_dict.get("fd_ecomap") or {}),
         )
@@ -375,6 +403,29 @@ def main(params: Params):
         .mapvalues(argnames=["df"], argvalues=grouped_events_feature_density)
     )
 
+    sort_grouped_density_values = (
+        sort_values.validate()
+        .partial(
+            column_name="density",
+            ascending=True,
+            **(params_dict.get("sort_grouped_density_values") or {}),
+        )
+        .mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
+    )
+
+    grouped_feature_density_format = (
+        map_values_with_unit.validate()
+        .partial(
+            original_unit=None,
+            new_unit=None,
+            input_column_name="density",
+            output_column_name="density",
+            decimal_places=0,
+            **(params_dict.get("grouped_feature_density_format") or {}),
+        )
+        .mapvalues(argnames=["df"], argvalues=sort_grouped_density_values)
+    )
+
     grouped_fd_map_layer = (
         create_polygon_layer.validate()
         .partial(
@@ -383,9 +434,10 @@ def main(params: Params):
                 "get_line_width": 0,
                 "opacity": 0.4,
             },
+            legend={"label_column": "density", "color_column": "density_colormap"},
             **(params_dict.get("grouped_fd_map_layer") or {}),
         )
-        .mapvalues(argnames=["geodataframe"], argvalues=grouped_fd_colormap)
+        .mapvalues(argnames=["geodataframe"], argvalues=grouped_feature_density_format)
     )
 
     grouped_fd_ecomap = (
@@ -393,7 +445,7 @@ def main(params: Params):
         .partial(
             tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
             north_arrow_style={"placement": "top-left"},
-            legend_style={"placement": "bottom-right"},
+            legend_style={"title": "Number of events", "placement": "bottom-right"},
             static=False,
             **(params_dict.get("grouped_fd_ecomap") or {}),
         )
