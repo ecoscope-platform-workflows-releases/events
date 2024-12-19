@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.0.38
+    version: 0.0.40
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.0.38
+    version: 0.0.40
     channel: https://repo.prefix.dev/ecoscope-workflows/
 workflow:
   - name: Set Workflow Details
@@ -132,15 +132,35 @@ workflow:
       input_column_name: density
       colormap: RdYlGn_r
       output_column_name: density_colormap
+  - name: Sort Density By Classification
+    id: sort_density_values
+    task: sort_values
+    partial:
+      df: ${{ workflow.fd_colormap.return }}
+      column_name: density
+      ascending: true
+  - name: Format Feature Density Labels
+    id: feature_density_format
+    task: map_values_with_unit
+    partial:
+      df: ${{ workflow.sort_density_values.return }}
+      original_unit: null
+      new_unit: null
+      input_column_name: density
+      output_column_name: density
+      decimal_places: 0
   - name: Create map layer from Feature Density
     id: fd_map_layer
     task: create_polygon_layer
     partial:
-      geodataframe: ${{ workflow.fd_colormap.return }}
+      geodataframe: ${{ workflow.feature_density_format.return }}
       layer_style:
         fill_color_column: density_colormap
         get_line_width: 0
         opacity: 0.400000
+      legend:
+        label_column: density
+        color_column: density_colormap
   - name: Draw Ecomap from Feature Density
     id: fd_ecomap
     task: draw_ecomap
@@ -154,6 +174,7 @@ workflow:
       north_arrow_style:
         placement: top-left
       legend_style:
+        title: Number of events
         placement: bottom-right
       static: false
   - name: Persist Feature Density Ecomap as Text
@@ -279,6 +300,27 @@ workflow:
     mapvalues:
       argnames: df
       argvalues: ${{ workflow.grouped_events_feature_density.return }}
+  - name: Sort Density By Classification
+    id: sort_grouped_density_values
+    task: sort_values
+    partial:
+      column_name: density
+      ascending: true
+    mapvalues:
+      argnames: df
+      argvalues: ${{ workflow.grouped_fd_colormap.return }}
+  - name: Format Grouped Feature Density Labels
+    id: grouped_feature_density_format
+    task: map_values_with_unit
+    partial:
+      original_unit: null
+      new_unit: null
+      input_column_name: density
+      output_column_name: density
+      decimal_places: 0
+    mapvalues:
+      argnames: df
+      argvalues: ${{ workflow.sort_grouped_density_values.return }}
   - name: Create map layer from Feature Density
     id: grouped_fd_map_layer
     task: create_polygon_layer
@@ -287,9 +329,12 @@ workflow:
         fill_color_column: density_colormap
         get_line_width: 0
         opacity: 0.400000
+      legend:
+        label_column: density
+        color_column: density_colormap
     mapvalues:
       argnames: geodataframe
-      argvalues: ${{ workflow.grouped_fd_colormap.return}}
+      argvalues: ${{ workflow.grouped_feature_density_format.return}}
   - name: Draw Ecomap from Feature Density
     id: grouped_fd_ecomap
     task: draw_ecomap
@@ -301,6 +346,7 @@ workflow:
       north_arrow_style:
         placement: top-left
       legend_style:
+        title: Number of events
         placement: bottom-right
       static: false
     mapvalues:

@@ -37,6 +37,8 @@ from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_c
 from ecoscope_workflows_core.tasks.results import create_plot_widget_single_view
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import create_meshgrid
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import calculate_feature_density
+from ecoscope_workflows_core.tasks.transformation import sort_values
+from ecoscope_workflows_core.tasks.transformation import map_values_with_unit
 from ecoscope_workflows_ext_ecoscope.tasks.results import create_polygon_layer
 from ecoscope_workflows_core.tasks.groupby import split_groups
 from ecoscope_workflows_core.tasks.results import merge_widget_views
@@ -70,7 +72,9 @@ def main(params: Params):
         "events_meshgrid": ["events_add_temporal_index"],
         "events_feature_density": ["events_add_temporal_index", "events_meshgrid"],
         "fd_colormap": ["events_feature_density"],
-        "fd_map_layer": ["fd_colormap"],
+        "sort_density_values": ["fd_colormap"],
+        "feature_density_format": ["sort_density_values"],
+        "fd_map_layer": ["feature_density_format"],
         "fd_ecomap": ["fd_map_layer"],
         "fd_ecomap_html_url": ["fd_ecomap"],
         "fd_map_widget": ["fd_ecomap_html_url"],
@@ -86,7 +90,9 @@ def main(params: Params):
         "grouped_events_pie_widget_merge": ["grouped_events_pie_chart_widgets"],
         "grouped_events_feature_density": ["events_meshgrid", "split_event_groups"],
         "grouped_fd_colormap": ["grouped_events_feature_density"],
-        "grouped_fd_map_layer": ["grouped_fd_colormap"],
+        "sort_grouped_density_values": ["grouped_fd_colormap"],
+        "grouped_feature_density_format": ["sort_grouped_density_values"],
+        "grouped_fd_map_layer": ["grouped_feature_density_format"],
         "grouped_fd_ecomap": ["grouped_fd_map_layer"],
         "grouped_fd_ecomap_html_url": ["grouped_fd_ecomap"],
         "grouped_fd_map_widget": ["grouped_fd_ecomap_html_url"],
@@ -276,14 +282,41 @@ def main(params: Params):
             | (params_dict.get("fd_colormap") or {}),
             method="call",
         ),
+        "sort_density_values": Node(
+            async_task=sort_values.validate().set_executor("lithops"),
+            partial={
+                "df": DependsOn("fd_colormap"),
+                "column_name": "density",
+                "ascending": True,
+            }
+            | (params_dict.get("sort_density_values") or {}),
+            method="call",
+        ),
+        "feature_density_format": Node(
+            async_task=map_values_with_unit.validate().set_executor("lithops"),
+            partial={
+                "df": DependsOn("sort_density_values"),
+                "original_unit": None,
+                "new_unit": None,
+                "input_column_name": "density",
+                "output_column_name": "density",
+                "decimal_places": 0,
+            }
+            | (params_dict.get("feature_density_format") or {}),
+            method="call",
+        ),
         "fd_map_layer": Node(
             async_task=create_polygon_layer.validate().set_executor("lithops"),
             partial={
-                "geodataframe": DependsOn("fd_colormap"),
+                "geodataframe": DependsOn("feature_density_format"),
                 "layer_style": {
                     "fill_color_column": "density_colormap",
                     "get_line_width": 0,
                     "opacity": 0.4,
+                },
+                "legend": {
+                    "label_column": "density",
+                    "color_column": "density_colormap",
                 },
             }
             | (params_dict.get("fd_map_layer") or {}),
@@ -298,7 +331,10 @@ def main(params: Params):
                     {"name": "SATELLITE", "opacity": 0.5},
                 ],
                 "north_arrow_style": {"placement": "top-left"},
-                "legend_style": {"placement": "bottom-right"},
+                "legend_style": {
+                    "title": "Number of events",
+                    "placement": "bottom-right",
+                },
                 "static": False,
             }
             | (params_dict.get("fd_ecomap") or {}),
@@ -475,6 +511,35 @@ def main(params: Params):
                 "argvalues": DependsOn("grouped_events_feature_density"),
             },
         ),
+        "sort_grouped_density_values": Node(
+            async_task=sort_values.validate().set_executor("lithops"),
+            partial={
+                "column_name": "density",
+                "ascending": True,
+            }
+            | (params_dict.get("sort_grouped_density_values") or {}),
+            method="mapvalues",
+            kwargs={
+                "argnames": ["df"],
+                "argvalues": DependsOn("grouped_fd_colormap"),
+            },
+        ),
+        "grouped_feature_density_format": Node(
+            async_task=map_values_with_unit.validate().set_executor("lithops"),
+            partial={
+                "original_unit": None,
+                "new_unit": None,
+                "input_column_name": "density",
+                "output_column_name": "density",
+                "decimal_places": 0,
+            }
+            | (params_dict.get("grouped_feature_density_format") or {}),
+            method="mapvalues",
+            kwargs={
+                "argnames": ["df"],
+                "argvalues": DependsOn("sort_grouped_density_values"),
+            },
+        ),
         "grouped_fd_map_layer": Node(
             async_task=create_polygon_layer.validate().set_executor("lithops"),
             partial={
@@ -483,12 +548,16 @@ def main(params: Params):
                     "get_line_width": 0,
                     "opacity": 0.4,
                 },
+                "legend": {
+                    "label_column": "density",
+                    "color_column": "density_colormap",
+                },
             }
             | (params_dict.get("grouped_fd_map_layer") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["geodataframe"],
-                "argvalues": DependsOn("grouped_fd_colormap"),
+                "argvalues": DependsOn("grouped_feature_density_format"),
             },
         ),
         "grouped_fd_ecomap": Node(
@@ -499,7 +568,10 @@ def main(params: Params):
                     {"name": "SATELLITE", "opacity": 0.5},
                 ],
                 "north_arrow_style": {"placement": "top-left"},
-                "legend_style": {"placement": "bottom-right"},
+                "legend_style": {
+                    "title": "Number of events",
+                    "placement": "bottom-right",
+                },
                 "static": False,
             }
             | (params_dict.get("grouped_fd_ecomap") or {}),

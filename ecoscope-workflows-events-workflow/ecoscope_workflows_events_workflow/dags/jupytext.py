@@ -29,6 +29,8 @@ from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_c
 from ecoscope_workflows_core.tasks.results import create_plot_widget_single_view
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import create_meshgrid
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import calculate_feature_density
+from ecoscope_workflows_core.tasks.transformation import sort_values
+from ecoscope_workflows_core.tasks.transformation import map_values_with_unit
 from ecoscope_workflows_ext_ecoscope.tasks.results import create_polygon_layer
 from ecoscope_workflows_core.tasks.groupby import split_groups
 from ecoscope_workflows_core.tasks.results import merge_widget_views
@@ -413,26 +415,67 @@ fd_colormap = apply_color_map.partial(
 
 
 # %% [markdown]
-# ## Create map layer from Feature Density
+# ## Sort Density By Classification
 
 # %%
 # parameters
 
-fd_map_layer_params = dict(
-    legend=...,
+sort_density_values_params = dict(
+    na_position=...,
 )
 
 # %%
 # call the task
 
 
+sort_density_values = sort_values.partial(
+    df=fd_colormap, column_name="density", ascending=True, **sort_density_values_params
+).call()
+
+
+# %% [markdown]
+# ## Format Feature Density Labels
+
+# %%
+# parameters
+
+feature_density_format_params = dict()
+
+# %%
+# call the task
+
+
+feature_density_format = map_values_with_unit.partial(
+    df=sort_density_values,
+    original_unit=None,
+    new_unit=None,
+    input_column_name="density",
+    output_column_name="density",
+    decimal_places=0,
+    **feature_density_format_params,
+).call()
+
+
+# %% [markdown]
+# ## Create map layer from Feature Density
+
+# %%
+# parameters
+
+fd_map_layer_params = dict()
+
+# %%
+# call the task
+
+
 fd_map_layer = create_polygon_layer.partial(
-    geodataframe=fd_colormap,
+    geodataframe=feature_density_format,
     layer_style={
         "fill_color_column": "density_colormap",
         "get_line_width": 0,
         "opacity": 0.4,
     },
+    legend={"label_column": "density", "color_column": "density_colormap"},
     **fd_map_layer_params,
 ).call()
 
@@ -455,7 +498,7 @@ fd_ecomap = draw_ecomap.partial(
     geo_layers=fd_map_layer,
     tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
     north_arrow_style={"placement": "top-left"},
-    legend_style={"placement": "bottom-right"},
+    legend_style={"title": "Number of events", "placement": "bottom-right"},
     static=False,
     **fd_ecomap_params,
 ).call()
@@ -731,14 +774,53 @@ grouped_fd_colormap = apply_color_map.partial(
 
 
 # %% [markdown]
+# ## Sort Density By Classification
+
+# %%
+# parameters
+
+sort_grouped_density_values_params = dict(
+    na_position=...,
+)
+
+# %%
+# call the task
+
+
+sort_grouped_density_values = sort_values.partial(
+    column_name="density", ascending=True, **sort_grouped_density_values_params
+).mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
+
+
+# %% [markdown]
+# ## Format Grouped Feature Density Labels
+
+# %%
+# parameters
+
+grouped_feature_density_format_params = dict()
+
+# %%
+# call the task
+
+
+grouped_feature_density_format = map_values_with_unit.partial(
+    original_unit=None,
+    new_unit=None,
+    input_column_name="density",
+    output_column_name="density",
+    decimal_places=0,
+    **grouped_feature_density_format_params,
+).mapvalues(argnames=["df"], argvalues=sort_grouped_density_values)
+
+
+# %% [markdown]
 # ## Create map layer from Feature Density
 
 # %%
 # parameters
 
-grouped_fd_map_layer_params = dict(
-    legend=...,
-)
+grouped_fd_map_layer_params = dict()
 
 # %%
 # call the task
@@ -750,8 +832,9 @@ grouped_fd_map_layer = create_polygon_layer.partial(
         "get_line_width": 0,
         "opacity": 0.4,
     },
+    legend={"label_column": "density", "color_column": "density_colormap"},
     **grouped_fd_map_layer_params,
-).mapvalues(argnames=["geodataframe"], argvalues=grouped_fd_colormap)
+).mapvalues(argnames=["geodataframe"], argvalues=grouped_feature_density_format)
 
 
 # %% [markdown]
@@ -771,7 +854,7 @@ grouped_fd_ecomap_params = dict(
 grouped_fd_ecomap = draw_ecomap.partial(
     tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
     north_arrow_style={"placement": "top-left"},
-    legend_style={"placement": "bottom-right"},
+    legend_style={"title": "Number of events", "placement": "bottom-right"},
     static=False,
     **grouped_fd_ecomap_params,
 ).mapvalues(argnames=["geo_layers"], argvalues=grouped_fd_map_layer)

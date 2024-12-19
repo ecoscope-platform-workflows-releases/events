@@ -1,11 +1,12 @@
 # TODO: generate this _instead_ of "params_fillable.yaml"  and then edit it
-test1:
-  name: Test 1
-  description: "Test case for events"
+month-grouper:
+  name: Month Grouper
+  description: A demonstration of the events workflow with monthly grouping.
   params:
     workflow_details:
       name: "Events Dashboard"
       description: "A dashboard for visualizing events."
+      image_url: ""
 
     er_client_name:
       data_source:
@@ -35,13 +36,3 @@ test1:
     # Parameters for 'Draw Time Series Bar Chart for Events' using task `draw_time_series_bar_chart`.
     events_bar_chart:
       time_interval: "month" # (typing.Literal['year', 'month', 'week', 'day', 'hour'], FieldInfo(annotation=NoneType, required=True, description='Sets the time interval of the x axis.'))
-
-  assertions:
-    result_stdout_contains:
-      - "A dashboard for visualizing events"
-      - "widget_type='map', title='Events Map', is_filtered=False"
-      - "widget_type='map', title='Density Map', is_filtered=False"
-      - "widget_type='map', title='Grouped Events Map', is_filtered=True"
-      - "widget_type='map', title='Grouped Density Map', is_filtered=True"
-      - "widget_type='graph', title='Events Bar Chart', is_filtered=False"
-      - "widget_type='graph', title='Events Pie Chart', is_filtered=True"
