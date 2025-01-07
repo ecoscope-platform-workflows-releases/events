@@ -108,6 +108,47 @@
       "type": "object",
       "title": "Get Events from EarthRanger"
     },
+    "filter_events": {
+      "additionalProperties": false,
+      "properties": {
+        "min_x": {
+          "default": -180.0,
+          "title": "Min X",
+          "type": "number",
+          "ecoscope:advanced": true
+        },
+        "max_x": {
+          "default": 180.0,
+          "title": "Max X",
+          "type": "number",
+          "ecoscope:advanced": true
+        },
+        "min_y": {
+          "default": -90.0,
+          "title": "Min Y",
+          "type": "number",
+          "ecoscope:advanced": true
+        },
+        "max_y": {
+          "default": 90.0,
+          "title": "Max Y",
+          "type": "number",
+          "ecoscope:advanced": true
+        },
+        "filter_point_coords": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Coordinate"
+          },
+          "title": "Filter Point Coords",
+          "type": "array",
+          "ecoscope:advanced": true
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Apply Relocation Coordinate Filter"
+    },
     "events_bar_chart": {
       "additionalProperties": false,
       "properties": {
@@ -129,6 +170,28 @@
       ],
       "type": "object",
       "title": "Draw Time Series Bar Chart for Events"
+    },
+    "events_meshgrid": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_width": {
+          "default": 10000,
+          "title": "Cell Width",
+          "type": "integer",
+          "description": "The width of a grid cell in meters.",
+          "ecoscope:advanced": true
+        },
+        "cell_height": {
+          "default": 10000,
+          "title": "Cell Height",
+          "type": "integer",
+          "description": "The height of a grid cell in meters.",
+          "ecoscope:advanced": true
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Create Events Meshgrid"
     }
   },
   "$defs": {
@@ -171,6 +234,10 @@
               "title": "Month (example: September)"
             },
             {
+              "const": "%Y-%m",
+              "title": "Year and Month (example: 2023-01)"
+            },
+            {
               "const": "%j",
               "title": "Day of the year as a number (example: 365)"
             },
@@ -196,6 +263,24 @@
       ],
       "title": "TemporalGrouper",
       "type": "object"
+    },
+    "Coordinate": {
+      "properties": {
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "Coordinate",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -206,7 +291,9 @@
       "groupers",
       "time_range",
       "get_events_data",
-      "events_bar_chart"
+      "filter_events",
+      "events_bar_chart",
+      "events_meshgrid"
     ]
   }
 }

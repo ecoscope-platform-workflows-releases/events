@@ -99,14 +99,15 @@ groupers = set_groupers.partial(**groupers_params).call()
 time_range_params = dict(
     since=...,
     until=...,
-    time_format=...,
 )
 
 # %%
 # call the task
 
 
-time_range = set_time_range.partial(**time_range_params).call()
+time_range = set_time_range.partial(
+    time_format="%d %b %Y %H:%M:%S %Z", **time_range_params
+).call()
 
 
 # %% [markdown]
@@ -160,10 +161,7 @@ filter_events = apply_reloc_coord_filter.partial(
 # %%
 # parameters
 
-events_add_temporal_index_params = dict(
-    cast_to_datetime=...,
-    format=...,
-)
+events_add_temporal_index_params = dict()
 
 # %%
 # call the task
@@ -173,6 +171,8 @@ events_add_temporal_index = add_temporal_index.partial(
     df=filter_events,
     time_col="time",
     groupers=groupers,
+    cast_to_datetime=True,
+    format="mixed",
     **events_add_temporal_index_params,
 ).call()
 
@@ -224,15 +224,14 @@ events_map_layer = create_point_layer.partial(
 # %%
 # parameters
 
-events_ecomap_params = dict(
-    title=...,
-)
+events_ecomap_params = dict()
 
 # %%
 # call the task
 
 
 events_ecomap = draw_ecomap.partial(
+    title=None,
     geo_layers=events_map_layer,
     tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
     north_arrow_style={"placement": "top-left"},
@@ -290,8 +289,6 @@ events_map_widget = create_map_widget_single_view.partial(
 
 events_bar_chart_params = dict(
     time_interval=...,
-    grouped_styles=...,
-    layout_style=...,
 )
 
 # %%
@@ -306,6 +303,8 @@ events_bar_chart = draw_time_series_bar_chart.partial(
     agg_function="count",
     color_column="event_type_colormap",
     plot_style={"xperiodalignment": "middle"},
+    grouped_styles=None,
+    layout_style=None,
     **events_bar_chart_params,
 ).call()
 
@@ -361,7 +360,6 @@ events_bar_chart_widget = create_plot_widget_single_view.partial(
 events_meshgrid_params = dict(
     cell_width=...,
     cell_height=...,
-    intersecting_only=...,
 )
 
 # %%
@@ -369,7 +367,7 @@ events_meshgrid_params = dict(
 
 
 events_meshgrid = create_meshgrid.partial(
-    aoi=events_add_temporal_index, **events_meshgrid_params
+    aoi=events_add_temporal_index, intersecting_only=False, **events_meshgrid_params
 ).call()
 
 
@@ -420,16 +418,18 @@ fd_colormap = apply_color_map.partial(
 # %%
 # parameters
 
-sort_density_values_params = dict(
-    na_position=...,
-)
+sort_density_values_params = dict()
 
 # %%
 # call the task
 
 
 sort_density_values = sort_values.partial(
-    df=fd_colormap, column_name="density", ascending=True, **sort_density_values_params
+    df=fd_colormap,
+    column_name="density",
+    ascending=True,
+    na_position="last",
+    **sort_density_values_params,
 ).call()
 
 
@@ -486,15 +486,14 @@ fd_map_layer = create_polygon_layer.partial(
 # %%
 # parameters
 
-fd_ecomap_params = dict(
-    title=...,
-)
+fd_ecomap_params = dict()
 
 # %%
 # call the task
 
 
 fd_ecomap = draw_ecomap.partial(
+    title=None,
     geo_layers=fd_map_layer,
     tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
     north_arrow_style={"placement": "top-left"},
@@ -586,15 +585,14 @@ grouped_events_map_layer = create_point_layer.partial(
 # %%
 # parameters
 
-grouped_events_ecomap_params = dict(
-    title=...,
-)
+grouped_events_ecomap_params = dict()
 
 # %%
 # call the task
 
 
 grouped_events_ecomap = draw_ecomap.partial(
+    title=None,
     tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
     north_arrow_style={"placement": "top-left"},
     legend_style={"placement": "bottom-right"},
@@ -663,10 +661,7 @@ grouped_events_map_widget_merge = merge_widget_views.partial(
 # %%
 # parameters
 
-grouped_events_pie_chart_params = dict(
-    label_column=...,
-    layout_style=...,
-)
+grouped_events_pie_chart_params = dict()
 
 # %%
 # call the task
@@ -676,6 +671,8 @@ grouped_events_pie_chart = draw_pie_chart.partial(
     value_column="event_type",
     color_column="event_type_colormap",
     plot_style={"textinfo": "value"},
+    label_column=None,
+    layout_style=None,
     **grouped_events_pie_chart_params,
 ).mapvalues(argnames=["dataframe"], argvalues=split_event_groups)
 
@@ -779,16 +776,17 @@ grouped_fd_colormap = apply_color_map.partial(
 # %%
 # parameters
 
-sort_grouped_density_values_params = dict(
-    na_position=...,
-)
+sort_grouped_density_values_params = dict()
 
 # %%
 # call the task
 
 
 sort_grouped_density_values = sort_values.partial(
-    column_name="density", ascending=True, **sort_grouped_density_values_params
+    column_name="density",
+    ascending=True,
+    na_position="last",
+    **sort_grouped_density_values_params,
 ).mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
 
 
@@ -843,15 +841,14 @@ grouped_fd_map_layer = create_polygon_layer.partial(
 # %%
 # parameters
 
-grouped_fd_ecomap_params = dict(
-    title=...,
-)
+grouped_fd_ecomap_params = dict()
 
 # %%
 # call the task
 
 
 grouped_fd_ecomap = draw_ecomap.partial(
+    title=None,
     tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
     north_arrow_style={"placement": "top-left"},
     legend_style={"title": "Number of events", "placement": "bottom-right"},

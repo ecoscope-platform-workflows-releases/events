@@ -69,7 +69,9 @@ def main(params: Params):
 
     time_range = (
         set_time_range.validate()
-        .partial(**(params_dict.get("time_range") or {}))
+        .partial(
+            time_format="%d %b %Y %H:%M:%S %Z", **(params_dict.get("time_range") or {})
+        )
         .call()
     )
 
@@ -96,6 +98,8 @@ def main(params: Params):
             df=filter_events,
             time_col="time",
             groupers=groupers,
+            cast_to_datetime=True,
+            format="mixed",
             **(params_dict.get("events_add_temporal_index") or {}),
         )
         .call()
@@ -130,6 +134,7 @@ def main(params: Params):
     events_ecomap = (
         draw_ecomap.validate()
         .partial(
+            title=None,
             geo_layers=events_map_layer,
             tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
             north_arrow_style={"placement": "top-left"},
@@ -170,6 +175,8 @@ def main(params: Params):
             agg_function="count",
             color_column="event_type_colormap",
             plot_style={"xperiodalignment": "middle"},
+            grouped_styles=None,
+            layout_style=None,
             **(params_dict.get("events_bar_chart") or {}),
         )
         .call()
@@ -198,7 +205,9 @@ def main(params: Params):
     events_meshgrid = (
         create_meshgrid.validate()
         .partial(
-            aoi=events_add_temporal_index, **(params_dict.get("events_meshgrid") or {})
+            aoi=events_add_temporal_index,
+            intersecting_only=False,
+            **(params_dict.get("events_meshgrid") or {}),
         )
         .call()
     )
@@ -232,6 +241,7 @@ def main(params: Params):
             df=fd_colormap,
             column_name="density",
             ascending=True,
+            na_position="last",
             **(params_dict.get("sort_density_values") or {}),
         )
         .call()
@@ -269,6 +279,7 @@ def main(params: Params):
     fd_ecomap = (
         draw_ecomap.validate()
         .partial(
+            title=None,
             geo_layers=fd_map_layer,
             tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
             north_arrow_style={"placement": "top-left"},
@@ -325,6 +336,7 @@ def main(params: Params):
     grouped_events_ecomap = (
         draw_ecomap.validate()
         .partial(
+            title=None,
             tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
             north_arrow_style={"placement": "top-left"},
             legend_style={"placement": "bottom-right"},
@@ -367,6 +379,8 @@ def main(params: Params):
             value_column="event_type",
             color_column="event_type_colormap",
             plot_style={"textinfo": "value"},
+            label_column=None,
+            layout_style=None,
             **(params_dict.get("grouped_events_pie_chart") or {}),
         )
         .mapvalues(argnames=["dataframe"], argvalues=split_event_groups)
@@ -425,6 +439,7 @@ def main(params: Params):
         .partial(
             column_name="density",
             ascending=True,
+            na_position="last",
             **(params_dict.get("sort_grouped_density_values") or {}),
         )
         .mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
@@ -460,6 +475,7 @@ def main(params: Params):
     grouped_fd_ecomap = (
         draw_ecomap.validate()
         .partial(
+            title=None,
             tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
             north_arrow_style={"placement": "top-left"},
             legend_style={"title": "Number of events", "placement": "bottom-right"},

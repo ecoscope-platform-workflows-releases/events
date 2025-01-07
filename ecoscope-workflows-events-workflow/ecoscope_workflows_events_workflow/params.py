@@ -52,6 +52,18 @@ class EventsBarChart(BaseModel):
     )
 
 
+class EventsMeshgrid(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    cell_width: Optional[int] = Field(
+        10000, description="The width of a grid cell in meters.", title="Cell Width"
+    )
+    cell_height: Optional[int] = Field(
+        10000, description="The height of a grid cell in meters.", title="Cell Height"
+    )
+
+
 class EarthRangerConnection(BaseModel):
     name: str = Field(..., title="Connection Name")
 
@@ -62,6 +74,11 @@ class Grouper(BaseModel):
 
 class TemporalGrouper(BaseModel):
     temporal_index: str = Field(..., title="Temporal Index")
+
+
+class Coordinate(BaseModel):
+    x: float = Field(..., title="X")
+    y: float = Field(..., title="Y")
 
 
 class ErClientName(BaseModel):
@@ -86,6 +103,19 @@ class Groupers(BaseModel):
     )
 
 
+class FilterEvents(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    min_x: Optional[float] = Field(-180.0, title="Min X")
+    max_x: Optional[float] = Field(180.0, title="Max X")
+    min_y: Optional[float] = Field(-90.0, title="Min Y")
+    max_y: Optional[float] = Field(90.0, title="Max Y")
+    filter_point_coords: Optional[List[Coordinate]] = Field(
+        [], title="Filter Point Coords"
+    )
+
+
 class Params(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -101,6 +131,12 @@ class Params(BaseModel):
     get_events_data: Optional[GetEventsData] = Field(
         None, title="Get Events from EarthRanger"
     )
+    filter_events: Optional[FilterEvents] = Field(
+        None, title="Apply Relocation Coordinate Filter"
+    )
     events_bar_chart: Optional[EventsBarChart] = Field(
         None, title="Draw Time Series Bar Chart for Events"
+    )
+    events_meshgrid: Optional[EventsMeshgrid] = Field(
+        None, title="Create Events Meshgrid"
     )
