@@ -33,6 +33,18 @@ month-grouper:
           "injured_animal_rep",
         ]
 
+    filter_events:
+      min_x: -180
+      max_x: 180
+      min_y: -90
+      max_y: 90
+      filter_point_coords: []
+
+
     # Parameters for 'Draw Time Series Bar Chart for Events' using task `draw_time_series_bar_chart`.
     events_bar_chart:
       time_interval: "month" # (typing.Literal['year', 'month', 'week', 'day', 'hour'], FieldInfo(annotation=NoneType, required=True, description='Sets the time interval of the x axis.'))
+
+    events_meshgrid:
+      cell_width: 10000
+      cell_height: 10000
