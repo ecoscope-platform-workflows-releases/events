@@ -1,0 +1,68 @@
+{
+  "error": null,
+  "result": {
+    "filters": {
+      "schema": {
+        "properties": {
+          "All": {
+            "default": "True",
+            "oneOf": [
+              {
+                "const": "True",
+                "title": "True"
+              }
+            ],
+            "title": "All",
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "uiSchema": {
+          "All": {
+            "ui:title": "All",
+            "ui:widget": "select"
+          }
+        }
+      }
+    },
+    "layout": [],
+    "metadata": {
+      "description": "A dashboard for visualizing events.",
+      "time_range": "From 01 Jan 2015 00:00:00 UTC to 31 Dec 2015 23:59:59 UTC",
+      "title": "Events Dashboard"
+    },
+    "views": {
+      "{\"All\": \"True\"}": [
+        {
+          "data": "str",
+          "id": 0,
+          "is_filtered": true,
+          "title": "Events Bar Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 1,
+          "is_filtered": true,
+          "title": "Events Map",
+          "widget_type": "map"
+        },
+        {
+          "data": "str",
+          "id": 2,
+          "is_filtered": true,
+          "title": "Events Pie Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 3,
+          "is_filtered": true,
+          "title": "Density Map",
+          "widget_type": "map"
+        }
+      ]
+    }
+  },
+  "traceback": null
+}
