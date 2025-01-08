@@ -21,20 +21,20 @@ from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
 )
 from ecoscope_workflows_core.tasks.transformation import add_temporal_index
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import apply_color_map
+from ecoscope_workflows_core.tasks.groupby import split_groups
+from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_chart
+from ecoscope_workflows_core.tasks.io import persist_text
+from ecoscope_workflows_core.tasks.results import create_plot_widget_single_view
+from ecoscope_workflows_core.tasks.results import merge_widget_views
 from ecoscope_workflows_ext_ecoscope.tasks.results import create_point_layer
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_ecomap
-from ecoscope_workflows_core.tasks.io import persist_text
 from ecoscope_workflows_core.tasks.results import create_map_widget_single_view
-from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_chart
-from ecoscope_workflows_core.tasks.results import create_plot_widget_single_view
+from ecoscope_workflows_ext_ecoscope.tasks.results import draw_pie_chart
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import create_meshgrid
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import calculate_feature_density
 from ecoscope_workflows_core.tasks.transformation import sort_values
 from ecoscope_workflows_core.tasks.transformation import map_values_with_unit
 from ecoscope_workflows_ext_ecoscope.tasks.results import create_polygon_layer
-from ecoscope_workflows_core.tasks.groupby import split_groups
-from ecoscope_workflows_core.tasks.results import merge_widget_views
-from ecoscope_workflows_ext_ecoscope.tasks.results import draw_pie_chart
 from ecoscope_workflows_core.tasks.results import gather_dashboard
 
 # %% [markdown]
@@ -99,14 +99,15 @@ groupers = set_groupers.partial(**groupers_params).call()
 time_range_params = dict(
     since=...,
     until=...,
-    time_format=...,
 )
 
 # %%
 # call the task
 
 
-time_range = set_time_range.partial(**time_range_params).call()
+time_range = set_time_range.partial(
+    time_format="%d %b %Y %H:%M:%S %Z", **time_range_params
+).call()
 
 
 # %% [markdown]
@@ -160,10 +161,7 @@ filter_events = apply_reloc_coord_filter.partial(
 # %%
 # parameters
 
-events_add_temporal_index_params = dict(
-    cast_to_datetime=...,
-    format=...,
-)
+events_add_temporal_index_params = dict()
 
 # %%
 # call the task
@@ -173,6 +171,8 @@ events_add_temporal_index = add_temporal_index.partial(
     df=filter_events,
     time_col="time",
     groupers=groupers,
+    cast_to_datetime=True,
+    format="mixed",
     **events_add_temporal_index_params,
 ).call()
 
@@ -199,86 +199,19 @@ events_colormap = apply_color_map.partial(
 
 
 # %% [markdown]
-# ## Create map layer from Events
+# ## Split Events by Group
 
 # %%
 # parameters
 
-events_map_layer_params = dict()
+split_event_groups_params = dict()
 
 # %%
 # call the task
 
 
-events_map_layer = create_point_layer.partial(
-    geodataframe=events_colormap,
-    layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
-    legend={"label_column": "event_type", "color_column": "event_type_colormap"},
-    **events_map_layer_params,
-).call()
-
-
-# %% [markdown]
-# ## Draw Ecomap from Time Density
-
-# %%
-# parameters
-
-events_ecomap_params = dict(
-    title=...,
-)
-
-# %%
-# call the task
-
-
-events_ecomap = draw_ecomap.partial(
-    geo_layers=events_map_layer,
-    tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
-    north_arrow_style={"placement": "top-left"},
-    legend_style={"placement": "bottom-right"},
-    static=False,
-    **events_ecomap_params,
-).call()
-
-
-# %% [markdown]
-# ## Persist Ecomap as Text
-
-# %%
-# parameters
-
-events_ecomap_html_url_params = dict(
-    filename=...,
-)
-
-# %%
-# call the task
-
-
-events_ecomap_html_url = persist_text.partial(
-    text=events_ecomap,
-    root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-    **events_ecomap_html_url_params,
-).call()
-
-
-# %% [markdown]
-# ## Create Time Density Map Widget
-
-# %%
-# parameters
-
-events_map_widget_params = dict(
-    view=...,
-)
-
-# %%
-# call the task
-
-
-events_map_widget = create_map_widget_single_view.partial(
-    data=events_ecomap_html_url, title="Events Map", **events_map_widget_params
+split_event_groups = split_groups.partial(
+    df=events_colormap, groupers=groupers, **split_event_groups_params
 ).call()
 
 
@@ -290,8 +223,6 @@ events_map_widget = create_map_widget_single_view.partial(
 
 events_bar_chart_params = dict(
     time_interval=...,
-    grouped_styles=...,
-    layout_style=...,
 )
 
 # %%
@@ -299,15 +230,16 @@ events_bar_chart_params = dict(
 
 
 events_bar_chart = draw_time_series_bar_chart.partial(
-    dataframe=events_colormap,
     x_axis="time",
     y_axis="event_type",
     category="event_type",
     agg_function="count",
     color_column="event_type_colormap",
     plot_style={"xperiodalignment": "middle"},
+    grouped_styles=None,
+    layout_style=None,
     **events_bar_chart_params,
-).call()
+).mapvalues(argnames=["dataframe"], argvalues=split_event_groups)
 
 
 # %% [markdown]
@@ -325,239 +257,42 @@ events_bar_chart_html_url_params = dict(
 
 
 events_bar_chart_html_url = persist_text.partial(
-    text=events_bar_chart,
     root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
     **events_bar_chart_html_url_params,
-).call()
+).mapvalues(argnames=["text"], argvalues=events_bar_chart)
 
 
 # %% [markdown]
-# ## Create Plot Widget for Events
+# ## Create Bar Plot Widget for Events
 
 # %%
 # parameters
 
-events_bar_chart_widget_params = dict(
-    view=...,
-)
+events_bar_chart_widget_params = dict()
 
 # %%
 # call the task
 
 
 events_bar_chart_widget = create_plot_widget_single_view.partial(
-    data=events_bar_chart_html_url,
-    title="Events Bar Chart",
-    **events_bar_chart_widget_params,
-).call()
+    title="Events Bar Chart", **events_bar_chart_widget_params
+).map(argnames=["view", "data"], argvalues=events_bar_chart_html_url)
 
 
 # %% [markdown]
-# ## Create Events Meshgrid
+# ## Merge Bar Plot Widget Views
 
 # %%
 # parameters
 
-events_meshgrid_params = dict(
-    cell_width=...,
-    cell_height=...,
-    intersecting_only=...,
-)
+grouped_bar_plot_widget_merge_params = dict()
 
 # %%
 # call the task
 
 
-events_meshgrid = create_meshgrid.partial(
-    aoi=events_add_temporal_index, **events_meshgrid_params
-).call()
-
-
-# %% [markdown]
-# ## Events Feature Density
-
-# %%
-# parameters
-
-events_feature_density_params = dict()
-
-# %%
-# call the task
-
-
-events_feature_density = calculate_feature_density.partial(
-    geodataframe=events_add_temporal_index,
-    meshgrid=events_meshgrid,
-    geometry_type="point",
-    **events_feature_density_params,
-).call()
-
-
-# %% [markdown]
-# ## Feature Density Colormap
-
-# %%
-# parameters
-
-fd_colormap_params = dict()
-
-# %%
-# call the task
-
-
-fd_colormap = apply_color_map.partial(
-    df=events_feature_density,
-    input_column_name="density",
-    colormap="RdYlGn_r",
-    output_column_name="density_colormap",
-    **fd_colormap_params,
-).call()
-
-
-# %% [markdown]
-# ## Sort Density By Classification
-
-# %%
-# parameters
-
-sort_density_values_params = dict(
-    na_position=...,
-)
-
-# %%
-# call the task
-
-
-sort_density_values = sort_values.partial(
-    df=fd_colormap, column_name="density", ascending=True, **sort_density_values_params
-).call()
-
-
-# %% [markdown]
-# ## Format Feature Density Labels
-
-# %%
-# parameters
-
-feature_density_format_params = dict()
-
-# %%
-# call the task
-
-
-feature_density_format = map_values_with_unit.partial(
-    df=sort_density_values,
-    original_unit=None,
-    new_unit=None,
-    input_column_name="density",
-    output_column_name="density",
-    decimal_places=0,
-    **feature_density_format_params,
-).call()
-
-
-# %% [markdown]
-# ## Create map layer from Feature Density
-
-# %%
-# parameters
-
-fd_map_layer_params = dict()
-
-# %%
-# call the task
-
-
-fd_map_layer = create_polygon_layer.partial(
-    geodataframe=feature_density_format,
-    layer_style={
-        "fill_color_column": "density_colormap",
-        "get_line_width": 0,
-        "opacity": 0.4,
-    },
-    legend={"label_column": "density", "color_column": "density_colormap"},
-    **fd_map_layer_params,
-).call()
-
-
-# %% [markdown]
-# ## Draw Ecomap from Feature Density
-
-# %%
-# parameters
-
-fd_ecomap_params = dict(
-    title=...,
-)
-
-# %%
-# call the task
-
-
-fd_ecomap = draw_ecomap.partial(
-    geo_layers=fd_map_layer,
-    tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
-    north_arrow_style={"placement": "top-left"},
-    legend_style={"title": "Number of events", "placement": "bottom-right"},
-    static=False,
-    **fd_ecomap_params,
-).call()
-
-
-# %% [markdown]
-# ## Persist Feature Density Ecomap as Text
-
-# %%
-# parameters
-
-fd_ecomap_html_url_params = dict(
-    filename=...,
-)
-
-# %%
-# call the task
-
-
-fd_ecomap_html_url = persist_text.partial(
-    text=fd_ecomap,
-    root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-    **fd_ecomap_html_url_params,
-).call()
-
-
-# %% [markdown]
-# ## Create Feature Density Map Widget
-
-# %%
-# parameters
-
-fd_map_widget_params = dict(
-    view=...,
-)
-
-# %%
-# call the task
-
-
-fd_map_widget = create_map_widget_single_view.partial(
-    data=fd_ecomap_html_url, title="Density Map", **fd_map_widget_params
-).call()
-
-
-# %% [markdown]
-# ## Split Events by Group
-
-# %%
-# parameters
-
-split_event_groups_params = dict()
-
-# %%
-# call the task
-
-
-split_event_groups = split_groups.partial(
-    df=events_colormap, groupers=groupers, **split_event_groups_params
+grouped_bar_plot_widget_merge = merge_widget_views.partial(
+    widgets=events_bar_chart_widget, **grouped_bar_plot_widget_merge_params
 ).call()
 
 
@@ -586,15 +321,14 @@ grouped_events_map_layer = create_point_layer.partial(
 # %%
 # parameters
 
-grouped_events_ecomap_params = dict(
-    title=...,
-)
+grouped_events_ecomap_params = dict()
 
 # %%
 # call the task
 
 
 grouped_events_ecomap = draw_ecomap.partial(
+    title=None,
     tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
     north_arrow_style={"placement": "top-left"},
     legend_style={"placement": "bottom-right"},
@@ -636,7 +370,7 @@ grouped_events_map_widget_params = dict()
 
 
 grouped_events_map_widget = create_map_widget_single_view.partial(
-    title="Grouped Events Map", **grouped_events_map_widget_params
+    title="Events Map", **grouped_events_map_widget_params
 ).map(argnames=["view", "data"], argvalues=grouped_events_ecomap_html_url)
 
 
@@ -663,10 +397,7 @@ grouped_events_map_widget_merge = merge_widget_views.partial(
 # %%
 # parameters
 
-grouped_events_pie_chart_params = dict(
-    label_column=...,
-    layout_style=...,
-)
+grouped_events_pie_chart_params = dict()
 
 # %%
 # call the task
@@ -676,6 +407,8 @@ grouped_events_pie_chart = draw_pie_chart.partial(
     value_column="event_type",
     color_column="event_type_colormap",
     plot_style={"textinfo": "value"},
+    label_column=None,
+    layout_style=None,
     **grouped_events_pie_chart_params,
 ).mapvalues(argnames=["dataframe"], argvalues=split_event_groups)
 
@@ -735,6 +468,26 @@ grouped_events_pie_widget_merge = merge_widget_views.partial(
 
 
 # %% [markdown]
+# ## Create Events Meshgrid
+
+# %%
+# parameters
+
+events_meshgrid_params = dict(
+    cell_width=...,
+    cell_height=...,
+)
+
+# %%
+# call the task
+
+
+events_meshgrid = create_meshgrid.partial(
+    aoi=events_add_temporal_index, intersecting_only=False, **events_meshgrid_params
+).call()
+
+
+# %% [markdown]
 # ## Grouped Events Feature Density
 
 # %%
@@ -779,16 +532,17 @@ grouped_fd_colormap = apply_color_map.partial(
 # %%
 # parameters
 
-sort_grouped_density_values_params = dict(
-    na_position=...,
-)
+sort_grouped_density_values_params = dict()
 
 # %%
 # call the task
 
 
 sort_grouped_density_values = sort_values.partial(
-    column_name="density", ascending=True, **sort_grouped_density_values_params
+    column_name="density",
+    ascending=True,
+    na_position="last",
+    **sort_grouped_density_values_params,
 ).mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
 
 
@@ -843,15 +597,14 @@ grouped_fd_map_layer = create_polygon_layer.partial(
 # %%
 # parameters
 
-grouped_fd_ecomap_params = dict(
-    title=...,
-)
+grouped_fd_ecomap_params = dict()
 
 # %%
 # call the task
 
 
 grouped_fd_ecomap = draw_ecomap.partial(
+    title=None,
     tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
     north_arrow_style={"placement": "top-left"},
     legend_style={"title": "Number of events", "placement": "bottom-right"},
@@ -893,7 +646,7 @@ grouped_fd_map_widget_params = dict()
 
 
 grouped_fd_map_widget = create_map_widget_single_view.partial(
-    title="Grouped Density Map", **grouped_fd_map_widget_params
+    title="Density Map", **grouped_fd_map_widget_params
 ).map(argnames=["view", "data"], argvalues=grouped_fd_ecomap_html_url)
 
 
@@ -929,9 +682,7 @@ events_dashboard_params = dict()
 events_dashboard = gather_dashboard.partial(
     details=workflow_details,
     widgets=[
-        events_map_widget,
-        events_bar_chart_widget,
-        fd_map_widget,
+        grouped_bar_plot_widget_merge,
         grouped_events_map_widget_merge,
         grouped_events_pie_widget_merge,
         grouped_fd_map_widget_merge,
