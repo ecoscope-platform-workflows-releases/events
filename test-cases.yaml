@@ -1,27 +1,19 @@
-# TODO: generate this _instead_ of "params_fillable.yaml"  and then edit it
-month-grouper:
-  name: Month Grouper
-  description: A demonstration of the events workflow with monthly grouping.
+all-grouper:
+  name: All Grouper
+  description: A demonstration of the events workflow with "all" (i.e. no) grouping.
   params:
     workflow_details:
       name: "Events Dashboard"
       description: "A dashboard for visualizing events."
       image_url: ""
-
     er_client_name:
       data_source:
         name: "mep_dev"
-
-    # Parameters for 'Set Groupers' using task `set_groupers`.
     groupers:
-      groupers: # (list[ecoscope_workflows.tasks.groupby._groupby.Grouper], FieldInfo(annotation=NoneType, required=True, description='            Index(es) and/or column(s) to group by, along with\n            optional display names and help text.\n            '))
-        - temporal_index: "%B"
-
+      groupers: []
     time_range:
       since: "2015-01-01T00:00:00Z"
       until: "2015-12-31T23:59:59Z"
-
-    # Parameters for 'Get Events from EarthRanger' using task `get_events`.
     get_events_data:
       event_types:
         [
@@ -32,7 +24,53 @@ month-grouper:
           "fire_rep",
           "injured_animal_rep",
         ]
-
-    # Parameters for 'Draw Time Series Bar Chart for Events' using task `draw_time_series_bar_chart`.
     events_bar_chart:
-      time_interval: "month" # (typing.Literal['year', 'month', 'week', 'day', 'hour'], FieldInfo(annotation=NoneType, required=True, description='Sets the time interval of the x axis.'))
+      time_interval: "month"
+    filter_events:
+      min_x: -180.0
+      max_x: 180.0
+      min_y: -90.0
+      max_y: 90.0
+      filter_point_coords: []
+    events_meshgrid:
+      cell_width: 10000
+      cell_height: 10000
+
+month-grouper:
+  name: Month Grouper
+  description: A demonstration of the events workflow with monthly grouping.
+  params:
+    workflow_details:
+      name: "Events Dashboard"
+      description: "A dashboard for visualizing events."
+      image_url: ""
+    er_client_name:
+      data_source:
+        name: "mep_dev"
+    groupers:
+      groupers:
+        - temporal_index: "%B"
+    time_range:
+      since: "2015-01-01T00:00:00Z"
+      until: "2015-12-31T23:59:59Z"
+    get_events_data:
+      event_types:
+        [
+          "hwc_rep",
+          "bird_sighting_rep",
+          "wildlife_sighting_rep",
+          "poacher_camp_rep",
+          "fire_rep",
+          "injured_animal_rep",
+        ]
+    events_bar_chart:
+      time_interval: "week"
+    filter_events:
+      min_x: -180.0
+      max_x: 180.0
+      min_y: -90.0
+      max_y: 90.0
+      filter_point_coords: []
+    events_meshgrid:
+      cell_width: 10000
+      cell_height: 10000
