@@ -128,6 +128,7 @@ get_events_data = get_events.partial(
     client=er_client_name,
     time_range=time_range,
     event_columns=["id", "time", "event_type", "geometry"],
+    raise_on_empty=True,
     **get_events_data_params,
 ).call()
 

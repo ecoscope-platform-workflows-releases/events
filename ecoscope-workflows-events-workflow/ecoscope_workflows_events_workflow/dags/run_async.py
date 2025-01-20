@@ -110,6 +110,7 @@ def main(params: Params):
                 "client": DependsOn("er_client_name"),
                 "time_range": DependsOn("time_range"),
                 "event_columns": ["id", "time", "event_type", "geometry"],
+                "raise_on_empty": True,
             }
             | (params_dict.get("get_events_data") or {}),
             method="call",
