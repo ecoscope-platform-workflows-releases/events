@@ -5,7 +5,6 @@ all-grouper:
     workflow_details:
       name: "Events Dashboard"
       description: "A dashboard for visualizing events."
-      image_url: ""
     er_client_name:
       data_source:
         name: "mep_dev"
@@ -43,7 +42,6 @@ month-grouper:
     workflow_details:
       name: "Events Dashboard"
       description: "A dashboard for visualizing events."
-      image_url: ""
     er_client_name:
       data_source:
         name: "mep_dev"

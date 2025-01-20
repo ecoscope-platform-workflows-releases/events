@@ -81,6 +81,7 @@ def main(params: Params):
             client=er_client_name,
             time_range=time_range,
             event_columns=["id", "time", "event_type", "geometry"],
+            raise_on_empty=True,
             **(params_dict.get("get_events_data") or {}),
         )
         .call()

@@ -12,12 +12,6 @@
           "title": "Description",
           "type": "string",
           "description": "A description"
-        },
-        "image_url": {
-          "default": "",
-          "title": "Image Url",
-          "type": "string",
-          "description": "An image url"
         }
       },
       "required": [
