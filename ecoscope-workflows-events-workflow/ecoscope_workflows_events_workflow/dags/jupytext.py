@@ -53,7 +53,11 @@ workflow_details_params = dict(
 # call the task
 
 
-workflow_details = set_workflow_details.partial(**workflow_details_params).call()
+workflow_details = (
+    set_workflow_details.handle_errors(task_instance_id="workflow_details")
+    .partial(**workflow_details_params)
+    .call()
+)
 
 
 # %% [markdown]
@@ -70,7 +74,11 @@ er_client_name_params = dict(
 # call the task
 
 
-er_client_name = set_er_connection.partial(**er_client_name_params).call()
+er_client_name = (
+    set_er_connection.handle_errors(task_instance_id="er_client_name")
+    .partial(**er_client_name_params)
+    .call()
+)
 
 
 # %% [markdown]
@@ -87,7 +95,11 @@ groupers_params = dict(
 # call the task
 
 
-groupers = set_groupers.partial(**groupers_params).call()
+groupers = (
+    set_groupers.handle_errors(task_instance_id="groupers")
+    .partial(**groupers_params)
+    .call()
+)
 
 
 # %% [markdown]
@@ -105,9 +117,11 @@ time_range_params = dict(
 # call the task
 
 
-time_range = set_time_range.partial(
-    time_format="%d %b %Y %H:%M:%S %Z", **time_range_params
-).call()
+time_range = (
+    set_time_range.handle_errors(task_instance_id="time_range")
+    .partial(time_format="%d %b %Y %H:%M:%S %Z", **time_range_params)
+    .call()
+)
 
 
 # %% [markdown]
@@ -124,13 +138,17 @@ get_events_data_params = dict(
 # call the task
 
 
-get_events_data = get_events.partial(
-    client=er_client_name,
-    time_range=time_range,
-    event_columns=["id", "time", "event_type", "geometry"],
-    raise_on_empty=True,
-    **get_events_data_params,
-).call()
+get_events_data = (
+    get_events.handle_errors(task_instance_id="get_events_data")
+    .partial(
+        client=er_client_name,
+        time_range=time_range,
+        event_columns=["id", "time", "event_type", "geometry"],
+        raise_on_empty=True,
+        **get_events_data_params,
+    )
+    .call()
+)
 
 
 # %% [markdown]
@@ -151,9 +169,11 @@ filter_events_params = dict(
 # call the task
 
 
-filter_events = apply_reloc_coord_filter.partial(
-    df=get_events_data, **filter_events_params
-).call()
+filter_events = (
+    apply_reloc_coord_filter.handle_errors(task_instance_id="filter_events")
+    .partial(df=get_events_data, **filter_events_params)
+    .call()
+)
 
 
 # %% [markdown]
@@ -168,14 +188,18 @@ events_add_temporal_index_params = dict()
 # call the task
 
 
-events_add_temporal_index = add_temporal_index.partial(
-    df=filter_events,
-    time_col="time",
-    groupers=groupers,
-    cast_to_datetime=True,
-    format="mixed",
-    **events_add_temporal_index_params,
-).call()
+events_add_temporal_index = (
+    add_temporal_index.handle_errors(task_instance_id="events_add_temporal_index")
+    .partial(
+        df=filter_events,
+        time_col="time",
+        groupers=groupers,
+        cast_to_datetime=True,
+        format="mixed",
+        **events_add_temporal_index_params,
+    )
+    .call()
+)
 
 
 # %% [markdown]
@@ -190,13 +214,17 @@ events_colormap_params = dict()
 # call the task
 
 
-events_colormap = apply_color_map.partial(
-    df=events_add_temporal_index,
-    input_column_name="event_type",
-    colormap="tab20b",
-    output_column_name="event_type_colormap",
-    **events_colormap_params,
-).call()
+events_colormap = (
+    apply_color_map.handle_errors(task_instance_id="events_colormap")
+    .partial(
+        df=events_add_temporal_index,
+        input_column_name="event_type",
+        colormap="tab20b",
+        output_column_name="event_type_colormap",
+        **events_colormap_params,
+    )
+    .call()
+)
 
 
 # %% [markdown]
@@ -211,9 +239,11 @@ split_event_groups_params = dict()
 # call the task
 
 
-split_event_groups = split_groups.partial(
-    df=events_colormap, groupers=groupers, **split_event_groups_params
-).call()
+split_event_groups = (
+    split_groups.handle_errors(task_instance_id="split_event_groups")
+    .partial(df=events_colormap, groupers=groupers, **split_event_groups_params)
+    .call()
+)
 
 
 # %% [markdown]
@@ -230,17 +260,21 @@ events_bar_chart_params = dict(
 # call the task
 
 
-events_bar_chart = draw_time_series_bar_chart.partial(
-    x_axis="time",
-    y_axis="event_type",
-    category="event_type",
-    agg_function="count",
-    color_column="event_type_colormap",
-    plot_style={"xperiodalignment": "middle"},
-    grouped_styles=None,
-    layout_style=None,
-    **events_bar_chart_params,
-).mapvalues(argnames=["dataframe"], argvalues=split_event_groups)
+events_bar_chart = (
+    draw_time_series_bar_chart.handle_errors(task_instance_id="events_bar_chart")
+    .partial(
+        x_axis="time",
+        y_axis="event_type",
+        category="event_type",
+        agg_function="count",
+        color_column="event_type_colormap",
+        plot_style={"xperiodalignment": "middle"},
+        grouped_styles=None,
+        layout_style=None,
+        **events_bar_chart_params,
+    )
+    .mapvalues(argnames=["dataframe"], argvalues=split_event_groups)
+)
 
 
 # %% [markdown]
@@ -257,10 +291,14 @@ events_bar_chart_html_url_params = dict(
 # call the task
 
 
-events_bar_chart_html_url = persist_text.partial(
-    root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-    **events_bar_chart_html_url_params,
-).mapvalues(argnames=["text"], argvalues=events_bar_chart)
+events_bar_chart_html_url = (
+    persist_text.handle_errors(task_instance_id="events_bar_chart_html_url")
+    .partial(
+        root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        **events_bar_chart_html_url_params,
+    )
+    .mapvalues(argnames=["text"], argvalues=events_bar_chart)
+)
 
 
 # %% [markdown]
@@ -275,9 +313,13 @@ events_bar_chart_widget_params = dict()
 # call the task
 
 
-events_bar_chart_widget = create_plot_widget_single_view.partial(
-    title="Events Bar Chart", **events_bar_chart_widget_params
-).map(argnames=["view", "data"], argvalues=events_bar_chart_html_url)
+events_bar_chart_widget = (
+    create_plot_widget_single_view.handle_errors(
+        task_instance_id="events_bar_chart_widget"
+    )
+    .partial(title="Events Bar Chart", **events_bar_chart_widget_params)
+    .map(argnames=["view", "data"], argvalues=events_bar_chart_html_url)
+)
 
 
 # %% [markdown]
@@ -292,9 +334,11 @@ grouped_bar_plot_widget_merge_params = dict()
 # call the task
 
 
-grouped_bar_plot_widget_merge = merge_widget_views.partial(
-    widgets=events_bar_chart_widget, **grouped_bar_plot_widget_merge_params
-).call()
+grouped_bar_plot_widget_merge = (
+    merge_widget_views.handle_errors(task_instance_id="grouped_bar_plot_widget_merge")
+    .partial(widgets=events_bar_chart_widget, **grouped_bar_plot_widget_merge_params)
+    .call()
+)
 
 
 # %% [markdown]
@@ -309,11 +353,15 @@ grouped_events_map_layer_params = dict()
 # call the task
 
 
-grouped_events_map_layer = create_point_layer.partial(
-    layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
-    legend={"label_column": "event_type", "color_column": "event_type_colormap"},
-    **grouped_events_map_layer_params,
-).mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
+grouped_events_map_layer = (
+    create_point_layer.handle_errors(task_instance_id="grouped_events_map_layer")
+    .partial(
+        layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
+        legend={"label_column": "event_type", "color_column": "event_type_colormap"},
+        **grouped_events_map_layer_params,
+    )
+    .mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
+)
 
 
 # %% [markdown]
@@ -328,14 +376,18 @@ grouped_events_ecomap_params = dict()
 # call the task
 
 
-grouped_events_ecomap = draw_ecomap.partial(
-    title=None,
-    tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
-    north_arrow_style={"placement": "top-left"},
-    legend_style={"placement": "bottom-right"},
-    static=False,
-    **grouped_events_ecomap_params,
-).mapvalues(argnames=["geo_layers"], argvalues=grouped_events_map_layer)
+grouped_events_ecomap = (
+    draw_ecomap.handle_errors(task_instance_id="grouped_events_ecomap")
+    .partial(
+        title=None,
+        tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
+        north_arrow_style={"placement": "top-left"},
+        legend_style={"placement": "bottom-right"},
+        static=False,
+        **grouped_events_ecomap_params,
+    )
+    .mapvalues(argnames=["geo_layers"], argvalues=grouped_events_map_layer)
+)
 
 
 # %% [markdown]
@@ -352,10 +404,14 @@ grouped_events_ecomap_html_url_params = dict(
 # call the task
 
 
-grouped_events_ecomap_html_url = persist_text.partial(
-    root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-    **grouped_events_ecomap_html_url_params,
-).mapvalues(argnames=["text"], argvalues=grouped_events_ecomap)
+grouped_events_ecomap_html_url = (
+    persist_text.handle_errors(task_instance_id="grouped_events_ecomap_html_url")
+    .partial(
+        root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        **grouped_events_ecomap_html_url_params,
+    )
+    .mapvalues(argnames=["text"], argvalues=grouped_events_ecomap)
+)
 
 
 # %% [markdown]
@@ -370,9 +426,13 @@ grouped_events_map_widget_params = dict()
 # call the task
 
 
-grouped_events_map_widget = create_map_widget_single_view.partial(
-    title="Events Map", **grouped_events_map_widget_params
-).map(argnames=["view", "data"], argvalues=grouped_events_ecomap_html_url)
+grouped_events_map_widget = (
+    create_map_widget_single_view.handle_errors(
+        task_instance_id="grouped_events_map_widget"
+    )
+    .partial(title="Events Map", **grouped_events_map_widget_params)
+    .map(argnames=["view", "data"], argvalues=grouped_events_ecomap_html_url)
+)
 
 
 # %% [markdown]
@@ -387,9 +447,13 @@ grouped_events_map_widget_merge_params = dict()
 # call the task
 
 
-grouped_events_map_widget_merge = merge_widget_views.partial(
-    widgets=grouped_events_map_widget, **grouped_events_map_widget_merge_params
-).call()
+grouped_events_map_widget_merge = (
+    merge_widget_views.handle_errors(task_instance_id="grouped_events_map_widget_merge")
+    .partial(
+        widgets=grouped_events_map_widget, **grouped_events_map_widget_merge_params
+    )
+    .call()
+)
 
 
 # %% [markdown]
@@ -404,14 +468,18 @@ grouped_events_pie_chart_params = dict()
 # call the task
 
 
-grouped_events_pie_chart = draw_pie_chart.partial(
-    value_column="event_type",
-    color_column="event_type_colormap",
-    plot_style={"textinfo": "value"},
-    label_column=None,
-    layout_style=None,
-    **grouped_events_pie_chart_params,
-).mapvalues(argnames=["dataframe"], argvalues=split_event_groups)
+grouped_events_pie_chart = (
+    draw_pie_chart.handle_errors(task_instance_id="grouped_events_pie_chart")
+    .partial(
+        value_column="event_type",
+        color_column="event_type_colormap",
+        plot_style={"textinfo": "value"},
+        label_column=None,
+        layout_style=None,
+        **grouped_events_pie_chart_params,
+    )
+    .mapvalues(argnames=["dataframe"], argvalues=split_event_groups)
+)
 
 
 # %% [markdown]
@@ -428,10 +496,14 @@ grouped_pie_chart_html_urls_params = dict(
 # call the task
 
 
-grouped_pie_chart_html_urls = persist_text.partial(
-    root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-    **grouped_pie_chart_html_urls_params,
-).mapvalues(argnames=["text"], argvalues=grouped_events_pie_chart)
+grouped_pie_chart_html_urls = (
+    persist_text.handle_errors(task_instance_id="grouped_pie_chart_html_urls")
+    .partial(
+        root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        **grouped_pie_chart_html_urls_params,
+    )
+    .mapvalues(argnames=["text"], argvalues=grouped_events_pie_chart)
+)
 
 
 # %% [markdown]
@@ -446,9 +518,13 @@ grouped_events_pie_chart_widgets_params = dict()
 # call the task
 
 
-grouped_events_pie_chart_widgets = create_plot_widget_single_view.partial(
-    title="Events Pie Chart", **grouped_events_pie_chart_widgets_params
-).map(argnames=["view", "data"], argvalues=grouped_pie_chart_html_urls)
+grouped_events_pie_chart_widgets = (
+    create_plot_widget_single_view.handle_errors(
+        task_instance_id="grouped_events_pie_chart_widgets"
+    )
+    .partial(title="Events Pie Chart", **grouped_events_pie_chart_widgets_params)
+    .map(argnames=["view", "data"], argvalues=grouped_pie_chart_html_urls)
+)
 
 
 # %% [markdown]
@@ -463,9 +539,14 @@ grouped_events_pie_widget_merge_params = dict()
 # call the task
 
 
-grouped_events_pie_widget_merge = merge_widget_views.partial(
-    widgets=grouped_events_pie_chart_widgets, **grouped_events_pie_widget_merge_params
-).call()
+grouped_events_pie_widget_merge = (
+    merge_widget_views.handle_errors(task_instance_id="grouped_events_pie_widget_merge")
+    .partial(
+        widgets=grouped_events_pie_chart_widgets,
+        **grouped_events_pie_widget_merge_params,
+    )
+    .call()
+)
 
 
 # %% [markdown]
@@ -483,9 +564,13 @@ events_meshgrid_params = dict(
 # call the task
 
 
-events_meshgrid = create_meshgrid.partial(
-    aoi=events_add_temporal_index, intersecting_only=False, **events_meshgrid_params
-).call()
+events_meshgrid = (
+    create_meshgrid.handle_errors(task_instance_id="events_meshgrid")
+    .partial(
+        aoi=events_add_temporal_index, intersecting_only=False, **events_meshgrid_params
+    )
+    .call()
+)
 
 
 # %% [markdown]
@@ -500,11 +585,17 @@ grouped_events_feature_density_params = dict()
 # call the task
 
 
-grouped_events_feature_density = calculate_feature_density.partial(
-    meshgrid=events_meshgrid,
-    geometry_type="point",
-    **grouped_events_feature_density_params,
-).mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
+grouped_events_feature_density = (
+    calculate_feature_density.handle_errors(
+        task_instance_id="grouped_events_feature_density"
+    )
+    .partial(
+        meshgrid=events_meshgrid,
+        geometry_type="point",
+        **grouped_events_feature_density_params,
+    )
+    .mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
+)
 
 
 # %% [markdown]
@@ -519,12 +610,16 @@ grouped_fd_colormap_params = dict()
 # call the task
 
 
-grouped_fd_colormap = apply_color_map.partial(
-    input_column_name="density",
-    colormap="RdYlGn_r",
-    output_column_name="density_colormap",
-    **grouped_fd_colormap_params,
-).mapvalues(argnames=["df"], argvalues=grouped_events_feature_density)
+grouped_fd_colormap = (
+    apply_color_map.handle_errors(task_instance_id="grouped_fd_colormap")
+    .partial(
+        input_column_name="density",
+        colormap="RdYlGn_r",
+        output_column_name="density_colormap",
+        **grouped_fd_colormap_params,
+    )
+    .mapvalues(argnames=["df"], argvalues=grouped_events_feature_density)
+)
 
 
 # %% [markdown]
@@ -539,12 +634,16 @@ sort_grouped_density_values_params = dict()
 # call the task
 
 
-sort_grouped_density_values = sort_values.partial(
-    column_name="density",
-    ascending=True,
-    na_position="last",
-    **sort_grouped_density_values_params,
-).mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
+sort_grouped_density_values = (
+    sort_values.handle_errors(task_instance_id="sort_grouped_density_values")
+    .partial(
+        column_name="density",
+        ascending=True,
+        na_position="last",
+        **sort_grouped_density_values_params,
+    )
+    .mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
+)
 
 
 # %% [markdown]
@@ -559,14 +658,20 @@ grouped_feature_density_format_params = dict()
 # call the task
 
 
-grouped_feature_density_format = map_values_with_unit.partial(
-    original_unit=None,
-    new_unit=None,
-    input_column_name="density",
-    output_column_name="density",
-    decimal_places=0,
-    **grouped_feature_density_format_params,
-).mapvalues(argnames=["df"], argvalues=sort_grouped_density_values)
+grouped_feature_density_format = (
+    map_values_with_unit.handle_errors(
+        task_instance_id="grouped_feature_density_format"
+    )
+    .partial(
+        original_unit=None,
+        new_unit=None,
+        input_column_name="density",
+        output_column_name="density",
+        decimal_places=0,
+        **grouped_feature_density_format_params,
+    )
+    .mapvalues(argnames=["df"], argvalues=sort_grouped_density_values)
+)
 
 
 # %% [markdown]
@@ -581,15 +686,19 @@ grouped_fd_map_layer_params = dict()
 # call the task
 
 
-grouped_fd_map_layer = create_polygon_layer.partial(
-    layer_style={
-        "fill_color_column": "density_colormap",
-        "get_line_width": 0,
-        "opacity": 0.4,
-    },
-    legend={"label_column": "density", "color_column": "density_colormap"},
-    **grouped_fd_map_layer_params,
-).mapvalues(argnames=["geodataframe"], argvalues=grouped_feature_density_format)
+grouped_fd_map_layer = (
+    create_polygon_layer.handle_errors(task_instance_id="grouped_fd_map_layer")
+    .partial(
+        layer_style={
+            "fill_color_column": "density_colormap",
+            "get_line_width": 0,
+            "opacity": 0.4,
+        },
+        legend={"label_column": "density", "color_column": "density_colormap"},
+        **grouped_fd_map_layer_params,
+    )
+    .mapvalues(argnames=["geodataframe"], argvalues=grouped_feature_density_format)
+)
 
 
 # %% [markdown]
@@ -604,14 +713,18 @@ grouped_fd_ecomap_params = dict()
 # call the task
 
 
-grouped_fd_ecomap = draw_ecomap.partial(
-    title=None,
-    tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
-    north_arrow_style={"placement": "top-left"},
-    legend_style={"title": "Number of events", "placement": "bottom-right"},
-    static=False,
-    **grouped_fd_ecomap_params,
-).mapvalues(argnames=["geo_layers"], argvalues=grouped_fd_map_layer)
+grouped_fd_ecomap = (
+    draw_ecomap.handle_errors(task_instance_id="grouped_fd_ecomap")
+    .partial(
+        title=None,
+        tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
+        north_arrow_style={"placement": "top-left"},
+        legend_style={"title": "Number of events", "placement": "bottom-right"},
+        static=False,
+        **grouped_fd_ecomap_params,
+    )
+    .mapvalues(argnames=["geo_layers"], argvalues=grouped_fd_map_layer)
+)
 
 
 # %% [markdown]
@@ -628,10 +741,14 @@ grouped_fd_ecomap_html_url_params = dict(
 # call the task
 
 
-grouped_fd_ecomap_html_url = persist_text.partial(
-    root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-    **grouped_fd_ecomap_html_url_params,
-).mapvalues(argnames=["text"], argvalues=grouped_fd_ecomap)
+grouped_fd_ecomap_html_url = (
+    persist_text.handle_errors(task_instance_id="grouped_fd_ecomap_html_url")
+    .partial(
+        root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        **grouped_fd_ecomap_html_url_params,
+    )
+    .mapvalues(argnames=["text"], argvalues=grouped_fd_ecomap)
+)
 
 
 # %% [markdown]
@@ -646,9 +763,13 @@ grouped_fd_map_widget_params = dict()
 # call the task
 
 
-grouped_fd_map_widget = create_map_widget_single_view.partial(
-    title="Density Map", **grouped_fd_map_widget_params
-).map(argnames=["view", "data"], argvalues=grouped_fd_ecomap_html_url)
+grouped_fd_map_widget = (
+    create_map_widget_single_view.handle_errors(
+        task_instance_id="grouped_fd_map_widget"
+    )
+    .partial(title="Density Map", **grouped_fd_map_widget_params)
+    .map(argnames=["view", "data"], argvalues=grouped_fd_ecomap_html_url)
+)
 
 
 # %% [markdown]
@@ -663,9 +784,11 @@ grouped_fd_map_widget_merge_params = dict()
 # call the task
 
 
-grouped_fd_map_widget_merge = merge_widget_views.partial(
-    widgets=grouped_fd_map_widget, **grouped_fd_map_widget_merge_params
-).call()
+grouped_fd_map_widget_merge = (
+    merge_widget_views.handle_errors(task_instance_id="grouped_fd_map_widget_merge")
+    .partial(widgets=grouped_fd_map_widget, **grouped_fd_map_widget_merge_params)
+    .call()
+)
 
 
 # %% [markdown]
@@ -680,15 +803,19 @@ events_dashboard_params = dict()
 # call the task
 
 
-events_dashboard = gather_dashboard.partial(
-    details=workflow_details,
-    widgets=[
-        grouped_bar_plot_widget_merge,
-        grouped_events_map_widget_merge,
-        grouped_events_pie_widget_merge,
-        grouped_fd_map_widget_merge,
-    ],
-    groupers=groupers,
-    time_range=time_range,
-    **events_dashboard_params,
-).call()
+events_dashboard = (
+    gather_dashboard.handle_errors(task_instance_id="events_dashboard")
+    .partial(
+        details=workflow_details,
+        widgets=[
+            grouped_bar_plot_widget_merge,
+            grouped_events_map_widget_merge,
+            grouped_events_pie_widget_merge,
+            grouped_fd_map_widget_merge,
+        ],
+        groupers=groupers,
+        time_range=time_range,
+        **events_dashboard_params,
+    )
+    .call()
+)

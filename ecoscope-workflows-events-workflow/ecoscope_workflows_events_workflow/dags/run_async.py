@@ -82,22 +82,30 @@ def main(params: Params):
 
     nodes = {
         "workflow_details": Node(
-            async_task=set_workflow_details.validate().set_executor("lithops"),
+            async_task=set_workflow_details.validate()
+            .handle_errors(task_instance_id="workflow_details")
+            .set_executor("lithops"),
             partial=(params_dict.get("workflow_details") or {}),
             method="call",
         ),
         "er_client_name": Node(
-            async_task=set_er_connection.validate().set_executor("lithops"),
+            async_task=set_er_connection.validate()
+            .handle_errors(task_instance_id="er_client_name")
+            .set_executor("lithops"),
             partial=(params_dict.get("er_client_name") or {}),
             method="call",
         ),
         "groupers": Node(
-            async_task=set_groupers.validate().set_executor("lithops"),
+            async_task=set_groupers.validate()
+            .handle_errors(task_instance_id="groupers")
+            .set_executor("lithops"),
             partial=(params_dict.get("groupers") or {}),
             method="call",
         ),
         "time_range": Node(
-            async_task=set_time_range.validate().set_executor("lithops"),
+            async_task=set_time_range.validate()
+            .handle_errors(task_instance_id="time_range")
+            .set_executor("lithops"),
             partial={
                 "time_format": "%d %b %Y %H:%M:%S %Z",
             }
@@ -105,7 +113,9 @@ def main(params: Params):
             method="call",
         ),
         "get_events_data": Node(
-            async_task=get_events.validate().set_executor("lithops"),
+            async_task=get_events.validate()
+            .handle_errors(task_instance_id="get_events_data")
+            .set_executor("lithops"),
             partial={
                 "client": DependsOn("er_client_name"),
                 "time_range": DependsOn("time_range"),
@@ -116,7 +126,9 @@ def main(params: Params):
             method="call",
         ),
         "filter_events": Node(
-            async_task=apply_reloc_coord_filter.validate().set_executor("lithops"),
+            async_task=apply_reloc_coord_filter.validate()
+            .handle_errors(task_instance_id="filter_events")
+            .set_executor("lithops"),
             partial={
                 "df": DependsOn("get_events_data"),
             }
@@ -124,7 +136,9 @@ def main(params: Params):
             method="call",
         ),
         "events_add_temporal_index": Node(
-            async_task=add_temporal_index.validate().set_executor("lithops"),
+            async_task=add_temporal_index.validate()
+            .handle_errors(task_instance_id="events_add_temporal_index")
+            .set_executor("lithops"),
             partial={
                 "df": DependsOn("filter_events"),
                 "time_col": "time",
@@ -136,7 +150,9 @@ def main(params: Params):
             method="call",
         ),
         "events_colormap": Node(
-            async_task=apply_color_map.validate().set_executor("lithops"),
+            async_task=apply_color_map.validate()
+            .handle_errors(task_instance_id="events_colormap")
+            .set_executor("lithops"),
             partial={
                 "df": DependsOn("events_add_temporal_index"),
                 "input_column_name": "event_type",
@@ -147,7 +163,9 @@ def main(params: Params):
             method="call",
         ),
         "split_event_groups": Node(
-            async_task=split_groups.validate().set_executor("lithops"),
+            async_task=split_groups.validate()
+            .handle_errors(task_instance_id="split_event_groups")
+            .set_executor("lithops"),
             partial={
                 "df": DependsOn("events_colormap"),
                 "groupers": DependsOn("groupers"),
@@ -156,7 +174,9 @@ def main(params: Params):
             method="call",
         ),
         "events_bar_chart": Node(
-            async_task=draw_time_series_bar_chart.validate().set_executor("lithops"),
+            async_task=draw_time_series_bar_chart.validate()
+            .handle_errors(task_instance_id="events_bar_chart")
+            .set_executor("lithops"),
             partial={
                 "x_axis": "time",
                 "y_axis": "event_type",
@@ -175,7 +195,9 @@ def main(params: Params):
             },
         ),
         "events_bar_chart_html_url": Node(
-            async_task=persist_text.validate().set_executor("lithops"),
+            async_task=persist_text.validate()
+            .handle_errors(task_instance_id="events_bar_chart_html_url")
+            .set_executor("lithops"),
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             }
@@ -187,9 +209,9 @@ def main(params: Params):
             },
         ),
         "events_bar_chart_widget": Node(
-            async_task=create_plot_widget_single_view.validate().set_executor(
-                "lithops"
-            ),
+            async_task=create_plot_widget_single_view.validate()
+            .handle_errors(task_instance_id="events_bar_chart_widget")
+            .set_executor("lithops"),
             partial={
                 "title": "Events Bar Chart",
             }
@@ -201,7 +223,9 @@ def main(params: Params):
             },
         ),
         "grouped_bar_plot_widget_merge": Node(
-            async_task=merge_widget_views.validate().set_executor("lithops"),
+            async_task=merge_widget_views.validate()
+            .handle_errors(task_instance_id="grouped_bar_plot_widget_merge")
+            .set_executor("lithops"),
             partial={
                 "widgets": DependsOn("events_bar_chart_widget"),
             }
@@ -209,7 +233,9 @@ def main(params: Params):
             method="call",
         ),
         "grouped_events_map_layer": Node(
-            async_task=create_point_layer.validate().set_executor("lithops"),
+            async_task=create_point_layer.validate()
+            .handle_errors(task_instance_id="grouped_events_map_layer")
+            .set_executor("lithops"),
             partial={
                 "layer_style": {
                     "fill_color_column": "event_type_colormap",
@@ -228,7 +254,9 @@ def main(params: Params):
             },
         ),
         "grouped_events_ecomap": Node(
-            async_task=draw_ecomap.validate().set_executor("lithops"),
+            async_task=draw_ecomap.validate()
+            .handle_errors(task_instance_id="grouped_events_ecomap")
+            .set_executor("lithops"),
             partial={
                 "title": None,
                 "tile_layers": [
@@ -247,7 +275,9 @@ def main(params: Params):
             },
         ),
         "grouped_events_ecomap_html_url": Node(
-            async_task=persist_text.validate().set_executor("lithops"),
+            async_task=persist_text.validate()
+            .handle_errors(task_instance_id="grouped_events_ecomap_html_url")
+            .set_executor("lithops"),
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             }
@@ -259,7 +289,9 @@ def main(params: Params):
             },
         ),
         "grouped_events_map_widget": Node(
-            async_task=create_map_widget_single_view.validate().set_executor("lithops"),
+            async_task=create_map_widget_single_view.validate()
+            .handle_errors(task_instance_id="grouped_events_map_widget")
+            .set_executor("lithops"),
             partial={
                 "title": "Events Map",
             }
@@ -271,7 +303,9 @@ def main(params: Params):
             },
         ),
         "grouped_events_map_widget_merge": Node(
-            async_task=merge_widget_views.validate().set_executor("lithops"),
+            async_task=merge_widget_views.validate()
+            .handle_errors(task_instance_id="grouped_events_map_widget_merge")
+            .set_executor("lithops"),
             partial={
                 "widgets": DependsOn("grouped_events_map_widget"),
             }
@@ -279,7 +313,9 @@ def main(params: Params):
             method="call",
         ),
         "grouped_events_pie_chart": Node(
-            async_task=draw_pie_chart.validate().set_executor("lithops"),
+            async_task=draw_pie_chart.validate()
+            .handle_errors(task_instance_id="grouped_events_pie_chart")
+            .set_executor("lithops"),
             partial={
                 "value_column": "event_type",
                 "color_column": "event_type_colormap",
@@ -295,7 +331,9 @@ def main(params: Params):
             },
         ),
         "grouped_pie_chart_html_urls": Node(
-            async_task=persist_text.validate().set_executor("lithops"),
+            async_task=persist_text.validate()
+            .handle_errors(task_instance_id="grouped_pie_chart_html_urls")
+            .set_executor("lithops"),
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             }
@@ -307,9 +345,9 @@ def main(params: Params):
             },
         ),
         "grouped_events_pie_chart_widgets": Node(
-            async_task=create_plot_widget_single_view.validate().set_executor(
-                "lithops"
-            ),
+            async_task=create_plot_widget_single_view.validate()
+            .handle_errors(task_instance_id="grouped_events_pie_chart_widgets")
+            .set_executor("lithops"),
             partial={
                 "title": "Events Pie Chart",
             }
@@ -321,7 +359,9 @@ def main(params: Params):
             },
         ),
         "grouped_events_pie_widget_merge": Node(
-            async_task=merge_widget_views.validate().set_executor("lithops"),
+            async_task=merge_widget_views.validate()
+            .handle_errors(task_instance_id="grouped_events_pie_widget_merge")
+            .set_executor("lithops"),
             partial={
                 "widgets": DependsOn("grouped_events_pie_chart_widgets"),
             }
@@ -329,7 +369,9 @@ def main(params: Params):
             method="call",
         ),
         "events_meshgrid": Node(
-            async_task=create_meshgrid.validate().set_executor("lithops"),
+            async_task=create_meshgrid.validate()
+            .handle_errors(task_instance_id="events_meshgrid")
+            .set_executor("lithops"),
             partial={
                 "aoi": DependsOn("events_add_temporal_index"),
                 "intersecting_only": False,
@@ -338,7 +380,9 @@ def main(params: Params):
             method="call",
         ),
         "grouped_events_feature_density": Node(
-            async_task=calculate_feature_density.validate().set_executor("lithops"),
+            async_task=calculate_feature_density.validate()
+            .handle_errors(task_instance_id="grouped_events_feature_density")
+            .set_executor("lithops"),
             partial={
                 "meshgrid": DependsOn("events_meshgrid"),
                 "geometry_type": "point",
@@ -351,7 +395,9 @@ def main(params: Params):
             },
         ),
         "grouped_fd_colormap": Node(
-            async_task=apply_color_map.validate().set_executor("lithops"),
+            async_task=apply_color_map.validate()
+            .handle_errors(task_instance_id="grouped_fd_colormap")
+            .set_executor("lithops"),
             partial={
                 "input_column_name": "density",
                 "colormap": "RdYlGn_r",
@@ -365,7 +411,9 @@ def main(params: Params):
             },
         ),
         "sort_grouped_density_values": Node(
-            async_task=sort_values.validate().set_executor("lithops"),
+            async_task=sort_values.validate()
+            .handle_errors(task_instance_id="sort_grouped_density_values")
+            .set_executor("lithops"),
             partial={
                 "column_name": "density",
                 "ascending": True,
@@ -379,7 +427,9 @@ def main(params: Params):
             },
         ),
         "grouped_feature_density_format": Node(
-            async_task=map_values_with_unit.validate().set_executor("lithops"),
+            async_task=map_values_with_unit.validate()
+            .handle_errors(task_instance_id="grouped_feature_density_format")
+            .set_executor("lithops"),
             partial={
                 "original_unit": None,
                 "new_unit": None,
@@ -395,7 +445,9 @@ def main(params: Params):
             },
         ),
         "grouped_fd_map_layer": Node(
-            async_task=create_polygon_layer.validate().set_executor("lithops"),
+            async_task=create_polygon_layer.validate()
+            .handle_errors(task_instance_id="grouped_fd_map_layer")
+            .set_executor("lithops"),
             partial={
                 "layer_style": {
                     "fill_color_column": "density_colormap",
@@ -415,7 +467,9 @@ def main(params: Params):
             },
         ),
         "grouped_fd_ecomap": Node(
-            async_task=draw_ecomap.validate().set_executor("lithops"),
+            async_task=draw_ecomap.validate()
+            .handle_errors(task_instance_id="grouped_fd_ecomap")
+            .set_executor("lithops"),
             partial={
                 "title": None,
                 "tile_layers": [
@@ -437,7 +491,9 @@ def main(params: Params):
             },
         ),
         "grouped_fd_ecomap_html_url": Node(
-            async_task=persist_text.validate().set_executor("lithops"),
+            async_task=persist_text.validate()
+            .handle_errors(task_instance_id="grouped_fd_ecomap_html_url")
+            .set_executor("lithops"),
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             }
@@ -449,7 +505,9 @@ def main(params: Params):
             },
         ),
         "grouped_fd_map_widget": Node(
-            async_task=create_map_widget_single_view.validate().set_executor("lithops"),
+            async_task=create_map_widget_single_view.validate()
+            .handle_errors(task_instance_id="grouped_fd_map_widget")
+            .set_executor("lithops"),
             partial={
                 "title": "Density Map",
             }
@@ -461,7 +519,9 @@ def main(params: Params):
             },
         ),
         "grouped_fd_map_widget_merge": Node(
-            async_task=merge_widget_views.validate().set_executor("lithops"),
+            async_task=merge_widget_views.validate()
+            .handle_errors(task_instance_id="grouped_fd_map_widget_merge")
+            .set_executor("lithops"),
             partial={
                 "widgets": DependsOn("grouped_fd_map_widget"),
             }
@@ -469,7 +529,9 @@ def main(params: Params):
             method="call",
         ),
         "events_dashboard": Node(
-            async_task=gather_dashboard.validate().set_executor("lithops"),
+            async_task=gather_dashboard.validate()
+            .handle_errors(task_instance_id="events_dashboard")
+            .set_executor("lithops"),
             partial={
                 "details": DependsOn("workflow_details"),
                 "widgets": DependsOnSequence(
