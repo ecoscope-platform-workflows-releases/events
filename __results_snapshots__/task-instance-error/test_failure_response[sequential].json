@@ -1,0 +1,5 @@
+{
+  "error": "Task instance 'grouped_events_ecomap' raised ValueError('Geometry type combination is not supported ([])')",
+  "result": null,
+  "traceback": "str"
+}
