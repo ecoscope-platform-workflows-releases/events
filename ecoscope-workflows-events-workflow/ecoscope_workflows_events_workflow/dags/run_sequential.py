@@ -36,22 +36,28 @@ def main(params: Params):
 
     workflow_details = (
         set_workflow_details.validate()
+        .handle_errors(task_instance_id="workflow_details")
         .partial(**(params_dict.get("workflow_details") or {}))
         .call()
     )
 
     er_client_name = (
         set_er_connection.validate()
+        .handle_errors(task_instance_id="er_client_name")
         .partial(**(params_dict.get("er_client_name") or {}))
         .call()
     )
 
     groupers = (
-        set_groupers.validate().partial(**(params_dict.get("groupers") or {})).call()
+        set_groupers.validate()
+        .handle_errors(task_instance_id="groupers")
+        .partial(**(params_dict.get("groupers") or {}))
+        .call()
     )
 
     time_range = (
         set_time_range.validate()
+        .handle_errors(task_instance_id="time_range")
         .partial(
             time_format="%d %b %Y %H:%M:%S %Z", **(params_dict.get("time_range") or {})
         )
@@ -60,6 +66,7 @@ def main(params: Params):
 
     get_events_data = (
         get_events.validate()
+        .handle_errors(task_instance_id="get_events_data")
         .partial(
             client=er_client_name,
             time_range=time_range,
@@ -72,12 +79,14 @@ def main(params: Params):
 
     filter_events = (
         apply_reloc_coord_filter.validate()
+        .handle_errors(task_instance_id="filter_events")
         .partial(df=get_events_data, **(params_dict.get("filter_events") or {}))
         .call()
     )
 
     events_add_temporal_index = (
         add_temporal_index.validate()
+        .handle_errors(task_instance_id="events_add_temporal_index")
         .partial(
             df=filter_events,
             time_col="time",
@@ -91,6 +100,7 @@ def main(params: Params):
 
     events_colormap = (
         apply_color_map.validate()
+        .handle_errors(task_instance_id="events_colormap")
         .partial(
             df=events_add_temporal_index,
             input_column_name="event_type",
@@ -103,6 +113,7 @@ def main(params: Params):
 
     split_event_groups = (
         split_groups.validate()
+        .handle_errors(task_instance_id="split_event_groups")
         .partial(
             df=events_colormap,
             groupers=groupers,
@@ -113,6 +124,7 @@ def main(params: Params):
 
     events_bar_chart = (
         draw_time_series_bar_chart.validate()
+        .handle_errors(task_instance_id="events_bar_chart")
         .partial(
             x_axis="time",
             y_axis="event_type",
@@ -129,6 +141,7 @@ def main(params: Params):
 
     events_bar_chart_html_url = (
         persist_text.validate()
+        .handle_errors(task_instance_id="events_bar_chart_html_url")
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             **(params_dict.get("events_bar_chart_html_url") or {}),
@@ -138,6 +151,7 @@ def main(params: Params):
 
     events_bar_chart_widget = (
         create_plot_widget_single_view.validate()
+        .handle_errors(task_instance_id="events_bar_chart_widget")
         .partial(
             title="Events Bar Chart",
             **(params_dict.get("events_bar_chart_widget") or {}),
@@ -147,6 +161,7 @@ def main(params: Params):
 
     grouped_bar_plot_widget_merge = (
         merge_widget_views.validate()
+        .handle_errors(task_instance_id="grouped_bar_plot_widget_merge")
         .partial(
             widgets=events_bar_chart_widget,
             **(params_dict.get("grouped_bar_plot_widget_merge") or {}),
@@ -156,6 +171,7 @@ def main(params: Params):
 
     grouped_events_map_layer = (
         create_point_layer.validate()
+        .handle_errors(task_instance_id="grouped_events_map_layer")
         .partial(
             layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
             legend={
@@ -169,6 +185,7 @@ def main(params: Params):
 
     grouped_events_ecomap = (
         draw_ecomap.validate()
+        .handle_errors(task_instance_id="grouped_events_ecomap")
         .partial(
             title=None,
             tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
@@ -182,6 +199,7 @@ def main(params: Params):
 
     grouped_events_ecomap_html_url = (
         persist_text.validate()
+        .handle_errors(task_instance_id="grouped_events_ecomap_html_url")
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             **(params_dict.get("grouped_events_ecomap_html_url") or {}),
@@ -191,6 +209,7 @@ def main(params: Params):
 
     grouped_events_map_widget = (
         create_map_widget_single_view.validate()
+        .handle_errors(task_instance_id="grouped_events_map_widget")
         .partial(
             title="Events Map", **(params_dict.get("grouped_events_map_widget") or {})
         )
@@ -199,6 +218,7 @@ def main(params: Params):
 
     grouped_events_map_widget_merge = (
         merge_widget_views.validate()
+        .handle_errors(task_instance_id="grouped_events_map_widget_merge")
         .partial(
             widgets=grouped_events_map_widget,
             **(params_dict.get("grouped_events_map_widget_merge") or {}),
@@ -208,6 +228,7 @@ def main(params: Params):
 
     grouped_events_pie_chart = (
         draw_pie_chart.validate()
+        .handle_errors(task_instance_id="grouped_events_pie_chart")
         .partial(
             value_column="event_type",
             color_column="event_type_colormap",
@@ -221,6 +242,7 @@ def main(params: Params):
 
     grouped_pie_chart_html_urls = (
         persist_text.validate()
+        .handle_errors(task_instance_id="grouped_pie_chart_html_urls")
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             **(params_dict.get("grouped_pie_chart_html_urls") or {}),
@@ -230,6 +252,7 @@ def main(params: Params):
 
     grouped_events_pie_chart_widgets = (
         create_plot_widget_single_view.validate()
+        .handle_errors(task_instance_id="grouped_events_pie_chart_widgets")
         .partial(
             title="Events Pie Chart",
             **(params_dict.get("grouped_events_pie_chart_widgets") or {}),
@@ -239,6 +262,7 @@ def main(params: Params):
 
     grouped_events_pie_widget_merge = (
         merge_widget_views.validate()
+        .handle_errors(task_instance_id="grouped_events_pie_widget_merge")
         .partial(
             widgets=grouped_events_pie_chart_widgets,
             **(params_dict.get("grouped_events_pie_widget_merge") or {}),
@@ -248,6 +272,7 @@ def main(params: Params):
 
     events_meshgrid = (
         create_meshgrid.validate()
+        .handle_errors(task_instance_id="events_meshgrid")
         .partial(
             aoi=events_add_temporal_index,
             intersecting_only=False,
@@ -258,6 +283,7 @@ def main(params: Params):
 
     grouped_events_feature_density = (
         calculate_feature_density.validate()
+        .handle_errors(task_instance_id="grouped_events_feature_density")
         .partial(
             meshgrid=events_meshgrid,
             geometry_type="point",
@@ -268,6 +294,7 @@ def main(params: Params):
 
     grouped_fd_colormap = (
         apply_color_map.validate()
+        .handle_errors(task_instance_id="grouped_fd_colormap")
         .partial(
             input_column_name="density",
             colormap="RdYlGn_r",
@@ -279,6 +306,7 @@ def main(params: Params):
 
     sort_grouped_density_values = (
         sort_values.validate()
+        .handle_errors(task_instance_id="sort_grouped_density_values")
         .partial(
             column_name="density",
             ascending=True,
@@ -290,6 +318,7 @@ def main(params: Params):
 
     grouped_feature_density_format = (
         map_values_with_unit.validate()
+        .handle_errors(task_instance_id="grouped_feature_density_format")
         .partial(
             original_unit=None,
             new_unit=None,
@@ -303,6 +332,7 @@ def main(params: Params):
 
     grouped_fd_map_layer = (
         create_polygon_layer.validate()
+        .handle_errors(task_instance_id="grouped_fd_map_layer")
         .partial(
             layer_style={
                 "fill_color_column": "density_colormap",
@@ -317,6 +347,7 @@ def main(params: Params):
 
     grouped_fd_ecomap = (
         draw_ecomap.validate()
+        .handle_errors(task_instance_id="grouped_fd_ecomap")
         .partial(
             title=None,
             tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
@@ -330,6 +361,7 @@ def main(params: Params):
 
     grouped_fd_ecomap_html_url = (
         persist_text.validate()
+        .handle_errors(task_instance_id="grouped_fd_ecomap_html_url")
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             **(params_dict.get("grouped_fd_ecomap_html_url") or {}),
@@ -339,6 +371,7 @@ def main(params: Params):
 
     grouped_fd_map_widget = (
         create_map_widget_single_view.validate()
+        .handle_errors(task_instance_id="grouped_fd_map_widget")
         .partial(
             title="Density Map", **(params_dict.get("grouped_fd_map_widget") or {})
         )
@@ -347,6 +380,7 @@ def main(params: Params):
 
     grouped_fd_map_widget_merge = (
         merge_widget_views.validate()
+        .handle_errors(task_instance_id="grouped_fd_map_widget_merge")
         .partial(
             widgets=grouped_fd_map_widget,
             **(params_dict.get("grouped_fd_map_widget_merge") or {}),
@@ -356,6 +390,7 @@ def main(params: Params):
 
     events_dashboard = (
         gather_dashboard.validate()
+        .handle_errors(task_instance_id="events_dashboard")
         .partial(
             details=workflow_details,
             widgets=[

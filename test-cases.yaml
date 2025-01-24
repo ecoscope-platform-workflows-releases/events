@@ -72,3 +72,36 @@ month-grouper:
     events_meshgrid:
       cell_width: 10000
       cell_height: 10000
+
+task-instance-error:
+  name: Task Instance Error
+  description: |
+    A demonstration of configuration that would raise a task instance error.
+    Specifically, `filter_events` configuration specifies an invalid bounding box.
+  raises: true
+  expected_status_code: 500
+  params:
+    workflow_details:
+      name: "Events Dashboard"
+      description: "A dashboard for visualizing events."
+    er_client_name:
+      data_source:
+        name: "mep_dev"
+    groupers:
+      groupers: []
+    time_range:
+      since: "2015-01-01T00:00:00Z"
+      until: "2015-12-31T23:59:59Z"
+    get_events_data:
+      event_types: []
+    events_bar_chart:
+      time_interval: "month"
+    filter_events:
+      min_x: -180.0
+      max_x: -181.0
+      min_y: -90.0
+      max_y: -91.0
+      filter_point_coords: []
+    events_meshgrid:
+      cell_width: 10000
+      cell_height: 10000
