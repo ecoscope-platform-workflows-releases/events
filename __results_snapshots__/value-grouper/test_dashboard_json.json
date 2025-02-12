@@ -1,0 +1,276 @@
+{
+  "error": null,
+  "result": {
+    "filters": {
+      "schema": {
+        "properties": {
+          "event_category": {
+            "default": "monitoring",
+            "oneOf": [
+              {
+                "const": "monitoring",
+                "title": "Monitoring"
+              },
+              {
+                "const": "security",
+                "title": "Security"
+              },
+              {
+                "const": "testing",
+                "title": "Testing"
+              }
+            ],
+            "title": "Event Category",
+            "type": "string"
+          },
+          "event_type": {
+            "default": "bird_sighting_rep",
+            "oneOf": [
+              {
+                "const": "bird_sighting_rep",
+                "title": "Bird_Sighting_Rep"
+              },
+              {
+                "const": "fire_rep",
+                "title": "Fire_Rep"
+              },
+              {
+                "const": "hwc_rep",
+                "title": "Hwc_Rep"
+              },
+              {
+                "const": "injured_animal_rep",
+                "title": "Injured_Animal_Rep"
+              },
+              {
+                "const": "poacher_camp_rep",
+                "title": "Poacher_Camp_Rep"
+              },
+              {
+                "const": "wildlife_sighting_rep",
+                "title": "Wildlife_Sighting_Rep"
+              }
+            ],
+            "title": "Event Type",
+            "type": "string"
+          },
+          "reported_by_name": {
+            "default": "eco_1",
+            "oneOf": [
+              {
+                "const": "eco_1",
+                "title": "Eco_1"
+              }
+            ],
+            "title": "Reported By Name",
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "uiSchema": {
+          "event_category": {
+            "ui:title": "Event Category",
+            "ui:widget": "select"
+          },
+          "event_type": {
+            "ui:title": "Event Type",
+            "ui:widget": "select"
+          },
+          "reported_by_name": {
+            "ui:title": "Reported By Name",
+            "ui:widget": "select"
+          }
+        }
+      }
+    },
+    "layout": [],
+    "metadata": {
+      "description": "A dashboard for visualizing events.",
+      "time_range": "From 01 Jan 2015 00:00:00 UTC to 31 Dec 2015 23:59:59 UTC",
+      "title": "Events Dashboard"
+    },
+    "views": {
+      "{\"event_category\": \"monitoring\", \"event_type\": \"fire_rep\", \"reported_by_name\": \"eco_1\"}": [
+        {
+          "data": "str",
+          "id": 0,
+          "is_filtered": true,
+          "title": "Events Bar Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 1,
+          "is_filtered": true,
+          "title": "Events Map",
+          "widget_type": "map"
+        },
+        {
+          "data": "str",
+          "id": 2,
+          "is_filtered": true,
+          "title": "Events Pie Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 3,
+          "is_filtered": true,
+          "title": "Density Map",
+          "widget_type": "map"
+        }
+      ],
+      "{\"event_category\": \"monitoring\", \"event_type\": \"hwc_rep\", \"reported_by_name\": \"eco_1\"}": [
+        {
+          "data": "str",
+          "id": 0,
+          "is_filtered": true,
+          "title": "Events Bar Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 1,
+          "is_filtered": true,
+          "title": "Events Map",
+          "widget_type": "map"
+        },
+        {
+          "data": "str",
+          "id": 2,
+          "is_filtered": true,
+          "title": "Events Pie Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 3,
+          "is_filtered": true,
+          "title": "Density Map",
+          "widget_type": "map"
+        }
+      ],
+      "{\"event_category\": \"monitoring\", \"event_type\": \"injured_animal_rep\", \"reported_by_name\": \"eco_1\"}": [
+        {
+          "data": "str",
+          "id": 0,
+          "is_filtered": true,
+          "title": "Events Bar Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 1,
+          "is_filtered": true,
+          "title": "Events Map",
+          "widget_type": "map"
+        },
+        {
+          "data": "str",
+          "id": 2,
+          "is_filtered": true,
+          "title": "Events Pie Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 3,
+          "is_filtered": true,
+          "title": "Density Map",
+          "widget_type": "map"
+        }
+      ],
+      "{\"event_category\": \"monitoring\", \"event_type\": \"wildlife_sighting_rep\", \"reported_by_name\": \"eco_1\"}": [
+        {
+          "data": "str",
+          "id": 0,
+          "is_filtered": true,
+          "title": "Events Bar Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 1,
+          "is_filtered": true,
+          "title": "Events Map",
+          "widget_type": "map"
+        },
+        {
+          "data": "str",
+          "id": 2,
+          "is_filtered": true,
+          "title": "Events Pie Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 3,
+          "is_filtered": true,
+          "title": "Density Map",
+          "widget_type": "map"
+        }
+      ],
+      "{\"event_category\": \"security\", \"event_type\": \"poacher_camp_rep\", \"reported_by_name\": \"eco_1\"}": [
+        {
+          "data": "str",
+          "id": 0,
+          "is_filtered": true,
+          "title": "Events Bar Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 1,
+          "is_filtered": true,
+          "title": "Events Map",
+          "widget_type": "map"
+        },
+        {
+          "data": "str",
+          "id": 2,
+          "is_filtered": true,
+          "title": "Events Pie Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 3,
+          "is_filtered": true,
+          "title": "Density Map",
+          "widget_type": "map"
+        }
+      ],
+      "{\"event_category\": \"testing\", \"event_type\": \"bird_sighting_rep\", \"reported_by_name\": \"eco_1\"}": [
+        {
+          "data": "str",
+          "id": 0,
+          "is_filtered": true,
+          "title": "Events Bar Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 1,
+          "is_filtered": true,
+          "title": "Events Map",
+          "widget_type": "map"
+        },
+        {
+          "data": "str",
+          "id": 2,
+          "is_filtered": true,
+          "title": "Events Pie Chart",
+          "widget_type": "graph"
+        },
+        {
+          "data": "str",
+          "id": 3,
+          "is_filtered": true,
+          "title": "Density Map",
+          "widget_type": "map"
+        }
+      ]
+    }
+  },
+  "trace": null
+}
