@@ -1,11 +1,29 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.0.51
+    version: 0.0.53
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.0.51
+    version: 0.0.53
     channel: https://repo.prefix.dev/ecoscope-workflows/
+rjsf-overrides:
+  $defs:
+    Grouper:
+      properties:
+        index_name:
+          title: Index Name
+          type: string
+          oneOf:
+            - const: event_category
+              title: Event Category
+            - const: event_type
+              title: Event Type
+            - const: reported_by_name
+              title: Reported By Name
+      required:
+        - index_name
+      title: Grouper
+      type: object
 workflow:
   - name: Set Workflow Details
     id: workflow_details
@@ -31,13 +49,25 @@ workflow:
         - id
         - time
         - event_type
+        - event_category
+        - reported_by
         - geometry
       raise_on_empty: true
+  - name: Extract reported_by_name from Events
+    id: extract_reported_by
+    task: extract_value_from_json_column
+    partial:
+      df: ${{ workflow.get_events_data.return }}
+      column_name: reported_by
+      field_name_options:
+        - name
+      output_type: str
+      output_column_name: reported_by_name
   - name: Apply Relocation Coordinate Filter
     id: filter_events
     task: apply_reloc_coord_filter
     partial:
-      df: ${{ workflow.get_events_data.return }}
+      df: ${{ workflow.extract_reported_by.return }}
   - name: Add temporal index to Events
     id: events_add_temporal_index
     task: add_temporal_index

@@ -7,6 +7,7 @@ from ecoscope_workflows_core.tasks.io import set_er_connection
 from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_core.tasks.filter import set_time_range
 from ecoscope_workflows_ext_ecoscope.tasks.io import get_events
+from ecoscope_workflows_core.tasks.transformation import extract_value_from_json_column
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
     apply_reloc_coord_filter,
 )
@@ -70,9 +71,30 @@ def main(params: Params):
         .partial(
             client=er_client_name,
             time_range=time_range,
-            event_columns=["id", "time", "event_type", "geometry"],
+            event_columns=[
+                "id",
+                "time",
+                "event_type",
+                "event_category",
+                "reported_by",
+                "geometry",
+            ],
             raise_on_empty=True,
             **(params_dict.get("get_events_data") or {}),
+        )
+        .call()
+    )
+
+    extract_reported_by = (
+        extract_value_from_json_column.validate()
+        .handle_errors(task_instance_id="extract_reported_by")
+        .partial(
+            df=get_events_data,
+            column_name="reported_by",
+            field_name_options=["name"],
+            output_type="str",
+            output_column_name="reported_by_name",
+            **(params_dict.get("extract_reported_by") or {}),
         )
         .call()
     )
@@ -80,7 +102,7 @@ def main(params: Params):
     filter_events = (
         apply_reloc_coord_filter.validate()
         .handle_errors(task_instance_id="filter_events")
-        .partial(df=get_events_data, **(params_dict.get("filter_events") or {}))
+        .partial(df=extract_reported_by, **(params_dict.get("filter_events") or {}))
         .call()
     )
 

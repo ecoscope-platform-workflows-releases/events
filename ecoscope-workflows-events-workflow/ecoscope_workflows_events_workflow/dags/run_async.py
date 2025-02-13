@@ -9,6 +9,7 @@ from ecoscope_workflows_core.tasks.io import set_er_connection
 from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_core.tasks.filter import set_time_range
 from ecoscope_workflows_ext_ecoscope.tasks.io import get_events
+from ecoscope_workflows_core.tasks.transformation import extract_value_from_json_column
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
     apply_reloc_coord_filter,
 )
@@ -42,7 +43,8 @@ def main(params: Params):
         "groupers": [],
         "time_range": [],
         "get_events_data": ["er_client_name", "time_range"],
-        "filter_events": ["get_events_data"],
+        "extract_reported_by": ["get_events_data"],
+        "filter_events": ["extract_reported_by"],
         "events_add_temporal_index": ["filter_events", "groupers"],
         "events_colormap": ["events_add_temporal_index"],
         "split_event_groups": ["events_colormap", "groupers"],
@@ -119,10 +121,31 @@ def main(params: Params):
             partial={
                 "client": DependsOn("er_client_name"),
                 "time_range": DependsOn("time_range"),
-                "event_columns": ["id", "time", "event_type", "geometry"],
+                "event_columns": [
+                    "id",
+                    "time",
+                    "event_type",
+                    "event_category",
+                    "reported_by",
+                    "geometry",
+                ],
                 "raise_on_empty": True,
             }
             | (params_dict.get("get_events_data") or {}),
+            method="call",
+        ),
+        "extract_reported_by": Node(
+            async_task=extract_value_from_json_column.validate()
+            .handle_errors(task_instance_id="extract_reported_by")
+            .set_executor("lithops"),
+            partial={
+                "df": DependsOn("get_events_data"),
+                "column_name": "reported_by",
+                "field_name_options": ["name"],
+                "output_type": "str",
+                "output_column_name": "reported_by_name",
+            }
+            | (params_dict.get("extract_reported_by") or {}),
             method="call",
         ),
         "filter_events": Node(
@@ -130,7 +153,7 @@ def main(params: Params):
             .handle_errors(task_instance_id="filter_events")
             .set_executor("lithops"),
             partial={
-                "df": DependsOn("get_events_data"),
+                "df": DependsOn("extract_reported_by"),
             }
             | (params_dict.get("filter_events") or {}),
             method="call",

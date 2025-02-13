@@ -205,7 +205,21 @@
       "properties": {
         "index_name": {
           "title": "Index Name",
-          "type": "string"
+          "type": "string",
+          "oneOf": [
+            {
+              "const": "event_category",
+              "title": "Event Category"
+            },
+            {
+              "const": "event_type",
+              "title": "Event Type"
+            },
+            {
+              "const": "reported_by_name",
+              "title": "Reported By Name"
+            }
+          ]
         }
       },
       "required": [

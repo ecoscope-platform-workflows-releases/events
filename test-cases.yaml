@@ -73,6 +73,46 @@ month-grouper:
       cell_width: 10000
       cell_height: 10000
 
+value-grouper:
+  name: Value Grouper
+  description: A demonstration of the events workflow with value grouping.
+  params:
+    workflow_details:
+      name: "Events Dashboard"
+      description: "A dashboard for visualizing events."
+    er_client_name:
+      data_source:
+        name: "mep_dev"
+    groupers:
+      groupers:
+        - index_name: "event_category"
+        - index_name: "event_type"
+        - index_name: "reported_by_name"
+    time_range:
+      since: "2015-01-01T00:00:00Z"
+      until: "2015-12-31T23:59:59Z"
+    get_events_data:
+      event_types:
+        [
+          "hwc_rep",
+          "bird_sighting_rep",
+          "wildlife_sighting_rep",
+          "poacher_camp_rep",
+          "fire_rep",
+          "injured_animal_rep",
+        ]
+    events_bar_chart:
+      time_interval: "week"
+    filter_events:
+      min_x: -180.0
+      max_x: 180.0
+      min_y: -90.0
+      max_y: 90.0
+      filter_point_coords: []
+    events_meshgrid:
+      cell_width: 10000
+      cell_height: 10000
+
 task-instance-error:
   name: Task Instance Error
   description: |
