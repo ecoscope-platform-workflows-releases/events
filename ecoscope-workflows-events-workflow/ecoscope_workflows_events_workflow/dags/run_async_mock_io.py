@@ -285,6 +285,7 @@ def main(params: Params):
                     "label_column": "event_type",
                     "color_column": "event_type_colormap",
                 },
+                "tooltip_columns": ["id", "time", "event_type"],
             }
             | (params_dict.get("grouped_events_map_layer") or {}),
             method="mapvalues",
@@ -306,6 +307,7 @@ def main(params: Params):
                 "north_arrow_style": {"placement": "top-left"},
                 "legend_style": {"placement": "bottom-right"},
                 "static": False,
+                "max_zoom": 20,
             }
             | (params_dict.get("grouped_events_ecomap") or {}),
             method="mapvalues",
@@ -498,6 +500,7 @@ def main(params: Params):
                     "label_column": "density",
                     "color_column": "density_colormap",
                 },
+                "tooltip_columns": ["density"],
             }
             | (params_dict.get("grouped_fd_map_layer") or {}),
             method="mapvalues",
@@ -522,6 +525,7 @@ def main(params: Params):
                     "placement": "bottom-right",
                 },
                 "static": False,
+                "max_zoom": 20,
             }
             | (params_dict.get("grouped_fd_ecomap") or {}),
             method="mapvalues",

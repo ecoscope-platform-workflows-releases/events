@@ -200,6 +200,7 @@ def main(params: Params):
                 "label_column": "event_type",
                 "color_column": "event_type_colormap",
             },
+            tooltip_columns=["id", "time", "event_type"],
             **(params_dict.get("grouped_events_map_layer") or {}),
         )
         .mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
@@ -214,6 +215,7 @@ def main(params: Params):
             north_arrow_style={"placement": "top-left"},
             legend_style={"placement": "bottom-right"},
             static=False,
+            max_zoom=20,
             **(params_dict.get("grouped_events_ecomap") or {}),
         )
         .mapvalues(argnames=["geo_layers"], argvalues=grouped_events_map_layer)
@@ -362,6 +364,7 @@ def main(params: Params):
                 "opacity": 0.4,
             },
             legend={"label_column": "density", "color_column": "density_colormap"},
+            tooltip_columns=["density"],
             **(params_dict.get("grouped_fd_map_layer") or {}),
         )
         .mapvalues(argnames=["geodataframe"], argvalues=grouped_feature_density_format)
@@ -376,6 +379,7 @@ def main(params: Params):
             north_arrow_style={"placement": "top-left"},
             legend_style={"title": "Number of events", "placement": "bottom-right"},
             static=False,
+            max_zoom=20,
             **(params_dict.get("grouped_fd_ecomap") or {}),
         )
         .mapvalues(argnames=["geo_layers"], argvalues=grouped_fd_map_layer)
