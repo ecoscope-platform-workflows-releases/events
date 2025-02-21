@@ -392,6 +392,7 @@ grouped_events_map_layer = (
     .partial(
         layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
         legend={"label_column": "event_type", "color_column": "event_type_colormap"},
+        tooltip_columns=["id", "time", "event_type"],
         **grouped_events_map_layer_params,
     )
     .mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
@@ -418,6 +419,7 @@ grouped_events_ecomap = (
         north_arrow_style={"placement": "top-left"},
         legend_style={"placement": "bottom-right"},
         static=False,
+        max_zoom=20,
         **grouped_events_ecomap_params,
     )
     .mapvalues(argnames=["geo_layers"], argvalues=grouped_events_map_layer)
@@ -729,6 +731,7 @@ grouped_fd_map_layer = (
             "opacity": 0.4,
         },
         legend={"label_column": "density", "color_column": "density_colormap"},
+        tooltip_columns=["density"],
         **grouped_fd_map_layer_params,
     )
     .mapvalues(argnames=["geodataframe"], argvalues=grouped_feature_density_format)
@@ -755,6 +758,7 @@ grouped_fd_ecomap = (
         north_arrow_style={"placement": "top-left"},
         legend_style={"title": "Number of events", "placement": "bottom-right"},
         static=False,
+        max_zoom=20,
         **grouped_fd_ecomap_params,
     )
     .mapvalues(argnames=["geo_layers"], argvalues=grouped_fd_map_layer)

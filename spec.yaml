@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.0.54
+    version: 0.0.56
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.0.54
+    version: 0.0.56
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   $defs:
@@ -140,6 +140,10 @@ workflow:
       legend:
         label_column: event_type
         color_column: event_type_colormap
+      tooltip_columns:
+        - id
+        - time
+        - event_type
     mapvalues:
       argnames: geodataframe
       argvalues: ${{ workflow.split_event_groups.return }}
@@ -157,6 +161,7 @@ workflow:
       legend_style:
         placement: bottom-right
       static: false
+      max_zoom: 20
     mapvalues:
       argnames: geo_layers
       argvalues: ${{ workflow.grouped_events_map_layer.return }}
@@ -277,6 +282,8 @@ workflow:
       legend:
         label_column: density
         color_column: density_colormap
+      tooltip_columns:
+        - density
     mapvalues:
       argnames: geodataframe
       argvalues: ${{ workflow.grouped_feature_density_format.return}}
@@ -295,6 +302,7 @@ workflow:
         title: Number of events
         placement: bottom-right
       static: false
+      max_zoom: 20
     mapvalues:
       argnames: geo_layers
       argvalues: ${{ workflow.grouped_fd_map_layer.return }}
