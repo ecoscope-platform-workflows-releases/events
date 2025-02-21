@@ -231,6 +231,7 @@ def main(params: Params):
             north_arrow_style={"placement": "top-left"},
             legend_style={"placement": "bottom-right"},
             static=False,
+            max_zoom=20,
             **(params_dict.get("grouped_events_ecomap") or {}),
         )
         .mapvalues(argnames=["geo_layers"], argvalues=grouped_events_map_layer)
@@ -393,6 +394,7 @@ def main(params: Params):
             north_arrow_style={"placement": "top-left"},
             legend_style={"title": "Number of events", "placement": "bottom-right"},
             static=False,
+            max_zoom=20,
             **(params_dict.get("grouped_fd_ecomap") or {}),
         )
         .mapvalues(argnames=["geo_layers"], argvalues=grouped_fd_map_layer)

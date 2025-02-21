@@ -418,6 +418,7 @@ grouped_events_ecomap = (
         north_arrow_style={"placement": "top-left"},
         legend_style={"placement": "bottom-right"},
         static=False,
+        max_zoom=20,
         **grouped_events_ecomap_params,
     )
     .mapvalues(argnames=["geo_layers"], argvalues=grouped_events_map_layer)
@@ -755,6 +756,7 @@ grouped_fd_ecomap = (
         north_arrow_style={"placement": "top-left"},
         legend_style={"title": "Number of events", "placement": "bottom-right"},
         static=False,
+        max_zoom=20,
         **grouped_fd_ecomap_params,
     )
     .mapvalues(argnames=["geo_layers"], argvalues=grouped_fd_map_layer)

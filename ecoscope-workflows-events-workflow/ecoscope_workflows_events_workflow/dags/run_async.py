@@ -289,6 +289,7 @@ def main(params: Params):
                 "north_arrow_style": {"placement": "top-left"},
                 "legend_style": {"placement": "bottom-right"},
                 "static": False,
+                "max_zoom": 20,
             }
             | (params_dict.get("grouped_events_ecomap") or {}),
             method="mapvalues",
@@ -505,6 +506,7 @@ def main(params: Params):
                     "placement": "bottom-right",
                 },
                 "static": False,
+                "max_zoom": 20,
             }
             | (params_dict.get("grouped_fd_ecomap") or {}),
             method="mapvalues",
