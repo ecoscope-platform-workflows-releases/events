@@ -381,7 +381,9 @@ grouped_bar_plot_widget_merge = (
 # %%
 # parameters
 
-grouped_events_map_layer_params = dict()
+grouped_events_map_layer_params = dict(
+    zoom=...,
+)
 
 # %%
 # call the task
@@ -405,7 +407,9 @@ grouped_events_map_layer = (
 # %%
 # parameters
 
-grouped_events_ecomap_params = dict()
+grouped_events_ecomap_params = dict(
+    view_state=...,
+)
 
 # %%
 # call the task
@@ -716,7 +720,9 @@ grouped_feature_density_format = (
 # %%
 # parameters
 
-grouped_fd_map_layer_params = dict()
+grouped_fd_map_layer_params = dict(
+    zoom=...,
+)
 
 # %%
 # call the task
@@ -744,7 +750,9 @@ grouped_fd_map_layer = (
 # %%
 # parameters
 
-grouped_fd_ecomap_params = dict()
+grouped_fd_ecomap_params = dict(
+    view_state=...,
+)
 
 # %%
 # call the task
