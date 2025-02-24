@@ -9,15 +9,15 @@
             "oneOf": [
               {
                 "const": "monitoring",
-                "title": "Monitoring"
+                "title": "monitoring"
               },
               {
                 "const": "security",
-                "title": "Security"
+                "title": "security"
               },
               {
                 "const": "testing",
-                "title": "Testing"
+                "title": "testing"
               }
             ],
             "title": "Event Category",
@@ -28,27 +28,27 @@
             "oneOf": [
               {
                 "const": "bird_sighting_rep",
-                "title": "Bird_Sighting_Rep"
+                "title": "bird_sighting_rep"
               },
               {
                 "const": "fire_rep",
-                "title": "Fire_Rep"
+                "title": "fire_rep"
               },
               {
                 "const": "hwc_rep",
-                "title": "Hwc_Rep"
+                "title": "hwc_rep"
               },
               {
                 "const": "injured_animal_rep",
-                "title": "Injured_Animal_Rep"
+                "title": "injured_animal_rep"
               },
               {
                 "const": "poacher_camp_rep",
-                "title": "Poacher_Camp_Rep"
+                "title": "poacher_camp_rep"
               },
               {
                 "const": "wildlife_sighting_rep",
-                "title": "Wildlife_Sighting_Rep"
+                "title": "wildlife_sighting_rep"
               }
             ],
             "title": "Event Type",
@@ -59,7 +59,7 @@
             "oneOf": [
               {
                 "const": "eco_1",
-                "title": "Eco_1"
+                "title": "eco_1"
               }
             ],
             "title": "Reported By Name",
