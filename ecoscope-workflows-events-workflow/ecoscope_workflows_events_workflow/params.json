@@ -129,7 +129,7 @@
           "ecoscope:advanced": true
         },
         "filter_point_coords": {
-          "default": [],
+          "default": null,
           "items": {
             "$ref": "#/$defs/Coordinate"
           },
