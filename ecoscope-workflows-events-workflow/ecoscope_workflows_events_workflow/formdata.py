@@ -111,7 +111,7 @@ class FilterEvents(BaseModel):
     min_y: Optional[float] = Field(-90.0, title="Min Y")
     max_y: Optional[float] = Field(90.0, title="Max Y")
     filter_point_coords: Optional[List[Coordinate]] = Field(
-        None, title="Filter Point Coords"
+        [], title="Filter Point Coords"
     )
 
 
