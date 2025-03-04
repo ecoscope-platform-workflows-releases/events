@@ -93,6 +93,13 @@
           "title": "Event Types",
           "type": "array",
           "description": "list of event types"
+        },
+        "drop_null_geometry": {
+          "default": false,
+          "title": "Drop Null Geometry",
+          "type": "boolean",
+          "description": "Whether or not to keep events with no geometry data",
+          "ecoscope:advanced": true
         }
       },
       "required": [

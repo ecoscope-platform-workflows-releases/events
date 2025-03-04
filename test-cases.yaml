@@ -23,6 +23,7 @@ all-grouper:
           "fire_rep",
           "injured_animal_rep",
         ]
+      drop_null_geometry: false
     events_bar_chart:
       time_interval: "month"
     filter_events:
@@ -61,6 +62,7 @@ month-grouper:
           "fire_rep",
           "injured_animal_rep",
         ]
+      drop_null_geometry: false
     events_bar_chart:
       time_interval: "week"
     filter_events:
@@ -101,6 +103,7 @@ value-grouper:
           "fire_rep",
           "injured_animal_rep",
         ]
+      drop_null_geometry: false
     events_bar_chart:
       time_interval: "week"
     filter_events:
@@ -134,6 +137,7 @@ task-instance-error:
       until: "2015-12-31T23:59:59Z"
     get_events_data:
       event_types: []
+      drop_null_geometry: false
     events_bar_chart:
       time_interval: "month"
     filter_events:
