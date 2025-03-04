@@ -133,6 +133,7 @@ time_range = (
 
 get_events_data_params = dict(
     event_types=...,
+    drop_null_geometry=...,
 )
 
 # %%

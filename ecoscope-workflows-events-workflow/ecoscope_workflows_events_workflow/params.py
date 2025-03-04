@@ -32,6 +32,11 @@ class GetEventsData(BaseModel):
     event_types: List[str] = Field(
         ..., description="list of event types", title="Event Types"
     )
+    drop_null_geometry: Optional[bool] = Field(
+        False,
+        description="Whether or not to keep events with no geometry data",
+        title="Drop Null Geometry",
+    )
 
 
 class TimeInterval(str, Enum):
