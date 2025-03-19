@@ -48,7 +48,7 @@ month-grouper:
         name: "mep_dev"
     groupers:
       groupers:
-        - temporal_index: "%B"
+        - "%B"
     time_range:
       since: "2015-01-01T00:00:00Z"
       until: "2015-12-31T23:59:59Z"
@@ -87,9 +87,9 @@ value-grouper:
         name: "mep_dev"
     groupers:
       groupers:
-        - index_name: "event_category"
-        - index_name: "event_type"
-        - index_name: "reported_by_name"
+        - "event_category"
+        - "event_type"
+        - "reported_by_name"
     time_range:
       since: "2015-01-01T00:00:00Z"
       until: "2015-12-31T23:59:59Z"
