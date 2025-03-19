@@ -5,55 +5,55 @@
       "schema": {
         "properties": {
           "TemporalGrouper_%B": {
-            "default": "April",
+            "default": "January",
             "oneOf": [
               {
-                "const": "April",
-                "title": "April"
-              },
-              {
-                "const": "August",
-                "title": "August"
-              },
-              {
-                "const": "December",
-                "title": "December"
+                "const": "January",
+                "title": "January"
               },
               {
                 "const": "February",
                 "title": "February"
               },
               {
-                "const": "January",
-                "title": "January"
-              },
-              {
-                "const": "July",
-                "title": "July"
-              },
-              {
-                "const": "June",
-                "title": "June"
-              },
-              {
                 "const": "March",
                 "title": "March"
+              },
+              {
+                "const": "April",
+                "title": "April"
               },
               {
                 "const": "May",
                 "title": "May"
               },
               {
-                "const": "November",
-                "title": "November"
+                "const": "June",
+                "title": "June"
+              },
+              {
+                "const": "July",
+                "title": "July"
+              },
+              {
+                "const": "August",
+                "title": "August"
+              },
+              {
+                "const": "September",
+                "title": "September"
               },
               {
                 "const": "October",
                 "title": "October"
               },
               {
-                "const": "September",
-                "title": "September"
+                "const": "November",
+                "title": "November"
+              },
+              {
+                "const": "December",
+                "title": "December"
               }
             ],
             "title": "Month",

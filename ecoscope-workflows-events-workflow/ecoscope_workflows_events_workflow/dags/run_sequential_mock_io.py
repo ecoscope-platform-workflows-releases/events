@@ -15,7 +15,6 @@ from ecoscope_workflows_core.testing import create_task_magicmock  # 🧪
 
 from ecoscope_workflows_core.tasks.config import set_workflow_details
 from ecoscope_workflows_core.tasks.io import set_er_connection
-from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_core.tasks.filter import set_time_range
 
 get_events = create_task_magicmock(  # 🧪
@@ -23,6 +22,7 @@ get_events = create_task_magicmock(  # 🧪
     func_name="get_events",  # 🧪
 )  # 🧪
 from ecoscope_workflows_core.tasks.transformation import extract_value_from_json_column
+from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
     apply_reloc_coord_filter,
 )
@@ -66,13 +66,6 @@ def main(params: Params):
         .call()
     )
 
-    groupers = (
-        set_groupers.validate()
-        .handle_errors(task_instance_id="groupers")
-        .partial(**(params_dict.get("groupers") or {}))
-        .call()
-    )
-
     time_range = (
         set_time_range.validate()
         .handle_errors(task_instance_id="time_range")
@@ -113,6 +106,13 @@ def main(params: Params):
             output_column_name="reported_by_name",
             **(params_dict.get("extract_reported_by") or {}),
         )
+        .call()
+    )
+
+    groupers = (
+        set_groupers.validate()
+        .handle_errors(task_instance_id="groupers")
+        .partial(**(params_dict.get("groupers") or {}))
         .call()
     )
 

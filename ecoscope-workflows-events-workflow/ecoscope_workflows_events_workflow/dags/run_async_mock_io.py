@@ -17,7 +17,6 @@ from ecoscope_workflows_core.graph import DependsOn, DependsOnSequence, Graph, N
 
 from ecoscope_workflows_core.tasks.config import set_workflow_details
 from ecoscope_workflows_core.tasks.io import set_er_connection
-from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_core.tasks.filter import set_time_range
 
 get_events = create_task_magicmock(  # 🧪
@@ -25,6 +24,7 @@ get_events = create_task_magicmock(  # 🧪
     func_name="get_events",  # 🧪
 )  # 🧪
 from ecoscope_workflows_core.tasks.transformation import extract_value_from_json_column
+from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
     apply_reloc_coord_filter,
 )
@@ -57,10 +57,10 @@ def main(params: Params):
     dependencies = {
         "workflow_details": [],
         "er_client_name": [],
-        "groupers": [],
         "time_range": [],
         "get_events_data": ["er_client_name", "time_range"],
         "extract_reported_by": ["get_events_data"],
+        "groupers": [],
         "filter_events": ["extract_reported_by"],
         "events_add_temporal_index": ["filter_events", "groupers"],
         "events_colormap": ["events_add_temporal_index"],
@@ -114,13 +114,6 @@ def main(params: Params):
             partial=(params_dict.get("er_client_name") or {}),
             method="call",
         ),
-        "groupers": Node(
-            async_task=set_groupers.validate()
-            .handle_errors(task_instance_id="groupers")
-            .set_executor("lithops"),
-            partial=(params_dict.get("groupers") or {}),
-            method="call",
-        ),
         "time_range": Node(
             async_task=set_time_range.validate()
             .handle_errors(task_instance_id="time_range")
@@ -163,6 +156,13 @@ def main(params: Params):
                 "output_column_name": "reported_by_name",
             }
             | (params_dict.get("extract_reported_by") or {}),
+            method="call",
+        ),
+        "groupers": Node(
+            async_task=set_groupers.validate()
+            .handle_errors(task_instance_id="groupers")
+            .set_executor("lithops"),
+            partial=(params_dict.get("groupers") or {}),
             method="call",
         ),
         "filter_events": Node(

@@ -13,10 +13,10 @@
 import os
 from ecoscope_workflows_core.tasks.config import set_workflow_details
 from ecoscope_workflows_core.tasks.io import set_er_connection
-from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_core.tasks.filter import set_time_range
 from ecoscope_workflows_ext_ecoscope.tasks.io import get_events
 from ecoscope_workflows_core.tasks.transformation import extract_value_from_json_column
+from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
     apply_reloc_coord_filter,
 )
@@ -39,7 +39,7 @@ from ecoscope_workflows_ext_ecoscope.tasks.results import create_polygon_layer
 from ecoscope_workflows_core.tasks.results import gather_dashboard
 
 # %% [markdown]
-# ## Set Workflow Details
+# ## Workflow Details
 
 # %%
 # parameters
@@ -62,7 +62,7 @@ workflow_details = (
 
 
 # %% [markdown]
-# ## Select EarthRanger Data Source
+# ## Data Source
 
 # %%
 # parameters
@@ -83,28 +83,7 @@ er_client_name = (
 
 
 # %% [markdown]
-# ## Set Groupers
-
-# %%
-# parameters
-
-groupers_params = dict(
-    groupers=...,
-)
-
-# %%
-# call the task
-
-
-groupers = (
-    set_groupers.handle_errors(task_instance_id="groupers")
-    .partial(**groupers_params)
-    .call()
-)
-
-
-# %% [markdown]
-# ## Set Time Range Filters
+# ## Time Range
 
 # %%
 # parameters
@@ -182,6 +161,27 @@ extract_reported_by = (
         output_column_name="reported_by_name",
         **extract_reported_by_params,
     )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Group Data
+
+# %%
+# parameters
+
+groupers_params = dict(
+    groupers=...,
+)
+
+# %%
+# call the task
+
+
+groupers = (
+    set_groupers.handle_errors(task_instance_id="groupers")
+    .partial(**groupers_params)
     .call()
 )
 

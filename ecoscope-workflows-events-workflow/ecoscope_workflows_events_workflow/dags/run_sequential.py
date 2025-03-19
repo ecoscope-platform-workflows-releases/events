@@ -4,10 +4,10 @@ import os
 
 from ecoscope_workflows_core.tasks.config import set_workflow_details
 from ecoscope_workflows_core.tasks.io import set_er_connection
-from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_core.tasks.filter import set_time_range
 from ecoscope_workflows_ext_ecoscope.tasks.io import get_events
 from ecoscope_workflows_core.tasks.transformation import extract_value_from_json_column
+from ecoscope_workflows_core.tasks.groupby import set_groupers
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
     apply_reloc_coord_filter,
 )
@@ -46,13 +46,6 @@ def main(params: Params):
         set_er_connection.validate()
         .handle_errors(task_instance_id="er_client_name")
         .partial(**(params_dict.get("er_client_name") or {}))
-        .call()
-    )
-
-    groupers = (
-        set_groupers.validate()
-        .handle_errors(task_instance_id="groupers")
-        .partial(**(params_dict.get("groupers") or {}))
         .call()
     )
 
@@ -96,6 +89,13 @@ def main(params: Params):
             output_column_name="reported_by_name",
             **(params_dict.get("extract_reported_by") or {}),
         )
+        .call()
+    )
+
+    groupers = (
+        set_groupers.validate()
+        .handle_errors(task_instance_id="groupers")
+        .partial(**(params_dict.get("groupers") or {}))
         .call()
     )
 
