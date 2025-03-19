@@ -1,40 +1,28 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.0.61
+    version: 0.0.65
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.0.61
+    version: 0.0.65
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   $defs:
-    Grouper:
-      properties:
-        index_name:
-          title: Index Name
-          type: string
-          oneOf:
-            - const: event_category
-              title: Event Category
-            - const: event_type
-              title: Event Type
-            - const: reported_by_name
-              title: Reported By Name
-      required:
-        - index_name
-      title: Grouper
-      type: object
+    ValueGrouper.oneOf:
+      - const: event_category
+        title: Event Category
+      - const: event_type
+        title: Event Type
+      - const: reported_by_name
+        title: Reported By Name
 workflow:
-  - name: Set Workflow Details
+  - name: Workflow Details
     id: workflow_details
     task: set_workflow_details
-  - name: Select EarthRanger Data Source
+  - name: Data Source
     id: er_client_name
     task: set_er_connection
-  - name: Set Groupers
-    id: groupers
-    task: set_groupers
-  - name: Set Time Range Filters
+  - name: Time Range
     id: time_range
     task: set_time_range
     partial:
@@ -63,6 +51,9 @@ workflow:
         - name
       output_type: str
       output_column_name: reported_by_name
+  - name: Group Data
+    id: groupers
+    task: set_groupers
   - name: Apply Relocation Coordinate Filter
     id: filter_events
     task: apply_reloc_coord_filter
