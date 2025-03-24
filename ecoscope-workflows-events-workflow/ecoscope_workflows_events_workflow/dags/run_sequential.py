@@ -102,7 +102,12 @@ def main(params: Params):
     filter_events = (
         apply_reloc_coord_filter.validate()
         .handle_errors(task_instance_id="filter_events")
-        .partial(df=extract_reported_by, **(params_dict.get("filter_events") or {}))
+        .partial(
+            df=extract_reported_by,
+            roi_gdf=None,
+            roi_name=None,
+            **(params_dict.get("filter_events") or {}),
+        )
         .call()
     )
 
