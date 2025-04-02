@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.0.65
+    version: 0.0.67
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.0.65
+    version: 0.0.67
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   $defs:
@@ -59,6 +59,8 @@ workflow:
     task: apply_reloc_coord_filter
     partial:
       df: ${{ workflow.extract_reported_by.return }}
+      roi_gdf: null
+      roi_name: null
   - name: Add temporal index to Events
     id: events_add_temporal_index
     task: add_temporal_index
