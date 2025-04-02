@@ -206,7 +206,9 @@ filter_events_params = dict(
 
 filter_events = (
     apply_reloc_coord_filter.handle_errors(task_instance_id="filter_events")
-    .partial(df=extract_reported_by, **filter_events_params)
+    .partial(
+        df=extract_reported_by, roi_gdf=None, roi_name=None, **filter_events_params
+    )
     .call()
 )
 

@@ -154,6 +154,8 @@ def main(params: Params):
             .set_executor("lithops"),
             partial={
                 "df": DependsOn("extract_reported_by"),
+                "roi_gdf": None,
+                "roi_name": None,
             }
             | (params_dict.get("filter_events") or {}),
             method="call",
