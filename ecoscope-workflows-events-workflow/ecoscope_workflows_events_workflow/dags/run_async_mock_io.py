@@ -35,6 +35,7 @@ from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_c
 from ecoscope_workflows_core.tasks.io import persist_text
 from ecoscope_workflows_core.tasks.results import create_plot_widget_single_view
 from ecoscope_workflows_core.tasks.results import merge_widget_views
+from ecoscope_workflows_ext_ecoscope.tasks.results import set_base_maps
 from ecoscope_workflows_ext_ecoscope.tasks.results import create_point_layer
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_ecomap
 from ecoscope_workflows_core.tasks.results import create_map_widget_single_view
@@ -69,8 +70,9 @@ def main(params: Params):
         "events_bar_chart_html_url": ["events_bar_chart"],
         "events_bar_chart_widget": ["events_bar_chart_html_url"],
         "grouped_bar_plot_widget_merge": ["events_bar_chart_widget"],
+        "base_map_defs": [],
         "grouped_events_map_layer": ["split_event_groups"],
-        "grouped_events_ecomap": ["grouped_events_map_layer"],
+        "grouped_events_ecomap": ["base_map_defs", "grouped_events_map_layer"],
         "grouped_events_ecomap_html_url": ["grouped_events_ecomap"],
         "grouped_events_map_widget": ["grouped_events_ecomap_html_url"],
         "grouped_events_map_widget_merge": ["grouped_events_map_widget"],
@@ -84,7 +86,7 @@ def main(params: Params):
         "sort_grouped_density_values": ["grouped_fd_colormap"],
         "grouped_feature_density_format": ["sort_grouped_density_values"],
         "grouped_fd_map_layer": ["grouped_feature_density_format"],
-        "grouped_fd_ecomap": ["grouped_fd_map_layer"],
+        "grouped_fd_ecomap": ["base_map_defs", "grouped_fd_map_layer"],
         "grouped_fd_ecomap_html_url": ["grouped_fd_ecomap"],
         "grouped_fd_map_widget": ["grouped_fd_ecomap_html_url"],
         "grouped_fd_map_widget_merge": ["grouped_fd_map_widget"],
@@ -274,6 +276,13 @@ def main(params: Params):
             | (params_dict.get("grouped_bar_plot_widget_merge") or {}),
             method="call",
         ),
+        "base_map_defs": Node(
+            async_task=set_base_maps.validate()
+            .handle_errors(task_instance_id="base_map_defs")
+            .set_executor("lithops"),
+            partial=(params_dict.get("base_map_defs") or {}),
+            method="call",
+        ),
         "grouped_events_map_layer": Node(
             async_task=create_point_layer.validate()
             .handle_errors(task_instance_id="grouped_events_map_layer")
@@ -302,10 +311,7 @@ def main(params: Params):
             .set_executor("lithops"),
             partial={
                 "title": None,
-                "tile_layers": [
-                    {"name": "TERRAIN"},
-                    {"name": "SATELLITE", "opacity": 0.5},
-                ],
+                "tile_layers": DependsOn("base_map_defs"),
                 "north_arrow_style": {"placement": "top-left"},
                 "legend_style": {"placement": "bottom-right"},
                 "static": False,
@@ -517,10 +523,7 @@ def main(params: Params):
             .set_executor("lithops"),
             partial={
                 "title": None,
-                "tile_layers": [
-                    {"name": "TERRAIN"},
-                    {"name": "SATELLITE", "opacity": 0.5},
-                ],
+                "tile_layers": DependsOn("base_map_defs"),
                 "north_arrow_style": {"placement": "top-left"},
                 "legend_style": {
                     "title": "Number of events",

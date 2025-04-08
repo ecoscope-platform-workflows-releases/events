@@ -33,6 +33,7 @@ from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_c
 from ecoscope_workflows_core.tasks.io import persist_text
 from ecoscope_workflows_core.tasks.results import create_plot_widget_single_view
 from ecoscope_workflows_core.tasks.results import merge_widget_views
+from ecoscope_workflows_ext_ecoscope.tasks.results import set_base_maps
 from ecoscope_workflows_ext_ecoscope.tasks.results import create_point_layer
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_ecomap
 from ecoscope_workflows_core.tasks.results import create_map_widget_single_view
@@ -213,6 +214,13 @@ def main(params: Params):
         .call()
     )
 
+    base_map_defs = (
+        set_base_maps.validate()
+        .handle_errors(task_instance_id="base_map_defs")
+        .partial(**(params_dict.get("base_map_defs") or {}))
+        .call()
+    )
+
     grouped_events_map_layer = (
         create_point_layer.validate()
         .handle_errors(task_instance_id="grouped_events_map_layer")
@@ -233,7 +241,7 @@ def main(params: Params):
         .handle_errors(task_instance_id="grouped_events_ecomap")
         .partial(
             title=None,
-            tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
+            tile_layers=base_map_defs,
             north_arrow_style={"placement": "top-left"},
             legend_style={"placement": "bottom-right"},
             static=False,
@@ -397,7 +405,7 @@ def main(params: Params):
         .handle_errors(task_instance_id="grouped_fd_ecomap")
         .partial(
             title=None,
-            tile_layers=[{"name": "TERRAIN"}, {"name": "SATELLITE", "opacity": 0.5}],
+            tile_layers=base_map_defs,
             north_arrow_style={"placement": "top-left"},
             legend_style={"title": "Number of events", "placement": "bottom-right"},
             static=False,
