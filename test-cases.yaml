@@ -32,6 +32,12 @@ all-grouper:
       min_y: -90.0
       max_y: 90.0
       filter_point_coords: []
+    base_map_defs:
+      base_maps:
+        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+          opacity: 1.0
+        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          opacity: 0.5
     events_meshgrid:
       cell_width: 10000
       cell_height: 10000
@@ -71,6 +77,12 @@ month-grouper:
       min_y: -90.0
       max_y: 90.0
       filter_point_coords: []
+    base_map_defs:
+      base_maps:
+        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+          opacity: 1.0
+        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          opacity: 0.5
     events_meshgrid:
       cell_width: 10000
       cell_height: 10000
@@ -112,6 +124,12 @@ value-grouper:
       min_y: -90.0
       max_y: 90.0
       filter_point_coords: []
+    base_map_defs:
+      base_maps:
+        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+          opacity: 1.0
+        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          opacity: 0.5
     events_meshgrid:
       cell_width: 10000
       cell_height: 10000
@@ -146,6 +164,12 @@ task-instance-error:
       min_y: -90.0
       max_y: -91.0
       filter_point_coords: []
+    base_map_defs:
+      base_maps:
+        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+          opacity: 1.0
+        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          opacity: 0.5
     events_meshgrid:
       cell_width: 10000
       cell_height: 10000
