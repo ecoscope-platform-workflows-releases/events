@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.0.67
+    version: 0.0.68
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.0.67
+    version: 0.0.68
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   $defs:
@@ -123,6 +123,9 @@ workflow:
     task: merge_widget_views
     partial:
       widgets: ${{ workflow.events_bar_chart_widget.return }}
+  - name: Base Maps
+    id: base_map_defs
+    task: set_base_maps
   - name: Create map layer from grouped Events
     id: grouped_events_map_layer
     task: create_point_layer
@@ -145,10 +148,7 @@ workflow:
     task: draw_ecomap
     partial:
       title: null
-      tile_layers:
-        - name: TERRAIN
-        - name: SATELLITE
-          opacity: 0.500000
+      tile_layers: ${{ workflow.base_map_defs.return }}
       north_arrow_style:
         placement: top-left
       legend_style:
@@ -285,10 +285,7 @@ workflow:
     task: draw_ecomap
     partial:
       title: null
-      tile_layers:
-        - name: TERRAIN
-        - name: SATELLITE
-          opacity: 0.500000
+      tile_layers: ${{ workflow.base_map_defs.return }}
       north_arrow_style:
         placement: top-left
       legend_style:
