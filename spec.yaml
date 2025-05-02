@@ -1,12 +1,14 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.0.72
+    version: 0.0.73
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.0.72
+    version: 0.0.73
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
+  properties:
+    get_events_data.properties.event_types.ecoscope:event_type: properties.er_client_name.properties.data_source.properties.name
   $defs:
     ValueGrouper.oneOf:
       - const: event_category
