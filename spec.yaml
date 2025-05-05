@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.0.73
+    version: 0.0.74
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.0.73
+    version: 0.0.74
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   properties:
@@ -41,6 +41,7 @@ workflow:
         - event_type
         - event_category
         - reported_by
+        - serial_number
         - geometry
       raise_on_empty: true
   - name: Extract reported_by_name from Events
@@ -125,6 +126,20 @@ workflow:
     task: merge_widget_views
     partial:
       widgets: ${{ workflow.events_bar_chart_widget.return }}
+  - name: Rename columns for map tooltip display
+    id: rename_display_columns
+    task: map_columns
+    partial:
+      drop_columns: []
+      retain_columns: []
+      rename_columns:
+        serial_number: Event Serial
+        time: Event Time
+        event_type: Event Type
+        reported_by_name: Reported By
+    mapvalues:
+      argnames: df
+      argvalues: ${{ workflow.split_event_groups.return }}
   - name: Base Maps
     id: base_map_defs
     task: set_base_maps
@@ -136,15 +151,16 @@ workflow:
         fill_color_column: event_type_colormap
         get_radius: 5
       legend:
-        label_column: event_type
+        label_column: Event Type
         color_column: event_type_colormap
       tooltip_columns:
-        - id
-        - time
-        - event_type
+        - Event Serial
+        - Event Time
+        - Event Type
+        - Reported By
     mapvalues:
       argnames: geodataframe
-      argvalues: ${{ workflow.split_event_groups.return }}
+      argvalues: ${{ workflow.rename_display_columns.return }}
   - name: Draw Ecomap from grouped Events
     id: grouped_events_ecomap
     task: draw_ecomap
