@@ -20,6 +20,7 @@ from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_c
 from ecoscope_workflows_core.tasks.io import persist_text
 from ecoscope_workflows_core.tasks.results import create_plot_widget_single_view
 from ecoscope_workflows_core.tasks.results import merge_widget_views
+from ecoscope_workflows_core.tasks.transformation import map_columns
 from ecoscope_workflows_ext_ecoscope.tasks.results import set_base_maps
 from ecoscope_workflows_ext_ecoscope.tasks.results import create_point_layer
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_ecomap
@@ -53,8 +54,9 @@ def main(params: Params):
         "events_bar_chart_html_url": ["events_bar_chart"],
         "events_bar_chart_widget": ["events_bar_chart_html_url"],
         "grouped_bar_plot_widget_merge": ["events_bar_chart_widget"],
+        "rename_display_columns": ["split_event_groups"],
         "base_map_defs": [],
-        "grouped_events_map_layer": ["split_event_groups"],
+        "grouped_events_map_layer": ["rename_display_columns"],
         "grouped_events_ecomap": ["base_map_defs", "grouped_events_map_layer"],
         "grouped_events_ecomap_html_url": ["grouped_events_ecomap"],
         "grouped_events_map_widget": ["grouped_events_ecomap_html_url"],
@@ -122,6 +124,7 @@ def main(params: Params):
                     "event_type",
                     "event_category",
                     "reported_by",
+                    "serial_number",
                     "geometry",
                 ],
                 "raise_on_empty": True,
@@ -259,6 +262,27 @@ def main(params: Params):
             | (params_dict.get("grouped_bar_plot_widget_merge") or {}),
             method="call",
         ),
+        "rename_display_columns": Node(
+            async_task=map_columns.validate()
+            .handle_errors(task_instance_id="rename_display_columns")
+            .set_executor("lithops"),
+            partial={
+                "drop_columns": [],
+                "retain_columns": [],
+                "rename_columns": {
+                    "serial_number": "Event Serial",
+                    "time": "Event Time",
+                    "event_type": "Event Type",
+                    "reported_by_name": "Reported By",
+                },
+            }
+            | (params_dict.get("rename_display_columns") or {}),
+            method="mapvalues",
+            kwargs={
+                "argnames": ["df"],
+                "argvalues": DependsOn("split_event_groups"),
+            },
+        ),
         "base_map_defs": Node(
             async_task=set_base_maps.validate()
             .handle_errors(task_instance_id="base_map_defs")
@@ -276,16 +300,21 @@ def main(params: Params):
                     "get_radius": 5,
                 },
                 "legend": {
-                    "label_column": "event_type",
+                    "label_column": "Event Type",
                     "color_column": "event_type_colormap",
                 },
-                "tooltip_columns": ["id", "time", "event_type"],
+                "tooltip_columns": [
+                    "Event Serial",
+                    "Event Time",
+                    "Event Type",
+                    "Reported By",
+                ],
             }
             | (params_dict.get("grouped_events_map_layer") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["geodataframe"],
-                "argvalues": DependsOn("split_event_groups"),
+                "argvalues": DependsOn("rename_display_columns"),
             },
         ),
         "grouped_events_ecomap": Node(
