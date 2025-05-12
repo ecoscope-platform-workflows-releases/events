@@ -1,5 +1,0 @@
-{
-  "error": "Task instance 'events_meshgrid' raised ValueError('NaN or None values are not allowed.')",
-  "result": null,
-  "trace": "str"
-}
