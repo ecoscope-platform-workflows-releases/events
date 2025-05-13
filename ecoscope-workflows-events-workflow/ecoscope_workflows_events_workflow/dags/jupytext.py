@@ -27,6 +27,7 @@ from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_c
 from ecoscope_workflows_core.tasks.io import persist_text
 from ecoscope_workflows_core.tasks.results import create_plot_widget_single_view
 from ecoscope_workflows_core.tasks.results import merge_widget_views
+from ecoscope_workflows_core.tasks.transformation import map_columns
 from ecoscope_workflows_ext_ecoscope.tasks.results import set_base_maps
 from ecoscope_workflows_ext_ecoscope.tasks.results import create_point_layer
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_ecomap
@@ -131,6 +132,7 @@ get_events_data = (
             "event_type",
             "event_category",
             "reported_by",
+            "serial_number",
             "geometry",
         ],
         raise_on_empty=True,
@@ -380,6 +382,35 @@ grouped_bar_plot_widget_merge = (
 
 
 # %% [markdown]
+# ## Rename columns for map tooltip display
+
+# %%
+# parameters
+
+rename_display_columns_params = dict()
+
+# %%
+# call the task
+
+
+rename_display_columns = (
+    map_columns.handle_errors(task_instance_id="rename_display_columns")
+    .partial(
+        drop_columns=[],
+        retain_columns=[],
+        rename_columns={
+            "serial_number": "Event Serial",
+            "time": "Event Time",
+            "event_type": "Event Type",
+            "reported_by_name": "Reported By",
+        },
+        **rename_display_columns_params,
+    )
+    .mapvalues(argnames=["df"], argvalues=split_event_groups)
+)
+
+
+# %% [markdown]
 # ## Base Maps
 
 # %%
@@ -418,11 +449,11 @@ grouped_events_map_layer = (
     create_point_layer.handle_errors(task_instance_id="grouped_events_map_layer")
     .partial(
         layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
-        legend={"label_column": "event_type", "color_column": "event_type_colormap"},
-        tooltip_columns=["id", "time", "event_type"],
+        legend={"label_column": "Event Type", "color_column": "event_type_colormap"},
+        tooltip_columns=["Event Serial", "Event Time", "Event Type", "Reported By"],
         **grouped_events_map_layer_params,
     )
-    .mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
+    .mapvalues(argnames=["geodataframe"], argvalues=rename_display_columns)
 )
 
 
