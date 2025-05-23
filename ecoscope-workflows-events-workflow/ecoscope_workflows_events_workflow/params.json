@@ -375,24 +375,22 @@
     "events_meshgrid": {
       "additionalProperties": false,
       "properties": {
-        "cell_width": {
-          "default": 10000,
-          "title": "Cell Width",
-          "type": "integer",
-          "description": "The width of a grid cell in meters.",
-          "ecoscope:advanced": true
-        },
-        "cell_height": {
-          "default": 10000,
-          "title": "Cell Height",
-          "type": "integer",
-          "description": "The height of a grid cell in meters.",
+        "auto_scale_or_custom_cell_size": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/AutoScaleOrCustomCellSize"
+            }
+          ],
+          "default": {
+            "auto_scale_or_custom": "Auto-scale"
+          },
+          "title": "",
           "ecoscope:advanced": true
         }
       },
       "required": [],
       "type": "object",
-      "title": "Create Events Meshgrid"
+      "title": ""
     }
   },
   "$defs": {
@@ -468,6 +466,54 @@
         "y"
       ],
       "title": "Coordinate",
+      "type": "object"
+    },
+    "AutoScaleOrCustomCellSize": {
+      "dependencies": {
+        "auto_scale_or_custom": {
+          "oneOf": [
+            {
+              "properties": {
+                "auto_scale_or_custom": {
+                  "enum": [
+                    "Auto-Scale"
+                  ]
+                }
+              }
+            },
+            {
+              "properties": {
+                "auto_scale_or_custom": {
+                  "enum": [
+                    "Customize"
+                  ]
+                },
+                "grid_cell_size": {
+                  "default": 5000,
+                  "title": "Custom Raster Pixel Size (Meters)",
+                  "type": "number"
+                }
+              },
+              "required": [
+                "grid_cell_size"
+              ]
+            }
+          ]
+        }
+      },
+      "properties": {
+        "auto_scale_or_custom": {
+          "default": "Auto-scale",
+          "description": "Define the resolution of the raster grid (in meters per pixel). Auto-scale for an optimized grid based on the data, or Customize to set a specific resolution.",
+          "enum": [
+            "Auto-scale",
+            "Customize"
+          ],
+          "title": "Auto Scale Or Custom",
+          "type": "string"
+        }
+      },
+      "title": "AutoScaleOrCustomCellSize",
       "type": "object"
     }
   },

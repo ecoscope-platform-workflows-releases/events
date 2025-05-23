@@ -230,18 +230,6 @@ class BaseMapDefs(BaseModel):
     )
 
 
-class EventsMeshgrid(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    cell_width: Optional[int] = Field(
-        10000, description="The width of a grid cell in meters.", title="Cell Width"
-    )
-    cell_height: Optional[int] = Field(
-        10000, description="The height of a grid cell in meters.", title="Cell Height"
-    )
-
-
 class EarthRangerConnection(BaseModel):
     name: str = Field(..., title="Data Source")
 
@@ -257,6 +245,19 @@ class ValueGrouper(RootModel[str]):
 class Coordinate(BaseModel):
     x: float = Field(..., title="X")
     y: float = Field(..., title="Y")
+
+
+class AutoScaleOrCustom(str, Enum):
+    Auto_scale = "Auto-scale"
+    Customize = "Customize"
+
+
+class AutoScaleOrCustomCellSize(BaseModel):
+    auto_scale_or_custom: Optional[AutoScaleOrCustom] = Field(
+        "Auto-scale",
+        description="Define the resolution of the raster grid (in meters per pixel). Auto-scale for an optimized grid based on the data, or Customize to set a specific resolution.",
+        title="Auto Scale Or Custom",
+    )
 
 
 class ErClientName(BaseModel):
@@ -292,6 +293,18 @@ class FilterEvents(BaseModel):
     )
 
 
+class EventsMeshgrid(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    auto_scale_or_custom_cell_size: Optional[AutoScaleOrCustomCellSize] = Field(
+        default_factory=lambda: AutoScaleOrCustomCellSize.model_validate(
+            {"auto_scale_or_custom": "Auto-scale"}
+        ),
+        title="",
+    )
+
+
 class Params(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -316,6 +329,4 @@ class Params(BaseModel):
         None, title="Draw Time Series Bar Chart for Events"
     )
     base_map_defs: Optional[BaseMapDefs] = Field(None, title="Base Maps")
-    events_meshgrid: Optional[EventsMeshgrid] = Field(
-        None, title="Create Events Meshgrid"
-    )
+    events_meshgrid: Optional[EventsMeshgrid] = Field(None, title="")
