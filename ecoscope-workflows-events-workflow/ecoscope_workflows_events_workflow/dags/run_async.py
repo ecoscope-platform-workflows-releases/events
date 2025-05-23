@@ -214,7 +214,6 @@ def main(params: Params):
                 "agg_function": "count",
                 "color_column": "event_type_colormap",
                 "plot_style": {"xperiodalignment": "middle"},
-                "grouped_styles": None,
                 "layout_style": None,
             }
             | (params_dict.get("events_bar_chart") or {}),

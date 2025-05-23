@@ -309,7 +309,6 @@ events_bar_chart = (
         agg_function="count",
         color_column="event_type_colormap",
         plot_style={"xperiodalignment": "middle"},
-        grouped_styles=None,
         layout_style=None,
         **events_bar_chart_params,
     )
@@ -646,14 +645,13 @@ grouped_events_pie_widget_merge = (
 
 
 # %% [markdown]
-# ## Create Events Meshgrid
+# ##
 
 # %%
 # parameters
 
 events_meshgrid_params = dict(
-    cell_width=...,
-    cell_height=...,
+    auto_scale_or_custom_cell_size=...,
 )
 
 # %%
