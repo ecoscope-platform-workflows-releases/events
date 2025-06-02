@@ -9,7 +9,7 @@ data "google_pubsub_topic" "workflow_topic_dlq" {
 }
 
 resource "google_pubsub_subscription" "run_from_pubsub" {
-  name    = "${var.application}-sub"
+  name    = "${var.application}-sub-${var.env}"
   project = var.project_id
   topic   = data.google_pubsub_topic.workflow_topic.name
 
