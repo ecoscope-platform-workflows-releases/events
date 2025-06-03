@@ -12,6 +12,8 @@
 
 import os
 from ecoscope_workflows_core.tasks.config import set_workflow_details
+from ecoscope_workflows_core.tasks.skip import any_is_empty_df
+from ecoscope_workflows_core.tasks.skip import any_dependency_skipped
 from ecoscope_workflows_core.tasks.io import set_er_connection
 from ecoscope_workflows_core.tasks.filter import set_time_range
 from ecoscope_workflows_ext_ecoscope.tasks.io import get_events
@@ -26,6 +28,7 @@ from ecoscope_workflows_core.tasks.groupby import split_groups
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_chart
 from ecoscope_workflows_core.tasks.io import persist_text
 from ecoscope_workflows_core.tasks.results import create_plot_widget_single_view
+from ecoscope_workflows_core.tasks.skip import never
 from ecoscope_workflows_core.tasks.results import merge_widget_views
 from ecoscope_workflows_core.tasks.transformation import map_columns
 from ecoscope_workflows_ext_ecoscope.tasks.results import set_base_maps
@@ -58,6 +61,13 @@ workflow_details_params = dict(
 
 workflow_details = (
     set_workflow_details.handle_errors(task_instance_id="workflow_details")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(**workflow_details_params)
     .call()
 )
@@ -79,6 +89,13 @@ er_client_name_params = dict(
 
 er_client_name = (
     set_er_connection.handle_errors(task_instance_id="er_client_name")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(**er_client_name_params)
     .call()
 )
@@ -101,6 +118,13 @@ time_range_params = dict(
 
 time_range = (
     set_time_range.handle_errors(task_instance_id="time_range")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(time_format="%d %b %Y %H:%M:%S %Z", **time_range_params)
     .call()
 )
@@ -123,6 +147,13 @@ get_events_data_params = dict(
 
 get_events_data = (
     get_events.handle_errors(task_instance_id="get_events_data")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         client=er_client_name,
         time_range=time_range,
@@ -135,7 +166,7 @@ get_events_data = (
             "serial_number",
             "geometry",
         ],
-        raise_on_empty=True,
+        raise_on_empty=False,
         **get_events_data_params,
     )
     .call()
@@ -156,6 +187,13 @@ extract_reported_by_params = dict()
 
 extract_reported_by = (
     extract_value_from_json_column.handle_errors(task_instance_id="extract_reported_by")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         df=get_events_data,
         column_name="reported_by",
@@ -184,6 +222,13 @@ groupers_params = dict(
 
 groupers = (
     set_groupers.handle_errors(task_instance_id="groupers")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(**groupers_params)
     .call()
 )
@@ -209,6 +254,13 @@ filter_events_params = dict(
 
 filter_events = (
     apply_reloc_coord_filter.handle_errors(task_instance_id="filter_events")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         df=extract_reported_by, roi_gdf=None, roi_name=None, **filter_events_params
     )
@@ -230,6 +282,13 @@ events_add_temporal_index_params = dict()
 
 events_add_temporal_index = (
     add_temporal_index.handle_errors(task_instance_id="events_add_temporal_index")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         df=filter_events,
         time_col="time",
@@ -256,6 +315,13 @@ events_colormap_params = dict()
 
 events_colormap = (
     apply_color_map.handle_errors(task_instance_id="events_colormap")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         df=events_add_temporal_index,
         input_column_name="event_type",
@@ -281,6 +347,13 @@ split_event_groups_params = dict()
 
 split_event_groups = (
     split_groups.handle_errors(task_instance_id="split_event_groups")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(df=events_colormap, groupers=groupers, **split_event_groups_params)
     .call()
 )
@@ -302,6 +375,13 @@ events_bar_chart_params = dict(
 
 events_bar_chart = (
     draw_time_series_bar_chart.handle_errors(task_instance_id="events_bar_chart")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         x_axis="time",
         y_axis="event_type",
@@ -332,6 +412,13 @@ events_bar_chart_html_url_params = dict(
 
 events_bar_chart_html_url = (
     persist_text.handle_errors(task_instance_id="events_bar_chart_html_url")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         **events_bar_chart_html_url_params,
@@ -356,6 +443,12 @@ events_bar_chart_widget = (
     create_plot_widget_single_view.handle_errors(
         task_instance_id="events_bar_chart_widget"
     )
+    .skipif(
+        conditions=[
+            never,
+        ],
+        unpack_depth=1,
+    )
     .partial(title="Events Bar Chart", **events_bar_chart_widget_params)
     .map(argnames=["view", "data"], argvalues=events_bar_chart_html_url)
 )
@@ -375,6 +468,13 @@ grouped_bar_plot_widget_merge_params = dict()
 
 grouped_bar_plot_widget_merge = (
     merge_widget_views.handle_errors(task_instance_id="grouped_bar_plot_widget_merge")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(widgets=events_bar_chart_widget, **grouped_bar_plot_widget_merge_params)
     .call()
 )
@@ -394,6 +494,13 @@ rename_display_columns_params = dict()
 
 rename_display_columns = (
     map_columns.handle_errors(task_instance_id="rename_display_columns")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         drop_columns=[],
         retain_columns=[],
@@ -425,6 +532,13 @@ base_map_defs_params = dict(
 
 base_map_defs = (
     set_base_maps.handle_errors(task_instance_id="base_map_defs")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(**base_map_defs_params)
     .call()
 )
@@ -446,6 +560,13 @@ grouped_events_map_layer_params = dict(
 
 grouped_events_map_layer = (
     create_point_layer.handle_errors(task_instance_id="grouped_events_map_layer")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
         legend={"label_column": "Event Type", "color_column": "event_type_colormap"},
@@ -472,6 +593,13 @@ grouped_events_ecomap_params = dict(
 
 grouped_events_ecomap = (
     draw_ecomap.handle_errors(task_instance_id="grouped_events_ecomap")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         title=None,
         tile_layers=base_map_defs,
@@ -501,6 +629,13 @@ grouped_events_ecomap_html_url_params = dict(
 
 grouped_events_ecomap_html_url = (
     persist_text.handle_errors(task_instance_id="grouped_events_ecomap_html_url")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         **grouped_events_ecomap_html_url_params,
@@ -525,6 +660,12 @@ grouped_events_map_widget = (
     create_map_widget_single_view.handle_errors(
         task_instance_id="grouped_events_map_widget"
     )
+    .skipif(
+        conditions=[
+            never,
+        ],
+        unpack_depth=1,
+    )
     .partial(title="Events Map", **grouped_events_map_widget_params)
     .map(argnames=["view", "data"], argvalues=grouped_events_ecomap_html_url)
 )
@@ -544,6 +685,13 @@ grouped_events_map_widget_merge_params = dict()
 
 grouped_events_map_widget_merge = (
     merge_widget_views.handle_errors(task_instance_id="grouped_events_map_widget_merge")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         widgets=grouped_events_map_widget, **grouped_events_map_widget_merge_params
     )
@@ -565,6 +713,13 @@ grouped_events_pie_chart_params = dict()
 
 grouped_events_pie_chart = (
     draw_pie_chart.handle_errors(task_instance_id="grouped_events_pie_chart")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         value_column="event_type",
         color_column="event_type_colormap",
@@ -593,6 +748,13 @@ grouped_pie_chart_html_urls_params = dict(
 
 grouped_pie_chart_html_urls = (
     persist_text.handle_errors(task_instance_id="grouped_pie_chart_html_urls")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         **grouped_pie_chart_html_urls_params,
@@ -617,6 +779,12 @@ grouped_events_pie_chart_widgets = (
     create_plot_widget_single_view.handle_errors(
         task_instance_id="grouped_events_pie_chart_widgets"
     )
+    .skipif(
+        conditions=[
+            never,
+        ],
+        unpack_depth=1,
+    )
     .partial(title="Events Pie Chart", **grouped_events_pie_chart_widgets_params)
     .map(argnames=["view", "data"], argvalues=grouped_pie_chart_html_urls)
 )
@@ -636,6 +804,13 @@ grouped_events_pie_widget_merge_params = dict()
 
 grouped_events_pie_widget_merge = (
     merge_widget_views.handle_errors(task_instance_id="grouped_events_pie_widget_merge")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         widgets=grouped_events_pie_chart_widgets,
         **grouped_events_pie_widget_merge_params,
@@ -660,6 +835,13 @@ events_meshgrid_params = dict(
 
 events_meshgrid = (
     create_meshgrid.handle_errors(task_instance_id="events_meshgrid")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         aoi=events_add_temporal_index, intersecting_only=False, **events_meshgrid_params
     )
@@ -682,6 +864,13 @@ grouped_events_feature_density_params = dict()
 grouped_events_feature_density = (
     calculate_feature_density.handle_errors(
         task_instance_id="grouped_events_feature_density"
+    )
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
     )
     .partial(
         meshgrid=events_meshgrid,
@@ -706,6 +895,13 @@ grouped_fd_colormap_params = dict()
 
 grouped_fd_colormap = (
     apply_color_map.handle_errors(task_instance_id="grouped_fd_colormap")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         input_column_name="density",
         colormap="RdYlGn_r",
@@ -730,6 +926,13 @@ sort_grouped_density_values_params = dict()
 
 sort_grouped_density_values = (
     sort_values.handle_errors(task_instance_id="sort_grouped_density_values")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         column_name="density",
         ascending=True,
@@ -755,6 +958,13 @@ grouped_feature_density_format_params = dict()
 grouped_feature_density_format = (
     map_values_with_unit.handle_errors(
         task_instance_id="grouped_feature_density_format"
+    )
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
     )
     .partial(
         original_unit=None,
@@ -784,6 +994,13 @@ grouped_fd_map_layer_params = dict(
 
 grouped_fd_map_layer = (
     create_polygon_layer.handle_errors(task_instance_id="grouped_fd_map_layer")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         layer_style={
             "fill_color_column": "density_colormap",
@@ -814,6 +1031,13 @@ grouped_fd_ecomap_params = dict(
 
 grouped_fd_ecomap = (
     draw_ecomap.handle_errors(task_instance_id="grouped_fd_ecomap")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         title=None,
         tile_layers=base_map_defs,
@@ -843,6 +1067,13 @@ grouped_fd_ecomap_html_url_params = dict(
 
 grouped_fd_ecomap_html_url = (
     persist_text.handle_errors(task_instance_id="grouped_fd_ecomap_html_url")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
         **grouped_fd_ecomap_html_url_params,
@@ -867,6 +1098,12 @@ grouped_fd_map_widget = (
     create_map_widget_single_view.handle_errors(
         task_instance_id="grouped_fd_map_widget"
     )
+    .skipif(
+        conditions=[
+            never,
+        ],
+        unpack_depth=1,
+    )
     .partial(title="Density Map", **grouped_fd_map_widget_params)
     .map(argnames=["view", "data"], argvalues=grouped_fd_ecomap_html_url)
 )
@@ -886,6 +1123,13 @@ grouped_fd_map_widget_merge_params = dict()
 
 grouped_fd_map_widget_merge = (
     merge_widget_views.handle_errors(task_instance_id="grouped_fd_map_widget_merge")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(widgets=grouped_fd_map_widget, **grouped_fd_map_widget_merge_params)
     .call()
 )
@@ -905,6 +1149,13 @@ events_dashboard_params = dict()
 
 events_dashboard = (
     gather_dashboard.handle_errors(task_instance_id="events_dashboard")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
     .partial(
         details=workflow_details,
         widgets=[

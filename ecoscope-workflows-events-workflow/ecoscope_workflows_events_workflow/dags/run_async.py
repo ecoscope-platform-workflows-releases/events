@@ -5,6 +5,8 @@ import os
 from ecoscope_workflows_core.graph import DependsOn, DependsOnSequence, Graph, Node
 
 from ecoscope_workflows_core.tasks.config import set_workflow_details
+from ecoscope_workflows_core.tasks.skip import any_is_empty_df
+from ecoscope_workflows_core.tasks.skip import any_dependency_skipped
 from ecoscope_workflows_core.tasks.io import set_er_connection
 from ecoscope_workflows_core.tasks.filter import set_time_range
 from ecoscope_workflows_ext_ecoscope.tasks.io import get_events
@@ -19,6 +21,7 @@ from ecoscope_workflows_core.tasks.groupby import split_groups
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_chart
 from ecoscope_workflows_core.tasks.io import persist_text
 from ecoscope_workflows_core.tasks.results import create_plot_widget_single_view
+from ecoscope_workflows_core.tasks.skip import never
 from ecoscope_workflows_core.tasks.results import merge_widget_views
 from ecoscope_workflows_core.tasks.transformation import map_columns
 from ecoscope_workflows_ext_ecoscope.tasks.results import set_base_maps
@@ -90,6 +93,13 @@ def main(params: Params):
         "workflow_details": Node(
             async_task=set_workflow_details.validate()
             .handle_errors(task_instance_id="workflow_details")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial=(params_dict.get("workflow_details") or {}),
             method="call",
@@ -97,6 +107,13 @@ def main(params: Params):
         "er_client_name": Node(
             async_task=set_er_connection.validate()
             .handle_errors(task_instance_id="er_client_name")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial=(params_dict.get("er_client_name") or {}),
             method="call",
@@ -104,6 +121,13 @@ def main(params: Params):
         "time_range": Node(
             async_task=set_time_range.validate()
             .handle_errors(task_instance_id="time_range")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "time_format": "%d %b %Y %H:%M:%S %Z",
@@ -114,6 +138,13 @@ def main(params: Params):
         "get_events_data": Node(
             async_task=get_events.validate()
             .handle_errors(task_instance_id="get_events_data")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "client": DependsOn("er_client_name"),
@@ -127,7 +158,7 @@ def main(params: Params):
                     "serial_number",
                     "geometry",
                 ],
-                "raise_on_empty": True,
+                "raise_on_empty": False,
             }
             | (params_dict.get("get_events_data") or {}),
             method="call",
@@ -135,6 +166,13 @@ def main(params: Params):
         "extract_reported_by": Node(
             async_task=extract_value_from_json_column.validate()
             .handle_errors(task_instance_id="extract_reported_by")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "df": DependsOn("get_events_data"),
@@ -149,6 +187,13 @@ def main(params: Params):
         "groupers": Node(
             async_task=set_groupers.validate()
             .handle_errors(task_instance_id="groupers")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial=(params_dict.get("groupers") or {}),
             method="call",
@@ -156,6 +201,13 @@ def main(params: Params):
         "filter_events": Node(
             async_task=apply_reloc_coord_filter.validate()
             .handle_errors(task_instance_id="filter_events")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "df": DependsOn("extract_reported_by"),
@@ -168,6 +220,13 @@ def main(params: Params):
         "events_add_temporal_index": Node(
             async_task=add_temporal_index.validate()
             .handle_errors(task_instance_id="events_add_temporal_index")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "df": DependsOn("filter_events"),
@@ -182,6 +241,13 @@ def main(params: Params):
         "events_colormap": Node(
             async_task=apply_color_map.validate()
             .handle_errors(task_instance_id="events_colormap")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "df": DependsOn("events_add_temporal_index"),
@@ -195,6 +261,13 @@ def main(params: Params):
         "split_event_groups": Node(
             async_task=split_groups.validate()
             .handle_errors(task_instance_id="split_event_groups")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "df": DependsOn("events_colormap"),
@@ -206,6 +279,13 @@ def main(params: Params):
         "events_bar_chart": Node(
             async_task=draw_time_series_bar_chart.validate()
             .handle_errors(task_instance_id="events_bar_chart")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "x_axis": "time",
@@ -226,6 +306,13 @@ def main(params: Params):
         "events_bar_chart_html_url": Node(
             async_task=persist_text.validate()
             .handle_errors(task_instance_id="events_bar_chart_html_url")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
@@ -240,6 +327,12 @@ def main(params: Params):
         "events_bar_chart_widget": Node(
             async_task=create_plot_widget_single_view.validate()
             .handle_errors(task_instance_id="events_bar_chart_widget")
+            .skipif(
+                conditions=[
+                    never,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "title": "Events Bar Chart",
@@ -254,6 +347,13 @@ def main(params: Params):
         "grouped_bar_plot_widget_merge": Node(
             async_task=merge_widget_views.validate()
             .handle_errors(task_instance_id="grouped_bar_plot_widget_merge")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "widgets": DependsOn("events_bar_chart_widget"),
@@ -264,6 +364,13 @@ def main(params: Params):
         "rename_display_columns": Node(
             async_task=map_columns.validate()
             .handle_errors(task_instance_id="rename_display_columns")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "drop_columns": [],
@@ -285,6 +392,13 @@ def main(params: Params):
         "base_map_defs": Node(
             async_task=set_base_maps.validate()
             .handle_errors(task_instance_id="base_map_defs")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial=(params_dict.get("base_map_defs") or {}),
             method="call",
@@ -292,6 +406,13 @@ def main(params: Params):
         "grouped_events_map_layer": Node(
             async_task=create_point_layer.validate()
             .handle_errors(task_instance_id="grouped_events_map_layer")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "layer_style": {
@@ -319,6 +440,13 @@ def main(params: Params):
         "grouped_events_ecomap": Node(
             async_task=draw_ecomap.validate()
             .handle_errors(task_instance_id="grouped_events_ecomap")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "title": None,
@@ -338,6 +466,13 @@ def main(params: Params):
         "grouped_events_ecomap_html_url": Node(
             async_task=persist_text.validate()
             .handle_errors(task_instance_id="grouped_events_ecomap_html_url")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
@@ -352,6 +487,12 @@ def main(params: Params):
         "grouped_events_map_widget": Node(
             async_task=create_map_widget_single_view.validate()
             .handle_errors(task_instance_id="grouped_events_map_widget")
+            .skipif(
+                conditions=[
+                    never,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "title": "Events Map",
@@ -366,6 +507,13 @@ def main(params: Params):
         "grouped_events_map_widget_merge": Node(
             async_task=merge_widget_views.validate()
             .handle_errors(task_instance_id="grouped_events_map_widget_merge")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "widgets": DependsOn("grouped_events_map_widget"),
@@ -376,6 +524,13 @@ def main(params: Params):
         "grouped_events_pie_chart": Node(
             async_task=draw_pie_chart.validate()
             .handle_errors(task_instance_id="grouped_events_pie_chart")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "value_column": "event_type",
@@ -394,6 +549,13 @@ def main(params: Params):
         "grouped_pie_chart_html_urls": Node(
             async_task=persist_text.validate()
             .handle_errors(task_instance_id="grouped_pie_chart_html_urls")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
@@ -408,6 +570,12 @@ def main(params: Params):
         "grouped_events_pie_chart_widgets": Node(
             async_task=create_plot_widget_single_view.validate()
             .handle_errors(task_instance_id="grouped_events_pie_chart_widgets")
+            .skipif(
+                conditions=[
+                    never,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "title": "Events Pie Chart",
@@ -422,6 +590,13 @@ def main(params: Params):
         "grouped_events_pie_widget_merge": Node(
             async_task=merge_widget_views.validate()
             .handle_errors(task_instance_id="grouped_events_pie_widget_merge")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "widgets": DependsOn("grouped_events_pie_chart_widgets"),
@@ -432,6 +607,13 @@ def main(params: Params):
         "events_meshgrid": Node(
             async_task=create_meshgrid.validate()
             .handle_errors(task_instance_id="events_meshgrid")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "aoi": DependsOn("events_add_temporal_index"),
@@ -443,6 +625,13 @@ def main(params: Params):
         "grouped_events_feature_density": Node(
             async_task=calculate_feature_density.validate()
             .handle_errors(task_instance_id="grouped_events_feature_density")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "meshgrid": DependsOn("events_meshgrid"),
@@ -458,6 +647,13 @@ def main(params: Params):
         "grouped_fd_colormap": Node(
             async_task=apply_color_map.validate()
             .handle_errors(task_instance_id="grouped_fd_colormap")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "input_column_name": "density",
@@ -474,6 +670,13 @@ def main(params: Params):
         "sort_grouped_density_values": Node(
             async_task=sort_values.validate()
             .handle_errors(task_instance_id="sort_grouped_density_values")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "column_name": "density",
@@ -490,6 +693,13 @@ def main(params: Params):
         "grouped_feature_density_format": Node(
             async_task=map_values_with_unit.validate()
             .handle_errors(task_instance_id="grouped_feature_density_format")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "original_unit": None,
@@ -508,6 +718,13 @@ def main(params: Params):
         "grouped_fd_map_layer": Node(
             async_task=create_polygon_layer.validate()
             .handle_errors(task_instance_id="grouped_fd_map_layer")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "layer_style": {
@@ -531,6 +748,13 @@ def main(params: Params):
         "grouped_fd_ecomap": Node(
             async_task=draw_ecomap.validate()
             .handle_errors(task_instance_id="grouped_fd_ecomap")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "title": None,
@@ -553,6 +777,13 @@ def main(params: Params):
         "grouped_fd_ecomap_html_url": Node(
             async_task=persist_text.validate()
             .handle_errors(task_instance_id="grouped_fd_ecomap_html_url")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
@@ -567,6 +798,12 @@ def main(params: Params):
         "grouped_fd_map_widget": Node(
             async_task=create_map_widget_single_view.validate()
             .handle_errors(task_instance_id="grouped_fd_map_widget")
+            .skipif(
+                conditions=[
+                    never,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "title": "Density Map",
@@ -581,6 +818,13 @@ def main(params: Params):
         "grouped_fd_map_widget_merge": Node(
             async_task=merge_widget_views.validate()
             .handle_errors(task_instance_id="grouped_fd_map_widget_merge")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "widgets": DependsOn("grouped_fd_map_widget"),
@@ -591,6 +835,13 @@ def main(params: Params):
         "events_dashboard": Node(
             async_task=gather_dashboard.validate()
             .handle_errors(task_instance_id="events_dashboard")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
             .set_executor("lithops"),
             partial={
                 "details": DependsOn("workflow_details"),
