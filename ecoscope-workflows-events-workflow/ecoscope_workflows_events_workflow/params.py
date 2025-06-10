@@ -38,11 +38,13 @@ class GetEventsData(BaseModel):
         extra="forbid",
     )
     event_types: List[str] = Field(
-        ..., description="list of event types", title="Event Types"
+        ...,
+        description="Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types.",
+        title=" ",
     )
     drop_null_geometry: Optional[bool] = Field(
         False,
-        description="Whether or not to keep events with no geometry data",
+        description="Include Events Without a Geometry (point or polygon)",
         title="Drop Null Geometry",
     )
 
@@ -242,6 +244,13 @@ class ValueGrouper(RootModel[str]):
     root: str = Field(..., title="Category")
 
 
+class BoundingBox(BaseModel):
+    min_y: Optional[float] = Field(-90.0, title="Min Latitude")
+    max_y: Optional[float] = Field(90.0, title="Max Latitude")
+    min_x: Optional[float] = Field(-180.0, title="Min Longitude")
+    max_x: Optional[float] = Field(180.0, title="Max Longitude")
+
+
 class Coordinate(BaseModel):
     x: float = Field(..., title="X")
     y: float = Field(..., title="Y")
@@ -298,10 +307,13 @@ class FilterEvents(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    min_x: Optional[float] = Field(-180.0, title="Min X")
-    max_x: Optional[float] = Field(180.0, title="Max X")
-    min_y: Optional[float] = Field(-90.0, title="Min Y")
-    max_y: Optional[float] = Field(90.0, title="Max Y")
+    bounding_box: Optional[BoundingBox] = Field(
+        default_factory=lambda: BoundingBox.model_validate(
+            {"min_y": -90.0, "max_y": 90.0, "min_x": -180.0, "max_x": 180.0}
+        ),
+        description="Filter events to inside these bounding coordinates.",
+        title="Bounding Box",
+    )
     filter_point_coords: Optional[List[Coordinate]] = Field(
         [], title="Filter Point Coords"
     )
@@ -332,13 +344,9 @@ class Params(BaseModel):
     time_range: Optional[TimeRange] = Field(
         None, description="Choose the period of time to analyze.", title="Time Range"
     )
-    get_events_data: Optional[GetEventsData] = Field(
-        None, title="Get Events from EarthRanger"
-    )
+    get_events_data: Optional[GetEventsData] = Field(None, title="Event Types")
     groupers: Optional[Groupers] = Field(None, title="Group Data")
-    filter_events: Optional[FilterEvents] = Field(
-        None, title="Apply Relocation Coordinate Filter"
-    )
+    filter_events: Optional[FilterEvents] = Field(None, title="Event Location Filter")
     events_bar_chart: Optional[EventsBarChart] = Field(
         None, title="Draw Time Series Bar Chart for Events"
     )
