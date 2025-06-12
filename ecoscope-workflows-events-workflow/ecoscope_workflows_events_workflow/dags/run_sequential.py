@@ -24,6 +24,7 @@ from ecoscope_workflows_core.tasks.results import merge_widget_views
 from ecoscope_workflows_core.tasks.transformation import map_columns
 from ecoscope_workflows_ext_ecoscope.tasks.results import set_base_maps
 from ecoscope_workflows_ext_ecoscope.tasks.results import create_point_layer
+from ecoscope_workflows_ext_ecoscope.tasks.skip import all_geometry_are_none
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_ecomap
 from ecoscope_workflows_core.tasks.results import create_map_widget_single_view
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_pie_chart
@@ -343,6 +344,7 @@ def main(params: Params):
             conditions=[
                 any_is_empty_df,
                 any_dependency_skipped,
+                all_geometry_are_none,
             ],
             unpack_depth=1,
         )
@@ -507,6 +509,7 @@ def main(params: Params):
             conditions=[
                 any_is_empty_df,
                 any_dependency_skipped,
+                all_geometry_are_none,
             ],
             unpack_depth=1,
         )
@@ -602,6 +605,7 @@ def main(params: Params):
             conditions=[
                 any_is_empty_df,
                 any_dependency_skipped,
+                all_geometry_are_none,
             ],
             unpack_depth=1,
         )

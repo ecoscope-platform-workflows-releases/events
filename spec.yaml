@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.3.1
+    version: 0.3.3
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.3.1
+    version: 0.3.3
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   properties:
@@ -34,7 +34,7 @@ workflow:
     task: set_time_range
     partial:
       time_format: '%d %b %Y %H:%M:%S %Z'
-  - name: Get Events from EarthRanger
+  - name: Event Types
     id: get_events_data
     task: get_events
     partial:
@@ -62,7 +62,7 @@ workflow:
   - name: Group Data
     id: groupers
     task: set_groupers
-  - name: Apply Relocation Coordinate Filter
+  - name: Event Location Filter
     id: filter_events
     task: apply_reloc_coord_filter
     partial:
@@ -92,47 +92,51 @@ workflow:
     partial:
       df: ${{ workflow.events_colormap.return }}
       groupers: ${{ workflow.groupers.return }}
-  - name: Draw Time Series Bar Chart for Events
-    id: events_bar_chart
-    task: draw_time_series_bar_chart
-    partial:
-      x_axis: time
-      y_axis: event_type
-      category: event_type
-      agg_function: count
-      color_column: event_type_colormap
-      plot_style:
-        xperiodalignment: middle
-      layout_style: null
-    mapvalues:
-      argnames: dataframe
-      argvalues: ${{ workflow.split_event_groups.return }}
-  - name: Persist Bar Chart as Text
-    id: events_bar_chart_html_url
-    task: persist_text
-    partial:
-      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-    mapvalues:
-      argnames: text
-      argvalues: ${{ workflow.events_bar_chart.return }}
-  - name: Create Bar Plot Widget for Events
-    id: events_bar_chart_widget
-    task: create_plot_widget_single_view
-    skipif:
-      conditions:
-        - never
-    partial:
-      title: Events Bar Chart
-    map:
-      argnames:
-        - view
-        - data
-      argvalues: ${{ workflow.events_bar_chart_html_url.return }}
-  - name: Merge Bar Plot Widget Views
-    id: grouped_bar_plot_widget_merge
-    task: merge_widget_views
-    partial:
-      widgets: ${{ workflow.events_bar_chart_widget.return }}
+  - title: Events Bar Chart
+    type: task-group
+    description: The bar chart shows how many events of different types occurred over time. Choose the time interval for the x-axis to control how event counts are summarized over time.
+    tasks:
+      - name: Draw Time Series Bar Chart for Events
+        id: events_bar_chart
+        task: draw_time_series_bar_chart
+        partial:
+          x_axis: time
+          y_axis: event_type
+          category: event_type
+          agg_function: count
+          color_column: event_type_colormap
+          plot_style:
+            xperiodalignment: middle
+          layout_style: null
+        mapvalues:
+          argnames: dataframe
+          argvalues: ${{ workflow.split_event_groups.return }}
+      - name: Persist Bar Chart as Text
+        id: events_bar_chart_html_url
+        task: persist_text
+        partial:
+          root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+        mapvalues:
+          argnames: text
+          argvalues: ${{ workflow.events_bar_chart.return }}
+      - name: Create Bar Plot Widget for Events
+        id: events_bar_chart_widget
+        task: create_plot_widget_single_view
+        skipif:
+          conditions:
+            - never
+        partial:
+          title: Events Bar Chart
+        map:
+          argnames:
+            - view
+            - data
+          argvalues: ${{ workflow.events_bar_chart_html_url.return }}
+      - name: Merge Bar Plot Widget Views
+        id: grouped_bar_plot_widget_merge
+        task: merge_widget_views
+        partial:
+          widgets: ${{ workflow.events_bar_chart_widget.return }}
   - name: Rename columns for map tooltip display
     id: rename_display_columns
     task: map_columns
@@ -153,6 +157,11 @@ workflow:
   - name: Create map layer from grouped Events
     id: grouped_events_map_layer
     task: create_point_layer
+    skipif:
+      conditions:
+        - any_is_empty_df
+        - any_dependency_skipped
+        - all_geometry_are_none
     partial:
       layer_style:
         fill_color_column: event_type_colormap
@@ -255,6 +264,11 @@ workflow:
       - name: null
         id: events_meshgrid
         task: create_meshgrid
+        skipif:
+          conditions:
+            - any_is_empty_df
+            - any_dependency_skipped
+            - all_geometry_are_none
         partial:
           aoi: ${{ workflow.events_add_temporal_index.return }}
           intersecting_only: false
@@ -302,6 +316,11 @@ workflow:
       - name: Create map layer from Feature Density
         id: grouped_fd_map_layer
         task: create_polygon_layer
+        skipif:
+          conditions:
+            - any_is_empty_df
+            - any_dependency_skipped
+            - all_geometry_are_none
         partial:
           layer_style:
             fill_color_column: density_colormap

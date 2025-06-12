@@ -27,10 +27,11 @@ all-grouper:
     events_bar_chart:
       time_interval: "month"
     filter_events:
-      min_x: -180.0
-      max_x: 180.0
-      min_y: -90.0
-      max_y: 90.0
+      bounding_box:
+        min_x: -180.0
+        max_x: 180.0
+        min_y: -90.0
+        max_y: 90.0
       filter_point_coords: []
     base_map_defs:
       base_maps:
@@ -74,10 +75,11 @@ month-grouper:
     events_bar_chart:
       time_interval: "week"
     filter_events:
-      min_x: -180.0
-      max_x: 180.0
-      min_y: -90.0
-      max_y: 90.0
+      bounding_box:
+        min_x: -180.0
+        max_x: 180.0
+        min_y: -90.0
+        max_y: 90.0
       filter_point_coords: []
     base_map_defs:
       base_maps:
@@ -121,10 +123,11 @@ value-grouper:
     events_bar_chart:
       time_interval: "week"
     filter_events:
-      min_x: -180.0
-      max_x: 180.0
-      min_y: -90.0
-      max_y: 90.0
+      bounding_box:
+        min_x: -180.0
+        max_x: 180.0
+        min_y: -90.0
+        max_y: 90.0
       filter_point_coords: []
     base_map_defs:
       base_maps:
@@ -140,7 +143,7 @@ task-instance-error:
   name: Task Instance Error
   description: |
     A demonstration of configuration that would raise a task instance error.
-    Specifically, `filter_events` configuration specifies an invalid bounding box.
+    Specifically, the grouper selection "%1234" will result in a value error..
   raises: true
   expected_status_code: 500
   params:
@@ -151,7 +154,8 @@ task-instance-error:
       data_source:
         name: "mep_dev"
     groupers:
-      groupers: []
+      groupers:
+        - "%1234"
     time_range:
       since: "2015-01-01T00:00:00Z"
       until: "2015-12-31T23:59:59Z"
@@ -161,10 +165,11 @@ task-instance-error:
     events_bar_chart:
       time_interval: "month"
     filter_events:
-      min_x: -180.0
-      max_x: -181.0
-      min_y: -90.0
-      max_y: -91.0
+      bounding_box:
+        min_x: -180.0
+        max_x: 180.0
+        min_y: -90.0
+        max_y: 90.0
       filter_point_coords: []
     base_map_defs:
       base_maps:

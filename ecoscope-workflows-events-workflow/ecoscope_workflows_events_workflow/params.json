@@ -66,15 +66,15 @@
           "items": {
             "type": "string"
           },
-          "title": "Event Types",
+          "title": " ",
           "type": "array",
-          "description": "list of event types"
+          "description": "Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types."
         },
         "drop_null_geometry": {
           "default": false,
           "title": "Drop Null Geometry",
           "type": "boolean",
-          "description": "Whether or not to keep events with no geometry data",
+          "description": "Include Events Without a Geometry (point or polygon)",
           "ecoscope:advanced": true
         }
       },
@@ -82,7 +82,7 @@
         "event_types"
       ],
       "type": "object",
-      "title": "Get Events from EarthRanger"
+      "title": "Event Types"
     },
     "groupers": {
       "additionalProperties": false,
@@ -112,28 +112,20 @@
     "filter_events": {
       "additionalProperties": false,
       "properties": {
-        "min_x": {
-          "default": -180.0,
-          "title": "Min X",
-          "type": "number",
-          "ecoscope:advanced": true
-        },
-        "max_x": {
-          "default": 180.0,
-          "title": "Max X",
-          "type": "number",
-          "ecoscope:advanced": true
-        },
-        "min_y": {
-          "default": -90.0,
-          "title": "Min Y",
-          "type": "number",
-          "ecoscope:advanced": true
-        },
-        "max_y": {
-          "default": 90.0,
-          "title": "Max Y",
-          "type": "number",
+        "bounding_box": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/BoundingBox"
+            }
+          ],
+          "default": {
+            "min_y": -90.0,
+            "max_y": 90.0,
+            "min_x": -180.0,
+            "max_x": 180.0
+          },
+          "title": "Bounding Box",
+          "description": "Filter events to inside these bounding coordinates.",
           "ecoscope:advanced": true
         },
         "filter_point_coords": {
@@ -148,7 +140,7 @@
       },
       "required": [],
       "type": "object",
-      "title": "Apply Relocation Coordinate Filter"
+      "title": "Event Location Filter"
     },
     "events_bar_chart": {
       "additionalProperties": false,
@@ -452,6 +444,36 @@
       "oneOf": [],
       "title": "Category",
       "type": "string"
+    },
+    "BoundingBox": {
+      "properties": {
+        "min_y": {
+          "default": -90.0,
+          "ecoscope:advanced": true,
+          "title": "Min Latitude",
+          "type": "number"
+        },
+        "max_y": {
+          "default": 90.0,
+          "ecoscope:advanced": true,
+          "title": "Max Latitude",
+          "type": "number"
+        },
+        "min_x": {
+          "default": -180.0,
+          "ecoscope:advanced": true,
+          "title": "Min Longitude",
+          "type": "number"
+        },
+        "max_x": {
+          "default": 180.0,
+          "ecoscope:advanced": true,
+          "title": "Max Longitude",
+          "type": "number"
+        }
+      },
+      "title": "BoundingBox",
+      "type": "object"
     },
     "Coordinate": {
       "properties": {
