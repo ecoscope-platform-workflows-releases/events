@@ -40,7 +40,7 @@ class GetEventsData(BaseModel):
     event_types: List[str] = Field(
         ...,
         description="Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types.",
-        title=" ",
+        title="Event Types",
     )
     drop_null_geometry: Optional[bool] = Field(
         False,
@@ -285,7 +285,7 @@ class CustomGridCellSize(BaseModel):
         title=" ",
     )
     grid_cell_size: Optional[confloat(lt=10000.0, gt=0.0)] = Field(
-        None, description="Custom Raster Pixel Size (Meters)", title="Grid Cell Size"
+        5000, description="Custom Raster Pixel Size (Meters)", title="Grid Cell Size"
     )
 
 

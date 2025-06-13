@@ -66,7 +66,7 @@
           "items": {
             "type": "string"
           },
-          "title": " ",
+          "title": "Event Types",
           "type": "array",
           "description": "Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types.",
           "ecoscope:event_type": "properties.er_client_name.properties.data_source.properties.name"
@@ -562,7 +562,7 @@
           "type": "string"
         },
         "grid_cell_size": {
-          "default": null,
+          "default": 5000,
           "description": "Custom Raster Pixel Size (Meters)",
           "exclusiveMaximum": 10000,
           "exclusiveMinimum": 0,
