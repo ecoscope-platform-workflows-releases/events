@@ -252,8 +252,8 @@ class BoundingBox(BaseModel):
 
 
 class Coordinate(BaseModel):
-    x: float = Field(..., title="X")
-    y: float = Field(..., title="Y")
+    y: float = Field(..., description="Example -0.15293", title="Latitude")
+    x: float = Field(..., description="Example 37.30906", title="Longitude")
 
 
 class AutoScaleOrCustom(str, Enum):
