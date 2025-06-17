@@ -477,18 +477,20 @@
     },
     "Coordinate": {
       "properties": {
-        "x": {
-          "title": "X",
+        "y": {
+          "description": "Example -0.15293",
+          "title": "Latitude",
           "type": "number"
         },
-        "y": {
-          "title": "Y",
+        "x": {
+          "description": "Example 37.30906",
+          "title": "Longitude",
           "type": "number"
         }
       },
       "required": [
-        "x",
-        "y"
+        "y",
+        "x"
       ],
       "title": "Coordinate",
       "type": "object"
