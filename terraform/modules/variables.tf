@@ -14,10 +14,16 @@ variable "location" {
   default     = "us-west1"
 }
 
-variable "application" {
+variable "application_name" {
   type = string
   description = "Name of the application"
   default = "workflow-events"
+}
+
+variable "application_short_name" {
+  type = string
+  description = "Name of the application"
+  default = "events"
 }
 
 variable "ingress" {
