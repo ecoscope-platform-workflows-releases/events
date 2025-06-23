@@ -170,11 +170,6 @@
           "type": "object",
           "title": "Draw Time Series Bar Chart for Events"
         }
-      },
-      "uiSchema": {
-        "ui:order": [
-          "events_bar_chart"
-        ]
       }
     },
     "base_map_defs": {
@@ -405,11 +400,6 @@
           "type": "object",
           "title": ""
         }
-      },
-      "uiSchema": {
-        "ui:order": [
-          "events_meshgrid"
-        ]
       }
     }
   },
@@ -578,8 +568,31 @@
       "type": "object"
     }
   },
-  "additionalProperties": false,
   "uiSchema": {
+    "workflow_details": {
+      "ui:order": [
+        "name",
+        "description"
+      ]
+    },
+    "time_range": {
+      "ui:order": [
+        "since",
+        "until"
+      ]
+    },
+    "get_events_data": {
+      "ui:order": [
+        "event_types",
+        "drop_null_geometry"
+      ]
+    },
+    "filter_events": {
+      "ui:order": [
+        "bounding_box",
+        "filter_point_coords"
+      ]
+    },
     "ui:order": [
       "workflow_details",
       "er_client_name",
@@ -591,5 +604,6 @@
       "base_map_defs",
       "Event Density Map"
     ]
-  }
+  },
+  "additionalProperties": false
 }
