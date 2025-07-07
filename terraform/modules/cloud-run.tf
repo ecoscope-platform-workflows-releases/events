@@ -60,7 +60,7 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 data "google_dns_managed_zone" "ecoscope" {
-  count        = startswith(var.env, "dev-preview") ? 1 : 0
+  count   = startswith(var.env, "dev-preview") ? 1 : 0
   name    = var.dns_config_name
   project = var.project_id
 }
