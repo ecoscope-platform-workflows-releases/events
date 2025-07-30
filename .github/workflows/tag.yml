@@ -1,8 +1,10 @@
 name: Tag
 
 on:
-  push:
-    branches: ["**"]  # https://stackoverflow.com/a/64635612/14658879
+  pull_request:
+    branches:
+      - 'main'
+      - 'patch-*'
 
 jobs:
   generate-tag:
@@ -39,11 +41,21 @@ jobs:
           else
             echo "Tag ${{ steps.create_tag.outputs.result }} does not exist. Proceeding."
           fi
+      - name: If this is a PR to a patch branch, ensure the patch version is not 0
+        if: startsWith(github.base_ref, 'patch-')
+        run: |
+          patch_version=$(echo "${{ steps.create_tag.outputs.result }}" | cut -d '.' -f 3)
+          if [ "$patch_version" -ne 0 ]; then
+            echo "Patch version is not 0. This is an acceptable PR to a patch branch."
+          else
+            echo "Patch version is 0. Please ensure that the patch version is incremented before merging this PR."
+            exit 1
+          fi
+
   cut-release:
     needs: generate-tag
-    # only actually cut a tag + release on push to main or patch branches;
-    # this avoids mutating PR branches (which generate push events when commits are pushed to them )
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/patch-'))
+    # only actually cut a tag + release when PRs to main or patch branches are merged
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: write
