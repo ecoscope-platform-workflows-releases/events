@@ -78,6 +78,7 @@ jobs:
       - name: Tag
         run: |
           echo "Tagging version ${{ needs.generate-tag.outputs.tag }}"
+          echo "Tagging from:\n$(git log -1)"
           git tag ${{ needs.generate-tag.outputs.tag }}
           git tag -l
       - name: Push tag
