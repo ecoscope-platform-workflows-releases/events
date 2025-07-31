@@ -63,7 +63,7 @@ jobs:
   cut-release:
     needs: generate-tag
     # only actually cut a tag + release when PRs to main or patch branches are merged
-    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: write
