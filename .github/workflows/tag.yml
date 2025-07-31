@@ -2,6 +2,7 @@ name: Tag
 
 on:
   pull_request:
+    types: [opened, reopened, synchronize, closed]
     branches:
       - 'main'
       - 'patch-*'
