@@ -68,14 +68,12 @@
           },
           "title": "Event Types",
           "type": "array",
-          "description": "Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types."
+          "description": "Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types. Only V1 Event Types can be analyzed at this time."
         },
-        "drop_null_geometry": {
-          "default": false,
-          "title": "Drop Null Geometry",
-          "type": "boolean",
-          "description": "Include Events Without a Geometry (point or polygon)",
-          "ecoscope:advanced": true
+        "include_null_geometry": {
+          "default": true,
+          "title": "Include Events Without a Geometry (point or polygon)",
+          "type": "boolean"
         }
       },
       "required": [
@@ -133,8 +131,9 @@
           "items": {
             "$ref": "#/$defs/Coordinate"
           },
-          "title": "Filter Point Coords",
+          "title": "Filter Exact Point Coordinates",
           "type": "array",
+          "description": "By adding a filter, the workflow will not include events recorded at the specified coordinates.",
           "ecoscope:advanced": true
         }
       },
@@ -154,15 +153,14 @@
             "hour"
           ],
           "title": "Time Interval",
-          "type": "string",
-          "description": "Sets the time interval of the x axis."
+          "type": "string"
         }
       },
       "required": [
         "time_interval"
       ],
       "type": "object",
-      "title": "Draw Time Series Bar Chart for Events"
+      "title": ""
     },
     "base_map_defs": {
       "additionalProperties": false,
@@ -179,7 +177,7 @@
             }
           ],
           "items": {
-            "title": "Base Layer or Custom Layer",
+            "title": "Base Layer",
             "anyOf": [
               {
                 "properties": {
@@ -354,7 +352,7 @@
               }
             ]
           },
-          "title": "Set Map Base Layers",
+          "title": " ",
           "type": "array",
           "description": "Select tile layers to use as base layers in map outputs. The first layer in the list will be the bottommost layer displayed.",
           "ecoscope:advanced": true
@@ -362,7 +360,7 @@
       },
       "type": "object",
       "required": [],
-      "title": "Base Maps"
+      "title": "Map Base Layers"
     },
     "events_meshgrid": {
       "additionalProperties": false,
@@ -379,7 +377,14 @@
           "default": {
             "auto_scale_or_custom": "Auto-scale"
           },
-          "title": "Auto Scale Or Custom Grid Cell Size",
+          "title": "Grid Cell Size",
+          "ecoscope:advanced": true
+        },
+        "crs": {
+          "default": "EPSG:3857",
+          "title": "Coordinate Reference System",
+          "type": "string",
+          "description": "The coordinate reference system in which to perform the density calculation, must be a valid CRS authority code, for example ESRI:53042",
           "ecoscope:advanced": true
         }
       },
@@ -500,12 +505,11 @@
         "auto_scale_or_custom": {
           "const": "Auto-scale",
           "default": "Auto-scale",
-          "description": "Define the resolution of the raster grid (in meters per pixel). Auto-scale for an optimized grid based on the data, or Customize to set a specific resolution.",
           "ecoscope:advanced": true,
           "enum": [
             "Auto-scale"
           ],
-          "title": " ",
+          "title": "Grid Cell Size",
           "type": "string"
         }
       },
@@ -517,22 +521,21 @@
         "auto_scale_or_custom": {
           "const": "Customize",
           "default": "Customize",
-          "description": "Define the resolution of the raster grid (in meters per pixel). Auto-scale for an optimized grid based on the data, or Customize to set a specific resolution.",
           "ecoscope:advanced": true,
           "enum": [
             "Customize"
           ],
-          "title": " ",
+          "title": "Grid Cell Size",
           "type": "string"
         },
         "grid_cell_size": {
           "default": 5000,
-          "description": "Custom Raster Pixel Size (Meters)",
+          "description": "Define the resolution of the raster grid (in metres per pixel). A smaller grid cell size provides more details, while a larger size generalizes the data.",
           "exclusiveMaximum": 10000,
           "exclusiveMinimum": 0,
           "gt": 0,
           "lt": 10000,
-          "title": "Grid Cell Size",
+          "title": "Custom Grid Cell Size (Meters)",
           "type": "number"
         }
       },
@@ -556,13 +559,19 @@
     "get_events_data": {
       "ui:order": [
         "event_types",
-        "drop_null_geometry"
+        "include_null_geometry"
       ]
     },
     "filter_events": {
       "ui:order": [
         "bounding_box",
         "filter_point_coords"
+      ]
+    },
+    "events_meshgrid": {
+      "ui:order": [
+        "auto_scale_or_custom_cell_size",
+        "crs"
       ]
     },
     "ui:order": [

@@ -139,7 +139,7 @@ time_range = (
 
 get_events_data_params = dict(
     event_types=...,
-    drop_null_geometry=...,
+    include_null_geometry=...,
 )
 
 # %%
@@ -358,7 +358,7 @@ split_event_groups = (
 
 
 # %% [markdown]
-# ## Draw Time Series Bar Chart for Events
+# ##
 
 # %%
 # parameters
@@ -515,7 +515,7 @@ rename_display_columns = (
 
 
 # %% [markdown]
-# ## Base Maps
+# ## Map Base Layers
 
 # %%
 # parameters
@@ -826,6 +826,7 @@ grouped_events_pie_widget_merge = (
 
 events_meshgrid_params = dict(
     auto_scale_or_custom_cell_size=...,
+    crs=...,
 )
 
 # %%

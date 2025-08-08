@@ -39,13 +39,11 @@ class GetEventsData(BaseModel):
     )
     event_types: List[str] = Field(
         ...,
-        description="Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types.",
+        description="Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types. Only V1 Event Types can be analyzed at this time.",
         title="Event Types",
     )
-    drop_null_geometry: Optional[bool] = Field(
-        False,
-        description="Include Events Without a Geometry (point or polygon)",
-        title="Drop Null Geometry",
+    include_null_geometry: Optional[bool] = Field(
+        True, title="Include Events Without a Geometry (point or polygon)"
     )
 
 
@@ -61,9 +59,7 @@ class EventsBarChart(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    time_interval: TimeInterval = Field(
-        ..., description="Sets the time interval of the x axis.", title="Time Interval"
-    )
+    time_interval: TimeInterval = Field(..., title="Time Interval")
 
 
 class Url(str, Enum):
@@ -228,7 +224,7 @@ class BaseMapDefs(BaseModel):
             },
         ],
         description="Select tile layers to use as base layers in map outputs. The first layer in the list will be the bottommost layer displayed.",
-        title="Set Map Base Layers",
+        title=" ",
     )
 
 
@@ -262,9 +258,7 @@ class AutoScaleOrCustom(str, Enum):
 
 class AutoScaleGridCellSize(BaseModel):
     auto_scale_or_custom: Literal["Auto-scale"] = Field(
-        "Auto-scale",
-        description="Define the resolution of the raster grid (in meters per pixel). Auto-scale for an optimized grid based on the data, or Customize to set a specific resolution.",
-        title=" ",
+        "Auto-scale", title="Grid Cell Size"
     )
 
 
@@ -274,12 +268,12 @@ class AutoScaleOrCustom1(str, Enum):
 
 class CustomGridCellSize(BaseModel):
     auto_scale_or_custom: Literal["Customize"] = Field(
-        "Customize",
-        description="Define the resolution of the raster grid (in meters per pixel). Auto-scale for an optimized grid based on the data, or Customize to set a specific resolution.",
-        title=" ",
+        "Customize", title="Grid Cell Size"
     )
     grid_cell_size: Optional[confloat(lt=10000.0, gt=0.0)] = Field(
-        5000, description="Custom Raster Pixel Size (Meters)", title="Grid Cell Size"
+        5000,
+        description="Define the resolution of the raster grid (in metres per pixel). A smaller grid cell size provides more details, while a larger size generalizes the data.",
+        title="Custom Grid Cell Size (Meters)",
     )
 
 
@@ -315,7 +309,9 @@ class FilterEvents(BaseModel):
         title="Bounding Box",
     )
     filter_point_coords: Optional[List[Coordinate]] = Field(
-        [], title="Filter Point Coords"
+        [],
+        description="By adding a filter, the workflow will not include events recorded at the specified coordinates.",
+        title="Filter Exact Point Coordinates",
     )
 
 
@@ -325,9 +321,11 @@ class EventsMeshgrid(BaseModel):
     )
     auto_scale_or_custom_cell_size: Optional[
         Union[AutoScaleGridCellSize, CustomGridCellSize]
-    ] = Field(
-        {"auto_scale_or_custom": "Auto-scale"},
-        title="Auto Scale Or Custom Grid Cell Size",
+    ] = Field({"auto_scale_or_custom": "Auto-scale"}, title="Grid Cell Size")
+    crs: Optional[str] = Field(
+        "EPSG:3857",
+        description="The coordinate reference system in which to perform the density calculation, must be a valid CRS authority code, for example ESRI:53042",
+        title="Coordinate Reference System",
     )
 
 
@@ -347,8 +345,6 @@ class Params(BaseModel):
     get_events_data: Optional[GetEventsData] = Field(None, title="Event Types")
     groupers: Optional[Groupers] = Field(None, title="Group Data")
     filter_events: Optional[FilterEvents] = Field(None, title="Event Location Filter")
-    events_bar_chart: Optional[EventsBarChart] = Field(
-        None, title="Draw Time Series Bar Chart for Events"
-    )
-    base_map_defs: Optional[BaseMapDefs] = Field(None, title="Base Maps")
+    events_bar_chart: Optional[EventsBarChart] = Field(None, title="")
+    base_map_defs: Optional[BaseMapDefs] = Field(None, title="Map Base Layers")
     events_meshgrid: Optional[EventsMeshgrid] = Field(None, title="")
