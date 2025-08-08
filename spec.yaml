@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.6.0
+    version: 0.7.0
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.6.0
+    version: 0.7.0
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   properties:
@@ -17,6 +17,23 @@ rjsf-overrides:
         title: Event Type
       - const: reported_by_name
         title: Reported By Name
+  uiSchema:
+    get_events_data.event_types.ui:options.displayLabel: false
+    filter_events.filter_point_coords.items.ui:options.label: false
+    base_map_defs.base_maps.items.ui:options.label: false
+    Event Density Map.events_meshgrid.auto_scale_or_custom_cell_size:
+      anyOf:
+        - ui:help: Auto-scale for an optimized grid cell size based the workflow data or Customize to set a specific grid cell size.
+          ui:options:
+            label: false
+          auto_scale_or_custom:
+            ui:widget: hidden
+        - ui:options:
+            label: false
+          auto_scale_or_custom:
+            ui:widget: hidden
+      auto_scale_or_custom:
+        ui:widget: hidden
 task-instance-defaults:
   skipif:
     conditions:
@@ -96,7 +113,7 @@ workflow:
     type: task-group
     description: The bar chart shows how many events of different types occurred over time. Choose the time interval for the x-axis to control how event counts are summarized over time.
     tasks:
-      - name: Draw Time Series Bar Chart for Events
+      - name: null
         id: events_bar_chart
         task: draw_time_series_bar_chart
         partial:
@@ -151,7 +168,7 @@ workflow:
     mapvalues:
       argnames: df
       argvalues: ${{ workflow.split_event_groups.return }}
-  - name: Base Maps
+  - name: Map Base Layers
     id: base_map_defs
     task: set_base_maps
   - name: Create map layer from grouped Events
@@ -259,7 +276,7 @@ workflow:
       widgets: ${{ workflow.grouped_events_pie_chart_widgets.return }}
   - title: Event Density Map
     type: task-group
-    description: These settings show a grid-based heatmap showing where events are concentrated.
+    description: These settings generate a grid-based heatmap showing where events are concentrated.
     tasks:
       - name: null
         id: events_meshgrid
