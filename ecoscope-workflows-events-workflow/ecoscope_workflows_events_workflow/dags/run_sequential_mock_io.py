@@ -45,6 +45,9 @@ from ecoscope_workflows_core.tasks.results import create_map_widget_single_view
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_pie_chart
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import create_meshgrid
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import calculate_feature_density
+from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
+    drop_nan_values_by_column,
+)
 from ecoscope_workflows_core.tasks.transformation import sort_values
 from ecoscope_workflows_core.tasks.transformation import map_values_with_unit
 from ecoscope_workflows_ext_ecoscope.tasks.results import create_polygon_layer
@@ -391,7 +394,7 @@ def main(params: Params):
             title=None,
             tile_layers=base_map_defs,
             north_arrow_style={"placement": "top-left"},
-            legend_style={"placement": "bottom-right"},
+            legend_style={"title": "Event Type", "placement": "bottom-right"},
             static=False,
             max_zoom=20,
             **(params_dict.get("grouped_events_ecomap") or {}),
@@ -575,6 +578,22 @@ def main(params: Params):
         .mapvalues(argnames=["df"], argvalues=grouped_events_feature_density)
     )
 
+    drop_nan_percentiles = (
+        drop_nan_values_by_column.validate()
+        .handle_errors(task_instance_id="drop_nan_percentiles")
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            column_name="density", **(params_dict.get("drop_nan_percentiles") or {})
+        )
+        .mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
+    )
+
     sort_grouped_density_values = (
         sort_values.validate()
         .handle_errors(task_instance_id="sort_grouped_density_values")
@@ -591,7 +610,7 @@ def main(params: Params):
             na_position="last",
             **(params_dict.get("sort_grouped_density_values") or {}),
         )
-        .mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
+        .mapvalues(argnames=["df"], argvalues=drop_nan_percentiles)
     )
 
     grouped_feature_density_format = (

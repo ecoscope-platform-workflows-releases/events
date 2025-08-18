@@ -272,8 +272,8 @@ class CustomGridCellSize(BaseModel):
     )
     grid_cell_size: Optional[confloat(lt=10000.0, gt=0.0)] = Field(
         5000,
-        description="Define the resolution of the raster grid (in metres per pixel). A smaller grid cell size provides more details, while a larger size generalizes the data.",
-        title="Custom Grid Cell Size (Meters)",
+        description="Define the resolution of the raster grid (in the unit of measurement defined by the coordinate reference system set below). A smaller grid cell size provides more detail, while a larger size generalizes the data.",
+        title="Custom Grid Cell Size",
     )
 
 

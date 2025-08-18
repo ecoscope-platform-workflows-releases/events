@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.7.2
+    version: 0.7.3
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.7.2
+    version: 0.7.3
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   properties:
@@ -203,6 +203,7 @@ workflow:
       north_arrow_style:
         placement: top-left
       legend_style:
+        title: Event Type
         placement: bottom-right
       static: false
       max_zoom: 20
@@ -308,6 +309,14 @@ workflow:
         mapvalues:
           argnames: df
           argvalues: ${{ workflow.grouped_events_feature_density.return }}
+      - name: Drop nan percentiles for map display
+        id: drop_nan_percentiles
+        task: drop_nan_values_by_column
+        partial:
+          column_name: density
+        mapvalues:
+          argnames: df
+          argvalues: ${{ workflow.grouped_fd_colormap.return }}
       - name: Sort Density By Classification
         id: sort_grouped_density_values
         task: sort_values
@@ -317,7 +326,7 @@ workflow:
           na_position: last
         mapvalues:
           argnames: df
-          argvalues: ${{ workflow.grouped_fd_colormap.return }}
+          argvalues: ${{ workflow.drop_nan_percentiles.return }}
       - name: Format Grouped Feature Density Labels
         id: grouped_feature_density_format
         task: map_values_with_unit
