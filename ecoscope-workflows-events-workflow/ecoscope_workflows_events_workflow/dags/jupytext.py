@@ -39,6 +39,9 @@ from ecoscope_workflows_core.tasks.results import create_map_widget_single_view
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_pie_chart
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import create_meshgrid
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import calculate_feature_density
+from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
+    drop_nan_values_by_column,
+)
 from ecoscope_workflows_core.tasks.transformation import sort_values
 from ecoscope_workflows_core.tasks.transformation import map_values_with_unit
 from ecoscope_workflows_ext_ecoscope.tasks.results import create_polygon_layer
@@ -603,7 +606,7 @@ grouped_events_ecomap = (
         title=None,
         tile_layers=base_map_defs,
         north_arrow_style={"placement": "top-left"},
-        legend_style={"placement": "bottom-right"},
+        legend_style={"title": "Event Type", "placement": "bottom-right"},
         static=False,
         max_zoom=20,
         **grouped_events_ecomap_params,
@@ -914,6 +917,32 @@ grouped_fd_colormap = (
 
 
 # %% [markdown]
+# ## Drop nan percentiles for map display
+
+# %%
+# parameters
+
+drop_nan_percentiles_params = dict()
+
+# %%
+# call the task
+
+
+drop_nan_percentiles = (
+    drop_nan_values_by_column.handle_errors(task_instance_id="drop_nan_percentiles")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(column_name="density", **drop_nan_percentiles_params)
+    .mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
+)
+
+
+# %% [markdown]
 # ## Sort Density By Classification
 
 # %%
@@ -940,7 +969,7 @@ sort_grouped_density_values = (
         na_position="last",
         **sort_grouped_density_values_params,
     )
-    .mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
+    .mapvalues(argnames=["df"], argvalues=drop_nan_percentiles)
 )
 
 
