@@ -24,6 +24,7 @@ from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
 )
 from ecoscope_workflows_core.tasks.transformation import add_temporal_index
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import apply_color_map
+from ecoscope_workflows_core.tasks.config import set_string_var
 from ecoscope_workflows_core.tasks.groupby import split_groups
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_chart
 from ecoscope_workflows_core.tasks.io import persist_text
@@ -335,6 +336,110 @@ events_colormap = (
 
 
 # %% [markdown]
+# ## Set Bar Chart Title
+
+# %%
+# parameters
+
+set_bar_chart_title_params = dict()
+
+# %%
+# call the task
+
+
+set_bar_chart_title = (
+    set_string_var.handle_errors(task_instance_id="set_bar_chart_title")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(var="Events Bar Chart", **set_bar_chart_title_params)
+    .call()
+)
+
+
+# %% [markdown]
+# ## Set Events Map Title
+
+# %%
+# parameters
+
+set_events_map_title_params = dict()
+
+# %%
+# call the task
+
+
+set_events_map_title = (
+    set_string_var.handle_errors(task_instance_id="set_events_map_title")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(var="Events Map", **set_events_map_title_params)
+    .call()
+)
+
+
+# %% [markdown]
+# ## Set Pie Chart Title
+
+# %%
+# parameters
+
+set_pie_chart_title_params = dict()
+
+# %%
+# call the task
+
+
+set_pie_chart_title = (
+    set_string_var.handle_errors(task_instance_id="set_pie_chart_title")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(var="Events Pie Chart", **set_pie_chart_title_params)
+    .call()
+)
+
+
+# %% [markdown]
+# ## Set Feature Denisty Map Title
+
+# %%
+# parameters
+
+set_fd_map_title_params = dict()
+
+# %%
+# call the task
+
+
+set_fd_map_title = (
+    set_string_var.handle_errors(task_instance_id="set_fd_map_title")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(var="Density Map", **set_fd_map_title_params)
+    .call()
+)
+
+
+# %% [markdown]
 # ## Split Events by Group
 
 # %%
@@ -391,6 +496,7 @@ events_bar_chart = (
         color_column="event_type_colormap",
         plot_style={"xperiodalignment": "middle"},
         layout_style=None,
+        widget_id=set_bar_chart_title,
         **events_bar_chart_params,
     )
     .mapvalues(argnames=["dataframe"], argvalues=split_event_groups)
@@ -422,6 +528,7 @@ events_bar_chart_html_url = (
     )
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        filename_suffix="v2",
         **events_bar_chart_html_url_params,
     )
     .mapvalues(argnames=["text"], argvalues=events_bar_chart)
@@ -450,7 +557,7 @@ events_bar_chart_widget = (
         ],
         unpack_depth=1,
     )
-    .partial(title="Events Bar Chart", **events_bar_chart_widget_params)
+    .partial(title=set_bar_chart_title, **events_bar_chart_widget_params)
     .map(argnames=["view", "data"], argvalues=events_bar_chart_html_url)
 )
 
@@ -609,6 +716,7 @@ grouped_events_ecomap = (
         legend_style={"title": "Event Type", "placement": "bottom-right"},
         static=False,
         max_zoom=20,
+        widget_id=set_events_map_title,
         **grouped_events_ecomap_params,
     )
     .mapvalues(argnames=["geo_layers"], argvalues=grouped_events_map_layer)
@@ -640,6 +748,7 @@ grouped_events_ecomap_html_url = (
     )
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        filename_suffix="v2",
         **grouped_events_ecomap_html_url_params,
     )
     .mapvalues(argnames=["text"], argvalues=grouped_events_ecomap)
@@ -668,7 +777,7 @@ grouped_events_map_widget = (
         ],
         unpack_depth=1,
     )
-    .partial(title="Events Map", **grouped_events_map_widget_params)
+    .partial(title=set_events_map_title, **grouped_events_map_widget_params)
     .map(argnames=["view", "data"], argvalues=grouped_events_ecomap_html_url)
 )
 
@@ -728,6 +837,7 @@ grouped_events_pie_chart = (
         plot_style={"textinfo": "value"},
         label_column=None,
         layout_style=None,
+        widget_id=set_pie_chart_title,
         **grouped_events_pie_chart_params,
     )
     .mapvalues(argnames=["dataframe"], argvalues=split_event_groups)
@@ -759,6 +869,7 @@ grouped_pie_chart_html_urls = (
     )
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        filename_suffix="v2",
         **grouped_pie_chart_html_urls_params,
     )
     .mapvalues(argnames=["text"], argvalues=grouped_events_pie_chart)
@@ -787,7 +898,7 @@ grouped_events_pie_chart_widgets = (
         ],
         unpack_depth=1,
     )
-    .partial(title="Events Pie Chart", **grouped_events_pie_chart_widgets_params)
+    .partial(title=set_pie_chart_title, **grouped_events_pie_chart_widgets_params)
     .map(argnames=["view", "data"], argvalues=grouped_pie_chart_html_urls)
 )
 
@@ -1076,6 +1187,7 @@ grouped_fd_ecomap = (
         legend_style={"title": "Number of events", "placement": "bottom-right"},
         static=False,
         max_zoom=20,
+        widget_id=set_fd_map_title,
         **grouped_fd_ecomap_params,
     )
     .mapvalues(argnames=["geo_layers"], argvalues=grouped_fd_map_layer)
@@ -1107,6 +1219,7 @@ grouped_fd_ecomap_html_url = (
     )
     .partial(
         root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+        filename_suffix="v2",
         **grouped_fd_ecomap_html_url_params,
     )
     .mapvalues(argnames=["text"], argvalues=grouped_fd_ecomap)
@@ -1135,7 +1248,7 @@ grouped_fd_map_widget = (
         ],
         unpack_depth=1,
     )
-    .partial(title="Density Map", **grouped_fd_map_widget_params)
+    .partial(title=set_fd_map_title, **grouped_fd_map_widget_params)
     .map(argnames=["view", "data"], argvalues=grouped_fd_ecomap_html_url)
 )
 
