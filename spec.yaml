@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.7.3
+    version: 0.7.4
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.7.3
+    version: 0.7.4
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   properties:
@@ -103,6 +103,26 @@ workflow:
       input_column_name: event_type
       colormap: tab20b
       output_column_name: event_type_colormap
+  - name: Set Bar Chart Title
+    id: set_bar_chart_title
+    task: set_string_var
+    partial:
+      var: Events Bar Chart
+  - name: Set Events Map Title
+    id: set_events_map_title
+    task: set_string_var
+    partial:
+      var: Events Map
+  - name: Set Pie Chart Title
+    id: set_pie_chart_title
+    task: set_string_var
+    partial:
+      var: Events Pie Chart
+  - name: Set Feature Denisty Map Title
+    id: set_fd_map_title
+    task: set_string_var
+    partial:
+      var: Density Map
   - name: Split Events by Group
     id: split_event_groups
     task: split_groups
@@ -125,6 +145,7 @@ workflow:
           plot_style:
             xperiodalignment: middle
           layout_style: null
+          widget_id: ${{ workflow.set_bar_chart_title.return }}
         mapvalues:
           argnames: dataframe
           argvalues: ${{ workflow.split_event_groups.return }}
@@ -133,6 +154,7 @@ workflow:
         task: persist_text
         partial:
           root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+          filename_suffix: v2
         mapvalues:
           argnames: text
           argvalues: ${{ workflow.events_bar_chart.return }}
@@ -143,7 +165,7 @@ workflow:
           conditions:
             - never
         partial:
-          title: Events Bar Chart
+          title: ${{ workflow.set_bar_chart_title.return }}
         map:
           argnames:
             - view
@@ -207,6 +229,7 @@ workflow:
         placement: bottom-right
       static: false
       max_zoom: 20
+      widget_id: ${{ workflow.set_events_map_title.return }}
     mapvalues:
       argnames: geo_layers
       argvalues: ${{ workflow.grouped_events_map_layer.return }}
@@ -215,6 +238,7 @@ workflow:
     task: persist_text
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: v2
     mapvalues:
       argnames: text
       argvalues: ${{ workflow.grouped_events_ecomap.return }}
@@ -225,7 +249,7 @@ workflow:
       conditions:
         - never
     partial:
-      title: Events Map
+      title: ${{ workflow.set_events_map_title.return }}
     map:
       argnames:
         - view
@@ -246,6 +270,7 @@ workflow:
         textinfo: value
       label_column: null
       layout_style: null
+      widget_id: ${{ workflow.set_pie_chart_title.return }}
     mapvalues:
       argnames: dataframe
       argvalues: ${{ workflow.split_event_groups.return }}
@@ -254,6 +279,7 @@ workflow:
     task: persist_text
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: v2
     mapvalues:
       argnames: text
       argvalues: ${{ workflow.grouped_events_pie_chart.return }}
@@ -264,7 +290,7 @@ workflow:
       conditions:
         - never
     partial:
-      title: Events Pie Chart
+      title: ${{ workflow.set_pie_chart_title.return }}
     map:
       argnames:
         - view
@@ -373,6 +399,7 @@ workflow:
             placement: bottom-right
           static: false
           max_zoom: 20
+          widget_id: ${{ workflow.set_fd_map_title.return }}
         mapvalues:
           argnames: geo_layers
           argvalues: ${{ workflow.grouped_fd_map_layer.return }}
@@ -381,6 +408,7 @@ workflow:
         task: persist_text
         partial:
           root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+          filename_suffix: v2
         mapvalues:
           argnames: text
           argvalues: ${{ workflow.grouped_fd_ecomap.return }}
@@ -391,7 +419,7 @@ workflow:
           conditions:
             - never
         partial:
-          title: Density Map
+          title: ${{ workflow.set_fd_map_title.return }}
         map:
           argnames:
             - view

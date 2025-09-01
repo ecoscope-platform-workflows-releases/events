@@ -32,6 +32,7 @@ from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
 )
 from ecoscope_workflows_core.tasks.transformation import add_temporal_index
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import apply_color_map
+from ecoscope_workflows_core.tasks.config import set_string_var
 from ecoscope_workflows_core.tasks.groupby import split_groups
 from ecoscope_workflows_ext_ecoscope.tasks.results import draw_time_series_bar_chart
 from ecoscope_workflows_core.tasks.io import persist_text
@@ -73,21 +74,35 @@ def main(params: Params):
         "filter_events": ["extract_reported_by"],
         "events_add_temporal_index": ["filter_events", "groupers"],
         "events_colormap": ["events_add_temporal_index"],
+        "set_bar_chart_title": [],
+        "set_events_map_title": [],
+        "set_pie_chart_title": [],
+        "set_fd_map_title": [],
         "split_event_groups": ["events_colormap", "groupers"],
-        "events_bar_chart": ["split_event_groups"],
+        "events_bar_chart": ["set_bar_chart_title", "split_event_groups"],
         "events_bar_chart_html_url": ["events_bar_chart"],
-        "events_bar_chart_widget": ["events_bar_chart_html_url"],
+        "events_bar_chart_widget": ["set_bar_chart_title", "events_bar_chart_html_url"],
         "grouped_bar_plot_widget_merge": ["events_bar_chart_widget"],
         "rename_display_columns": ["split_event_groups"],
         "base_map_defs": [],
         "grouped_events_map_layer": ["rename_display_columns"],
-        "grouped_events_ecomap": ["base_map_defs", "grouped_events_map_layer"],
+        "grouped_events_ecomap": [
+            "base_map_defs",
+            "set_events_map_title",
+            "grouped_events_map_layer",
+        ],
         "grouped_events_ecomap_html_url": ["grouped_events_ecomap"],
-        "grouped_events_map_widget": ["grouped_events_ecomap_html_url"],
+        "grouped_events_map_widget": [
+            "set_events_map_title",
+            "grouped_events_ecomap_html_url",
+        ],
         "grouped_events_map_widget_merge": ["grouped_events_map_widget"],
-        "grouped_events_pie_chart": ["split_event_groups"],
+        "grouped_events_pie_chart": ["set_pie_chart_title", "split_event_groups"],
         "grouped_pie_chart_html_urls": ["grouped_events_pie_chart"],
-        "grouped_events_pie_chart_widgets": ["grouped_pie_chart_html_urls"],
+        "grouped_events_pie_chart_widgets": [
+            "set_pie_chart_title",
+            "grouped_pie_chart_html_urls",
+        ],
         "grouped_events_pie_widget_merge": ["grouped_events_pie_chart_widgets"],
         "events_meshgrid": ["events_add_temporal_index"],
         "grouped_events_feature_density": ["events_meshgrid", "split_event_groups"],
@@ -96,9 +111,13 @@ def main(params: Params):
         "sort_grouped_density_values": ["drop_nan_percentiles"],
         "grouped_feature_density_format": ["sort_grouped_density_values"],
         "grouped_fd_map_layer": ["grouped_feature_density_format"],
-        "grouped_fd_ecomap": ["base_map_defs", "grouped_fd_map_layer"],
+        "grouped_fd_ecomap": [
+            "base_map_defs",
+            "set_fd_map_title",
+            "grouped_fd_map_layer",
+        ],
         "grouped_fd_ecomap_html_url": ["grouped_fd_ecomap"],
-        "grouped_fd_map_widget": ["grouped_fd_ecomap_html_url"],
+        "grouped_fd_map_widget": ["set_fd_map_title", "grouped_fd_ecomap_html_url"],
         "grouped_fd_map_widget_merge": ["grouped_fd_map_widget"],
         "events_dashboard": [
             "workflow_details",
@@ -280,6 +299,74 @@ def main(params: Params):
             | (params_dict.get("events_colormap") or {}),
             method="call",
         ),
+        "set_bar_chart_title": Node(
+            async_task=set_string_var.validate()
+            .handle_errors(task_instance_id="set_bar_chart_title")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
+            .set_executor("lithops"),
+            partial={
+                "var": "Events Bar Chart",
+            }
+            | (params_dict.get("set_bar_chart_title") or {}),
+            method="call",
+        ),
+        "set_events_map_title": Node(
+            async_task=set_string_var.validate()
+            .handle_errors(task_instance_id="set_events_map_title")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
+            .set_executor("lithops"),
+            partial={
+                "var": "Events Map",
+            }
+            | (params_dict.get("set_events_map_title") or {}),
+            method="call",
+        ),
+        "set_pie_chart_title": Node(
+            async_task=set_string_var.validate()
+            .handle_errors(task_instance_id="set_pie_chart_title")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
+            .set_executor("lithops"),
+            partial={
+                "var": "Events Pie Chart",
+            }
+            | (params_dict.get("set_pie_chart_title") or {}),
+            method="call",
+        ),
+        "set_fd_map_title": Node(
+            async_task=set_string_var.validate()
+            .handle_errors(task_instance_id="set_fd_map_title")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
+            .set_executor("lithops"),
+            partial={
+                "var": "Density Map",
+            }
+            | (params_dict.get("set_fd_map_title") or {}),
+            method="call",
+        ),
         "split_event_groups": Node(
             async_task=split_groups.validate()
             .handle_errors(task_instance_id="split_event_groups")
@@ -317,6 +404,7 @@ def main(params: Params):
                 "color_column": "event_type_colormap",
                 "plot_style": {"xperiodalignment": "middle"},
                 "layout_style": None,
+                "widget_id": DependsOn("set_bar_chart_title"),
             }
             | (params_dict.get("events_bar_chart") or {}),
             method="mapvalues",
@@ -338,6 +426,7 @@ def main(params: Params):
             .set_executor("lithops"),
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+                "filename_suffix": "v2",
             }
             | (params_dict.get("events_bar_chart_html_url") or {}),
             method="mapvalues",
@@ -357,7 +446,7 @@ def main(params: Params):
             )
             .set_executor("lithops"),
             partial={
-                "title": "Events Bar Chart",
+                "title": DependsOn("set_bar_chart_title"),
             }
             | (params_dict.get("events_bar_chart_widget") or {}),
             method="map",
@@ -478,6 +567,7 @@ def main(params: Params):
                 "legend_style": {"title": "Event Type", "placement": "bottom-right"},
                 "static": False,
                 "max_zoom": 20,
+                "widget_id": DependsOn("set_events_map_title"),
             }
             | (params_dict.get("grouped_events_ecomap") or {}),
             method="mapvalues",
@@ -499,6 +589,7 @@ def main(params: Params):
             .set_executor("lithops"),
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+                "filename_suffix": "v2",
             }
             | (params_dict.get("grouped_events_ecomap_html_url") or {}),
             method="mapvalues",
@@ -518,7 +609,7 @@ def main(params: Params):
             )
             .set_executor("lithops"),
             partial={
-                "title": "Events Map",
+                "title": DependsOn("set_events_map_title"),
             }
             | (params_dict.get("grouped_events_map_widget") or {}),
             method="map",
@@ -561,6 +652,7 @@ def main(params: Params):
                 "plot_style": {"textinfo": "value"},
                 "label_column": None,
                 "layout_style": None,
+                "widget_id": DependsOn("set_pie_chart_title"),
             }
             | (params_dict.get("grouped_events_pie_chart") or {}),
             method="mapvalues",
@@ -582,6 +674,7 @@ def main(params: Params):
             .set_executor("lithops"),
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+                "filename_suffix": "v2",
             }
             | (params_dict.get("grouped_pie_chart_html_urls") or {}),
             method="mapvalues",
@@ -601,7 +694,7 @@ def main(params: Params):
             )
             .set_executor("lithops"),
             partial={
-                "title": "Events Pie Chart",
+                "title": DependsOn("set_pie_chart_title"),
             }
             | (params_dict.get("grouped_events_pie_chart_widgets") or {}),
             method="map",
@@ -812,6 +905,7 @@ def main(params: Params):
                 },
                 "static": False,
                 "max_zoom": 20,
+                "widget_id": DependsOn("set_fd_map_title"),
             }
             | (params_dict.get("grouped_fd_ecomap") or {}),
             method="mapvalues",
@@ -833,6 +927,7 @@ def main(params: Params):
             .set_executor("lithops"),
             partial={
                 "root_path": os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+                "filename_suffix": "v2",
             }
             | (params_dict.get("grouped_fd_ecomap_html_url") or {}),
             method="mapvalues",
@@ -852,7 +947,7 @@ def main(params: Params):
             )
             .set_executor("lithops"),
             partial={
-                "title": "Density Map",
+                "title": DependsOn("set_fd_map_title"),
             }
             | (params_dict.get("grouped_fd_map_widget") or {}),
             method="map",
