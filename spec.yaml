@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.7.7
+    version: 0.7.9
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.7.7
+    version: 0.7.9
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   properties:
@@ -66,6 +66,9 @@ workflow:
         - serial_number
         - geometry
       raise_on_empty: false
+      include_details: false
+      include_updates: false
+      include_related_events: false
   - name: Extract reported_by_name from Events
     id: extract_reported_by
     task: extract_value_from_json_column
