@@ -129,9 +129,6 @@ def main(params: Params):
                 "geometry",
             ],
             raise_on_empty=False,
-            include_details=False,
-            include_updates=False,
-            include_related_events=False,
             **(params_dict.get("get_events_data") or {}),
         )
         .call()

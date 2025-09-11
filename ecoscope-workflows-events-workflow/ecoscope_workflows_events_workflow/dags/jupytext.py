@@ -172,9 +172,6 @@ get_events_data = (
             "geometry",
         ],
         raise_on_empty=False,
-        include_details=False,
-        include_updates=False,
-        include_related_events=False,
         **get_events_data_params,
     )
     .call()
