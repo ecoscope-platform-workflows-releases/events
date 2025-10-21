@@ -573,7 +573,11 @@ def main(params: Params):
                 "title": None,
                 "tile_layers": DependsOn("base_map_defs"),
                 "north_arrow_style": {"placement": "top-left"},
-                "legend_style": {"title": "Event Type", "placement": "bottom-right"},
+                "legend_style": {
+                    "title": "Event Type",
+                    "format_title": False,
+                    "placement": "bottom-right",
+                },
                 "static": False,
                 "max_zoom": 20,
                 "widget_id": DependsOn("set_events_map_title"),
@@ -909,7 +913,8 @@ def main(params: Params):
                 "tile_layers": DependsOn("base_map_defs"),
                 "north_arrow_style": {"placement": "top-left"},
                 "legend_style": {
-                    "title": "Number of events",
+                    "title": "Number Of Events",
+                    "format_title": False,
                     "placement": "bottom-right",
                 },
                 "static": False,
