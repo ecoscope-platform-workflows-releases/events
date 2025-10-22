@@ -13,7 +13,10 @@
 import os
 
 from ecoscope_workflows_core.tasks.config import set_string_var, set_workflow_details
-from ecoscope_workflows_core.tasks.filter import set_time_range
+from ecoscope_workflows_core.tasks.filter import (
+    get_timezone_from_time_range,
+    set_time_range,
+)
 from ecoscope_workflows_core.tasks.groupby import set_groupers, split_groups
 from ecoscope_workflows_core.tasks.io import persist_text, set_er_connection
 from ecoscope_workflows_core.tasks.results import (
@@ -29,6 +32,7 @@ from ecoscope_workflows_core.tasks.skip import (
 )
 from ecoscope_workflows_core.tasks.transformation import (
     add_temporal_index,
+    convert_values_to_timezone,
     extract_value_from_json_column,
     map_columns,
     map_values_with_unit,
@@ -121,6 +125,7 @@ er_client_name = (
 time_range_params = dict(
     since=...,
     until=...,
+    timezone=...,
 )
 
 # %%
@@ -136,7 +141,33 @@ time_range = (
         ],
         unpack_depth=1,
     )
-    .partial(time_format="%d %b %Y %H:%M:%S %Z", **time_range_params)
+    .partial(time_format="%d %b %Y %H:%M:%S", **time_range_params)
+    .call()
+)
+
+
+# %% [markdown]
+# ## Extract Timezone Selection
+
+# %%
+# parameters
+
+get_timezone_params = dict()
+
+# %%
+# call the task
+
+
+get_timezone = (
+    get_timezone_from_time_range.handle_errors(task_instance_id="get_timezone")
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(time_range=time_range, **get_timezone_params)
     .call()
 )
 
@@ -188,6 +219,39 @@ get_events_data = (
 
 
 # %% [markdown]
+# ## Convert to timezone
+
+# %%
+# parameters
+
+convert_to_user_timezone_params = dict()
+
+# %%
+# call the task
+
+
+convert_to_user_timezone = (
+    convert_values_to_timezone.handle_errors(
+        task_instance_id="convert_to_user_timezone"
+    )
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(
+        df=get_events_data,
+        timezone=get_timezone,
+        columns=["time"],
+        **convert_to_user_timezone_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
 # ## Extract reported_by_name from Events
 
 # %%
@@ -209,7 +273,7 @@ extract_reported_by = (
         unpack_depth=1,
     )
     .partial(
-        df=get_events_data,
+        df=convert_to_user_timezone,
         column_name="reported_by",
         field_name_options=["name"],
         output_type="str",
