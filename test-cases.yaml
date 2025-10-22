@@ -11,8 +11,13 @@ all-grouper:
     groupers:
       groupers: []
     time_range:
-      since: "2015-01-01T00:00:00Z"
-      until: "2015-12-31T23:59:59Z"
+      since: "2015-01-01T00:00:00"
+      until: "2015-12-31T23:59:59"
+      timezone:
+        label: "Africa/Nairobi (UTC+03:00)"
+        tzCode: "Africa/Nairobi"
+        name: "(UTC+03:00) Nairobi"
+        utc: "+03:00"
     get_events_data:
       event_types:
         [
@@ -60,8 +65,13 @@ month-grouper:
       groupers:
         - "%B"
     time_range:
-      since: "2015-01-01T00:00:00Z"
-      until: "2015-12-31T23:59:59Z"
+      since: "2015-01-01T00:00:00"
+      until: "2015-12-31T23:59:59"
+      timezone:
+        label: "UTC (UTC+00:00)"
+        tzCode: "UTC"
+        name: "(UTC+00:00) UTC"
+        utc: "+00:00"
     get_events_data:
       event_types:
         [
@@ -109,8 +119,13 @@ value-grouper:
         - "event_type"
         - "reported_by_name"
     time_range:
-      since: "2015-01-01T00:00:00Z"
-      until: "2015-12-31T23:59:59Z"
+      since: "2015-01-01T00:00:00"
+      until: "2015-12-31T23:59:59"
+      timezone:
+        label: "UTC (UTC+00:00)"
+        tzCode: "UTC"
+        name: "(UTC+00:00) UTC"
+        utc: "+00:00"
     get_events_data:
       event_types:
         [
@@ -160,8 +175,13 @@ task-instance-error:
       groupers:
         - "%1234"
     time_range:
-      since: "2015-01-01T00:00:00Z"
-      until: "2015-12-31T23:59:59Z"
+      since: "2015-01-01T00:00:00"
+      until: "2015-12-31T23:59:59"
+      timezone:
+        label: "UTC (UTC+00:00)"
+        tzCode: "UTC"
+        name: "(UTC+00:00) UTC"
+        utc: "+00:00"
     get_events_data:
       event_types: []
       include_null_geometry: false

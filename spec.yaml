@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.13.0
+    version: 0.14.0
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.13.0
+    version: 0.14.0
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   properties:
@@ -50,7 +50,12 @@ workflow:
     id: time_range
     task: set_time_range
     partial:
-      time_format: '%d %b %Y %H:%M:%S %Z'
+      time_format: '%d %b %Y %H:%M:%S'
+  - name: Extract Timezone Selection
+    id: get_timezone
+    task: get_timezone_from_time_range
+    partial:
+      time_range: ${{ workflow.time_range.return }}
   - name: Event Types
     id: get_events_data
     task: get_events
@@ -69,11 +74,19 @@ workflow:
       include_details: false
       include_updates: false
       include_related_events: false
+  - name: Convert to timezone
+    id: convert_to_user_timezone
+    task: convert_values_to_timezone
+    partial:
+      df: ${{ workflow.get_events_data.return }}
+      timezone: ${{ workflow.get_timezone.return }}
+      columns:
+        - time
   - name: Extract reported_by_name from Events
     id: extract_reported_by
     task: extract_value_from_json_column
     partial:
-      df: ${{ workflow.get_events_data.return }}
+      df: ${{ workflow.convert_to_user_timezone.return }}
       column_name: reported_by
       field_name_options:
         - name

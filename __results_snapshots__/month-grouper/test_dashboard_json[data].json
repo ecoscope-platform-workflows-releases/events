@@ -72,7 +72,8 @@
     "layout": [],
     "metadata": {
       "description": "A dashboard for visualizing events.",
-      "time_range": "From 01 Jan 2015 00:00:00 UTC to 31 Dec 2015 23:59:59 UTC",
+      "time_range": "From 01 Jan 2015 00:00:00 to 31 Dec 2015 23:59:59",
+      "time_zone": "UTC (UTC+00:00)",
       "title": "Events Dashboard"
     },
     "views": {

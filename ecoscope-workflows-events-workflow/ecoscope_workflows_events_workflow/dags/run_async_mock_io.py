@@ -13,7 +13,10 @@ import warnings  # 🧪
 
 from ecoscope_workflows_core.graph import DependsOn, DependsOnSequence, Graph, Node
 from ecoscope_workflows_core.tasks.config import set_workflow_details
-from ecoscope_workflows_core.tasks.filter import set_time_range
+from ecoscope_workflows_core.tasks.filter import (
+    get_timezone_from_time_range,
+    set_time_range,
+)
 from ecoscope_workflows_core.tasks.io import set_er_connection
 from ecoscope_workflows_core.tasks.skip import any_dependency_skipped, any_is_empty_df
 from ecoscope_workflows_core.testing import create_task_magicmock  # 🧪
@@ -38,6 +41,7 @@ from ecoscope_workflows_core.tasks.skip import (
 )
 from ecoscope_workflows_core.tasks.transformation import (
     add_temporal_index,
+    convert_values_to_timezone,
     extract_value_from_json_column,
     map_columns,
     map_values_with_unit,
@@ -74,8 +78,10 @@ def main(params: Params):
         "workflow_details": [],
         "er_client_name": [],
         "time_range": [],
+        "get_timezone": ["time_range"],
         "get_events_data": ["er_client_name", "time_range"],
-        "extract_reported_by": ["get_events_data"],
+        "convert_to_user_timezone": ["get_events_data", "get_timezone"],
+        "extract_reported_by": ["convert_to_user_timezone"],
         "groupers": [],
         "filter_events": ["extract_reported_by"],
         "events_add_temporal_index": ["filter_events", "groupers"],
@@ -177,9 +183,26 @@ def main(params: Params):
             )
             .set_executor("lithops"),
             partial={
-                "time_format": "%d %b %Y %H:%M:%S %Z",
+                "time_format": "%d %b %Y %H:%M:%S",
             }
             | (params_dict.get("time_range") or {}),
+            method="call",
+        ),
+        "get_timezone": Node(
+            async_task=get_timezone_from_time_range.validate()
+            .handle_errors(task_instance_id="get_timezone")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
+            .set_executor("lithops"),
+            partial={
+                "time_range": DependsOn("time_range"),
+            }
+            | (params_dict.get("get_timezone") or {}),
             method="call",
         ),
         "get_events_data": Node(
@@ -213,6 +236,25 @@ def main(params: Params):
             | (params_dict.get("get_events_data") or {}),
             method="call",
         ),
+        "convert_to_user_timezone": Node(
+            async_task=convert_values_to_timezone.validate()
+            .handle_errors(task_instance_id="convert_to_user_timezone")
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
+            .set_executor("lithops"),
+            partial={
+                "df": DependsOn("get_events_data"),
+                "timezone": DependsOn("get_timezone"),
+                "columns": ["time"],
+            }
+            | (params_dict.get("convert_to_user_timezone") or {}),
+            method="call",
+        ),
         "extract_reported_by": Node(
             async_task=extract_value_from_json_column.validate()
             .handle_errors(task_instance_id="extract_reported_by")
@@ -225,7 +267,7 @@ def main(params: Params):
             )
             .set_executor("lithops"),
             partial={
-                "df": DependsOn("get_events_data"),
+                "df": DependsOn("convert_to_user_timezone"),
                 "column_name": "reported_by",
                 "field_name_options": ["name"],
                 "output_type": "str",
