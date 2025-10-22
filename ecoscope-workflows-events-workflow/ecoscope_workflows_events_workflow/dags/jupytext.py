@@ -75,7 +75,9 @@ workflow_details_params = dict(
 
 
 workflow_details = (
-    set_workflow_details.handle_errors(task_instance_id="workflow_details")
+    set_workflow_details.set_task_instance_id("workflow_details")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -103,7 +105,9 @@ er_client_name_params = dict(
 
 
 er_client_name = (
-    set_er_connection.handle_errors(task_instance_id="er_client_name")
+    set_er_connection.set_task_instance_id("er_client_name")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -133,7 +137,9 @@ time_range_params = dict(
 
 
 time_range = (
-    set_time_range.handle_errors(task_instance_id="time_range")
+    set_time_range.set_task_instance_id("time_range")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -159,7 +165,9 @@ get_timezone_params = dict()
 
 
 get_timezone = (
-    get_timezone_from_time_range.handle_errors(task_instance_id="get_timezone")
+    get_timezone_from_time_range.set_task_instance_id("get_timezone")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -188,7 +196,9 @@ get_events_data_params = dict(
 
 
 get_events_data = (
-    get_events.handle_errors(task_instance_id="get_events_data")
+    get_events.set_task_instance_id("get_events_data")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -231,9 +241,9 @@ convert_to_user_timezone_params = dict()
 
 
 convert_to_user_timezone = (
-    convert_values_to_timezone.handle_errors(
-        task_instance_id="convert_to_user_timezone"
-    )
+    convert_values_to_timezone.set_task_instance_id("convert_to_user_timezone")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -264,7 +274,9 @@ extract_reported_by_params = dict()
 
 
 extract_reported_by = (
-    extract_value_from_json_column.handle_errors(task_instance_id="extract_reported_by")
+    extract_value_from_json_column.set_task_instance_id("extract_reported_by")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -299,7 +311,9 @@ groupers_params = dict(
 
 
 groupers = (
-    set_groupers.handle_errors(task_instance_id="groupers")
+    set_groupers.set_task_instance_id("groupers")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -328,7 +342,9 @@ filter_events_params = dict(
 
 
 filter_events = (
-    apply_reloc_coord_filter.handle_errors(task_instance_id="filter_events")
+    apply_reloc_coord_filter.set_task_instance_id("filter_events")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -356,7 +372,9 @@ events_add_temporal_index_params = dict()
 
 
 events_add_temporal_index = (
-    add_temporal_index.handle_errors(task_instance_id="events_add_temporal_index")
+    add_temporal_index.set_task_instance_id("events_add_temporal_index")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -389,7 +407,9 @@ events_colormap_params = dict()
 
 
 events_colormap = (
-    apply_color_map.handle_errors(task_instance_id="events_colormap")
+    apply_color_map.set_task_instance_id("events_colormap")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -421,7 +441,9 @@ set_bar_chart_title_params = dict()
 
 
 set_bar_chart_title = (
-    set_string_var.handle_errors(task_instance_id="set_bar_chart_title")
+    set_string_var.set_task_instance_id("set_bar_chart_title")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -447,7 +469,9 @@ set_events_map_title_params = dict()
 
 
 set_events_map_title = (
-    set_string_var.handle_errors(task_instance_id="set_events_map_title")
+    set_string_var.set_task_instance_id("set_events_map_title")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -473,7 +497,9 @@ set_pie_chart_title_params = dict()
 
 
 set_pie_chart_title = (
-    set_string_var.handle_errors(task_instance_id="set_pie_chart_title")
+    set_string_var.set_task_instance_id("set_pie_chart_title")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -499,7 +525,9 @@ set_fd_map_title_params = dict()
 
 
 set_fd_map_title = (
-    set_string_var.handle_errors(task_instance_id="set_fd_map_title")
+    set_string_var.set_task_instance_id("set_fd_map_title")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -525,7 +553,9 @@ split_event_groups_params = dict()
 
 
 split_event_groups = (
-    split_groups.handle_errors(task_instance_id="split_event_groups")
+    split_groups.set_task_instance_id("split_event_groups")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -553,7 +583,9 @@ events_bar_chart_params = dict(
 
 
 events_bar_chart = (
-    draw_time_series_bar_chart.handle_errors(task_instance_id="events_bar_chart")
+    draw_time_series_bar_chart.set_task_instance_id("events_bar_chart")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -591,7 +623,9 @@ events_bar_chart_html_url_params = dict(
 
 
 events_bar_chart_html_url = (
-    persist_text.handle_errors(task_instance_id="events_bar_chart_html_url")
+    persist_text.set_task_instance_id("events_bar_chart_html_url")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -621,9 +655,9 @@ events_bar_chart_widget_params = dict()
 
 
 events_bar_chart_widget = (
-    create_plot_widget_single_view.handle_errors(
-        task_instance_id="events_bar_chart_widget"
-    )
+    create_plot_widget_single_view.set_task_instance_id("events_bar_chart_widget")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             never,
@@ -648,7 +682,9 @@ grouped_bar_plot_widget_merge_params = dict()
 
 
 grouped_bar_plot_widget_merge = (
-    merge_widget_views.handle_errors(task_instance_id="grouped_bar_plot_widget_merge")
+    merge_widget_views.set_task_instance_id("grouped_bar_plot_widget_merge")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -674,7 +710,9 @@ rename_display_columns_params = dict()
 
 
 rename_display_columns = (
-    map_columns.handle_errors(task_instance_id="rename_display_columns")
+    map_columns.set_task_instance_id("rename_display_columns")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -712,7 +750,9 @@ base_map_defs_params = dict(
 
 
 base_map_defs = (
-    set_base_maps.handle_errors(task_instance_id="base_map_defs")
+    set_base_maps.set_task_instance_id("base_map_defs")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -740,7 +780,9 @@ grouped_events_map_layer_params = dict(
 
 
 grouped_events_map_layer = (
-    create_point_layer.handle_errors(task_instance_id="grouped_events_map_layer")
+    create_point_layer.set_task_instance_id("grouped_events_map_layer")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -774,7 +816,9 @@ grouped_events_ecomap_params = dict(
 
 
 grouped_events_ecomap = (
-    draw_ecomap.handle_errors(task_instance_id="grouped_events_ecomap")
+    draw_ecomap.set_task_instance_id("grouped_events_ecomap")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -815,7 +859,9 @@ grouped_events_ecomap_html_url_params = dict(
 
 
 grouped_events_ecomap_html_url = (
-    persist_text.handle_errors(task_instance_id="grouped_events_ecomap_html_url")
+    persist_text.set_task_instance_id("grouped_events_ecomap_html_url")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -845,9 +891,9 @@ grouped_events_map_widget_params = dict()
 
 
 grouped_events_map_widget = (
-    create_map_widget_single_view.handle_errors(
-        task_instance_id="grouped_events_map_widget"
-    )
+    create_map_widget_single_view.set_task_instance_id("grouped_events_map_widget")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             never,
@@ -872,7 +918,9 @@ grouped_events_map_widget_merge_params = dict()
 
 
 grouped_events_map_widget_merge = (
-    merge_widget_views.handle_errors(task_instance_id="grouped_events_map_widget_merge")
+    merge_widget_views.set_task_instance_id("grouped_events_map_widget_merge")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -900,7 +948,9 @@ grouped_events_pie_chart_params = dict()
 
 
 grouped_events_pie_chart = (
-    draw_pie_chart.handle_errors(task_instance_id="grouped_events_pie_chart")
+    draw_pie_chart.set_task_instance_id("grouped_events_pie_chart")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -936,7 +986,9 @@ grouped_pie_chart_html_urls_params = dict(
 
 
 grouped_pie_chart_html_urls = (
-    persist_text.handle_errors(task_instance_id="grouped_pie_chart_html_urls")
+    persist_text.set_task_instance_id("grouped_pie_chart_html_urls")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -966,9 +1018,11 @@ grouped_events_pie_chart_widgets_params = dict()
 
 
 grouped_events_pie_chart_widgets = (
-    create_plot_widget_single_view.handle_errors(
-        task_instance_id="grouped_events_pie_chart_widgets"
+    create_plot_widget_single_view.set_task_instance_id(
+        "grouped_events_pie_chart_widgets"
     )
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             never,
@@ -993,7 +1047,9 @@ grouped_events_pie_widget_merge_params = dict()
 
 
 grouped_events_pie_widget_merge = (
-    merge_widget_views.handle_errors(task_instance_id="grouped_events_pie_widget_merge")
+    merge_widget_views.set_task_instance_id("grouped_events_pie_widget_merge")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -1025,7 +1081,9 @@ events_meshgrid_params = dict(
 
 
 events_meshgrid = (
-    create_meshgrid.handle_errors(task_instance_id="events_meshgrid")
+    create_meshgrid.set_task_instance_id("events_meshgrid")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -1054,9 +1112,9 @@ grouped_events_feature_density_params = dict()
 
 
 grouped_events_feature_density = (
-    calculate_feature_density.handle_errors(
-        task_instance_id="grouped_events_feature_density"
-    )
+    calculate_feature_density.set_task_instance_id("grouped_events_feature_density")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -1086,7 +1144,9 @@ grouped_fd_colormap_params = dict()
 
 
 grouped_fd_colormap = (
-    apply_color_map.handle_errors(task_instance_id="grouped_fd_colormap")
+    apply_color_map.set_task_instance_id("grouped_fd_colormap")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -1117,7 +1177,9 @@ drop_nan_percentiles_params = dict()
 
 
 drop_nan_percentiles = (
-    drop_nan_values_by_column.handle_errors(task_instance_id="drop_nan_percentiles")
+    drop_nan_values_by_column.set_task_instance_id("drop_nan_percentiles")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -1143,7 +1205,9 @@ sort_grouped_density_values_params = dict()
 
 
 sort_grouped_density_values = (
-    sort_values.handle_errors(task_instance_id="sort_grouped_density_values")
+    sort_values.set_task_instance_id("sort_grouped_density_values")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -1174,9 +1238,9 @@ grouped_feature_density_format_params = dict()
 
 
 grouped_feature_density_format = (
-    map_values_with_unit.handle_errors(
-        task_instance_id="grouped_feature_density_format"
-    )
+    map_values_with_unit.set_task_instance_id("grouped_feature_density_format")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -1211,7 +1275,9 @@ grouped_fd_map_layer_params = dict(
 
 
 grouped_fd_map_layer = (
-    create_polygon_layer.handle_errors(task_instance_id="grouped_fd_map_layer")
+    create_polygon_layer.set_task_instance_id("grouped_fd_map_layer")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -1249,7 +1315,9 @@ grouped_fd_ecomap_params = dict(
 
 
 grouped_fd_ecomap = (
-    draw_ecomap.handle_errors(task_instance_id="grouped_fd_ecomap")
+    draw_ecomap.set_task_instance_id("grouped_fd_ecomap")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -1290,7 +1358,9 @@ grouped_fd_ecomap_html_url_params = dict(
 
 
 grouped_fd_ecomap_html_url = (
-    persist_text.handle_errors(task_instance_id="grouped_fd_ecomap_html_url")
+    persist_text.set_task_instance_id("grouped_fd_ecomap_html_url")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -1320,9 +1390,9 @@ grouped_fd_map_widget_params = dict()
 
 
 grouped_fd_map_widget = (
-    create_map_widget_single_view.handle_errors(
-        task_instance_id="grouped_fd_map_widget"
-    )
+    create_map_widget_single_view.set_task_instance_id("grouped_fd_map_widget")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             never,
@@ -1347,7 +1417,9 @@ grouped_fd_map_widget_merge_params = dict()
 
 
 grouped_fd_map_widget_merge = (
-    merge_widget_views.handle_errors(task_instance_id="grouped_fd_map_widget_merge")
+    merge_widget_views.set_task_instance_id("grouped_fd_map_widget_merge")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
@@ -1373,7 +1445,9 @@ events_dashboard_params = dict()
 
 
 events_dashboard = (
-    gather_dashboard.handle_errors(task_instance_id="events_dashboard")
+    gather_dashboard.set_task_instance_id("events_dashboard")
+    .handle_errors()
+    .with_tracing()
     .skipif(
         conditions=[
             any_is_empty_df,
