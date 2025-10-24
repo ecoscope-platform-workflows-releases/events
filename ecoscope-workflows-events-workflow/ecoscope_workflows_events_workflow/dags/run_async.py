@@ -126,7 +126,9 @@ def main(params: Params):
     nodes = {
         "workflow_details": Node(
             async_task=set_workflow_details.validate()
-            .handle_errors(task_instance_id="workflow_details")
+            .set_task_instance_id("workflow_details")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -140,7 +142,9 @@ def main(params: Params):
         ),
         "er_client_name": Node(
             async_task=set_er_connection.validate()
-            .handle_errors(task_instance_id="er_client_name")
+            .set_task_instance_id("er_client_name")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -154,7 +158,9 @@ def main(params: Params):
         ),
         "time_range": Node(
             async_task=set_time_range.validate()
-            .handle_errors(task_instance_id="time_range")
+            .set_task_instance_id("time_range")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -171,7 +177,9 @@ def main(params: Params):
         ),
         "get_timezone": Node(
             async_task=get_timezone_from_time_range.validate()
-            .handle_errors(task_instance_id="get_timezone")
+            .set_task_instance_id("get_timezone")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -188,7 +196,9 @@ def main(params: Params):
         ),
         "get_events_data": Node(
             async_task=get_events.validate()
-            .handle_errors(task_instance_id="get_events_data")
+            .set_task_instance_id("get_events_data")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -219,7 +229,9 @@ def main(params: Params):
         ),
         "convert_to_user_timezone": Node(
             async_task=convert_values_to_timezone.validate()
-            .handle_errors(task_instance_id="convert_to_user_timezone")
+            .set_task_instance_id("convert_to_user_timezone")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -238,7 +250,9 @@ def main(params: Params):
         ),
         "extract_reported_by": Node(
             async_task=extract_value_from_json_column.validate()
-            .handle_errors(task_instance_id="extract_reported_by")
+            .set_task_instance_id("extract_reported_by")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -259,7 +273,9 @@ def main(params: Params):
         ),
         "groupers": Node(
             async_task=set_groupers.validate()
-            .handle_errors(task_instance_id="groupers")
+            .set_task_instance_id("groupers")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -273,7 +289,9 @@ def main(params: Params):
         ),
         "filter_events": Node(
             async_task=apply_reloc_coord_filter.validate()
-            .handle_errors(task_instance_id="filter_events")
+            .set_task_instance_id("filter_events")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -292,7 +310,9 @@ def main(params: Params):
         ),
         "events_add_temporal_index": Node(
             async_task=add_temporal_index.validate()
-            .handle_errors(task_instance_id="events_add_temporal_index")
+            .set_task_instance_id("events_add_temporal_index")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -313,7 +333,9 @@ def main(params: Params):
         ),
         "events_colormap": Node(
             async_task=apply_color_map.validate()
-            .handle_errors(task_instance_id="events_colormap")
+            .set_task_instance_id("events_colormap")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -333,7 +355,9 @@ def main(params: Params):
         ),
         "set_bar_chart_title": Node(
             async_task=set_string_var.validate()
-            .handle_errors(task_instance_id="set_bar_chart_title")
+            .set_task_instance_id("set_bar_chart_title")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -350,7 +374,9 @@ def main(params: Params):
         ),
         "set_events_map_title": Node(
             async_task=set_string_var.validate()
-            .handle_errors(task_instance_id="set_events_map_title")
+            .set_task_instance_id("set_events_map_title")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -367,7 +393,9 @@ def main(params: Params):
         ),
         "set_pie_chart_title": Node(
             async_task=set_string_var.validate()
-            .handle_errors(task_instance_id="set_pie_chart_title")
+            .set_task_instance_id("set_pie_chart_title")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -384,7 +412,9 @@ def main(params: Params):
         ),
         "set_fd_map_title": Node(
             async_task=set_string_var.validate()
-            .handle_errors(task_instance_id="set_fd_map_title")
+            .set_task_instance_id("set_fd_map_title")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -401,7 +431,9 @@ def main(params: Params):
         ),
         "split_event_groups": Node(
             async_task=split_groups.validate()
-            .handle_errors(task_instance_id="split_event_groups")
+            .set_task_instance_id("split_event_groups")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -419,7 +451,9 @@ def main(params: Params):
         ),
         "events_bar_chart": Node(
             async_task=draw_time_series_bar_chart.validate()
-            .handle_errors(task_instance_id="events_bar_chart")
+            .set_task_instance_id("events_bar_chart")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -447,7 +481,9 @@ def main(params: Params):
         ),
         "events_bar_chart_html_url": Node(
             async_task=persist_text.validate()
-            .handle_errors(task_instance_id="events_bar_chart_html_url")
+            .set_task_instance_id("events_bar_chart_html_url")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -469,7 +505,9 @@ def main(params: Params):
         ),
         "events_bar_chart_widget": Node(
             async_task=create_plot_widget_single_view.validate()
-            .handle_errors(task_instance_id="events_bar_chart_widget")
+            .set_task_instance_id("events_bar_chart_widget")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     never,
@@ -489,7 +527,9 @@ def main(params: Params):
         ),
         "grouped_bar_plot_widget_merge": Node(
             async_task=merge_widget_views.validate()
-            .handle_errors(task_instance_id="grouped_bar_plot_widget_merge")
+            .set_task_instance_id("grouped_bar_plot_widget_merge")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -506,7 +546,9 @@ def main(params: Params):
         ),
         "rename_display_columns": Node(
             async_task=map_columns.validate()
-            .handle_errors(task_instance_id="rename_display_columns")
+            .set_task_instance_id("rename_display_columns")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -534,7 +576,9 @@ def main(params: Params):
         ),
         "base_map_defs": Node(
             async_task=set_base_maps.validate()
-            .handle_errors(task_instance_id="base_map_defs")
+            .set_task_instance_id("base_map_defs")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -548,7 +592,9 @@ def main(params: Params):
         ),
         "grouped_events_map_layer": Node(
             async_task=create_point_layer.validate()
-            .handle_errors(task_instance_id="grouped_events_map_layer")
+            .set_task_instance_id("grouped_events_map_layer")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -583,7 +629,9 @@ def main(params: Params):
         ),
         "grouped_events_ecomap": Node(
             async_task=draw_ecomap.validate()
-            .handle_errors(task_instance_id="grouped_events_ecomap")
+            .set_task_instance_id("grouped_events_ecomap")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -614,7 +662,9 @@ def main(params: Params):
         ),
         "grouped_events_ecomap_html_url": Node(
             async_task=persist_text.validate()
-            .handle_errors(task_instance_id="grouped_events_ecomap_html_url")
+            .set_task_instance_id("grouped_events_ecomap_html_url")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -636,7 +686,9 @@ def main(params: Params):
         ),
         "grouped_events_map_widget": Node(
             async_task=create_map_widget_single_view.validate()
-            .handle_errors(task_instance_id="grouped_events_map_widget")
+            .set_task_instance_id("grouped_events_map_widget")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     never,
@@ -656,7 +708,9 @@ def main(params: Params):
         ),
         "grouped_events_map_widget_merge": Node(
             async_task=merge_widget_views.validate()
-            .handle_errors(task_instance_id="grouped_events_map_widget_merge")
+            .set_task_instance_id("grouped_events_map_widget_merge")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -673,7 +727,9 @@ def main(params: Params):
         ),
         "grouped_events_pie_chart": Node(
             async_task=draw_pie_chart.validate()
-            .handle_errors(task_instance_id="grouped_events_pie_chart")
+            .set_task_instance_id("grouped_events_pie_chart")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -699,7 +755,9 @@ def main(params: Params):
         ),
         "grouped_pie_chart_html_urls": Node(
             async_task=persist_text.validate()
-            .handle_errors(task_instance_id="grouped_pie_chart_html_urls")
+            .set_task_instance_id("grouped_pie_chart_html_urls")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -721,7 +779,9 @@ def main(params: Params):
         ),
         "grouped_events_pie_chart_widgets": Node(
             async_task=create_plot_widget_single_view.validate()
-            .handle_errors(task_instance_id="grouped_events_pie_chart_widgets")
+            .set_task_instance_id("grouped_events_pie_chart_widgets")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     never,
@@ -741,7 +801,9 @@ def main(params: Params):
         ),
         "grouped_events_pie_widget_merge": Node(
             async_task=merge_widget_views.validate()
-            .handle_errors(task_instance_id="grouped_events_pie_widget_merge")
+            .set_task_instance_id("grouped_events_pie_widget_merge")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -758,7 +820,9 @@ def main(params: Params):
         ),
         "events_meshgrid": Node(
             async_task=create_meshgrid.validate()
-            .handle_errors(task_instance_id="events_meshgrid")
+            .set_task_instance_id("events_meshgrid")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -777,7 +841,9 @@ def main(params: Params):
         ),
         "grouped_events_feature_density": Node(
             async_task=calculate_feature_density.validate()
-            .handle_errors(task_instance_id="grouped_events_feature_density")
+            .set_task_instance_id("grouped_events_feature_density")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -799,7 +865,9 @@ def main(params: Params):
         ),
         "grouped_fd_colormap": Node(
             async_task=apply_color_map.validate()
-            .handle_errors(task_instance_id="grouped_fd_colormap")
+            .set_task_instance_id("grouped_fd_colormap")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -822,7 +890,9 @@ def main(params: Params):
         ),
         "drop_nan_percentiles": Node(
             async_task=drop_nan_values_by_column.validate()
-            .handle_errors(task_instance_id="drop_nan_percentiles")
+            .set_task_instance_id("drop_nan_percentiles")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -843,7 +913,9 @@ def main(params: Params):
         ),
         "sort_grouped_density_values": Node(
             async_task=sort_values.validate()
-            .handle_errors(task_instance_id="sort_grouped_density_values")
+            .set_task_instance_id("sort_grouped_density_values")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -866,7 +938,9 @@ def main(params: Params):
         ),
         "grouped_feature_density_format": Node(
             async_task=map_values_with_unit.validate()
-            .handle_errors(task_instance_id="grouped_feature_density_format")
+            .set_task_instance_id("grouped_feature_density_format")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -891,7 +965,9 @@ def main(params: Params):
         ),
         "grouped_fd_map_layer": Node(
             async_task=create_polygon_layer.validate()
-            .handle_errors(task_instance_id="grouped_fd_map_layer")
+            .set_task_instance_id("grouped_fd_map_layer")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -922,7 +998,9 @@ def main(params: Params):
         ),
         "grouped_fd_ecomap": Node(
             async_task=draw_ecomap.validate()
-            .handle_errors(task_instance_id="grouped_fd_ecomap")
+            .set_task_instance_id("grouped_fd_ecomap")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -953,7 +1031,9 @@ def main(params: Params):
         ),
         "grouped_fd_ecomap_html_url": Node(
             async_task=persist_text.validate()
-            .handle_errors(task_instance_id="grouped_fd_ecomap_html_url")
+            .set_task_instance_id("grouped_fd_ecomap_html_url")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -975,7 +1055,9 @@ def main(params: Params):
         ),
         "grouped_fd_map_widget": Node(
             async_task=create_map_widget_single_view.validate()
-            .handle_errors(task_instance_id="grouped_fd_map_widget")
+            .set_task_instance_id("grouped_fd_map_widget")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     never,
@@ -995,7 +1077,9 @@ def main(params: Params):
         ),
         "grouped_fd_map_widget_merge": Node(
             async_task=merge_widget_views.validate()
-            .handle_errors(task_instance_id="grouped_fd_map_widget_merge")
+            .set_task_instance_id("grouped_fd_map_widget_merge")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
@@ -1012,7 +1096,9 @@ def main(params: Params):
         ),
         "events_dashboard": Node(
             async_task=gather_dashboard.validate()
-            .handle_errors(task_instance_id="events_dashboard")
+            .set_task_instance_id("events_dashboard")
+            .handle_errors()
+            .with_tracing()
             .skipif(
                 conditions=[
                     any_is_empty_df,
