@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.15.0
+    version: 0.16.0
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.15.0
+    version: 0.16.0
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   properties:
@@ -74,6 +74,7 @@ workflow:
       include_details: false
       include_updates: false
       include_related_events: false
+      include_display_values: true
   - name: Convert to timezone
     id: convert_to_user_timezone
     task: convert_values_to_timezone
@@ -154,8 +155,8 @@ workflow:
         task: draw_time_series_bar_chart
         partial:
           x_axis: time
-          y_axis: event_type
-          category: event_type
+          y_axis: event_type_display
+          category: event_type_display
           agg_function: count
           color_column: event_type_colormap
           plot_style:
@@ -201,7 +202,7 @@ workflow:
       rename_columns:
         serial_number: Event Serial
         time: Event Time
-        event_type: Event Type
+        event_type_display: Event Type
         reported_by_name: Reported By
     mapvalues:
       argnames: df
@@ -281,7 +282,7 @@ workflow:
     id: grouped_events_pie_chart
     task: draw_pie_chart
     partial:
-      value_column: event_type
+      value_column: event_type_display
       color_column: event_type_colormap
       plot_style:
         textinfo: value

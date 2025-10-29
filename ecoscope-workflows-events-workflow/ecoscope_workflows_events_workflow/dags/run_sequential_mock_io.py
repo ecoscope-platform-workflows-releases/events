@@ -167,6 +167,7 @@ def main(params: Params):
             include_details=False,
             include_updates=False,
             include_related_events=False,
+            include_display_values=True,
             **(params_dict.get("get_events_data") or {}),
         )
         .call()
@@ -400,8 +401,8 @@ def main(params: Params):
         )
         .partial(
             x_axis="time",
-            y_axis="event_type",
-            category="event_type",
+            y_axis="event_type_display",
+            category="event_type_display",
             agg_function="count",
             color_column="event_type_colormap",
             plot_style={"xperiodalignment": "middle"},
@@ -487,7 +488,7 @@ def main(params: Params):
             rename_columns={
                 "serial_number": "Event Serial",
                 "time": "Event Time",
-                "event_type": "Event Type",
+                "event_type_display": "Event Type",
                 "reported_by_name": "Reported By",
             },
             **(params_dict.get("rename_display_columns") or {}),
@@ -635,7 +636,7 @@ def main(params: Params):
             unpack_depth=1,
         )
         .partial(
-            value_column="event_type",
+            value_column="event_type_display",
             color_column="event_type_colormap",
             plot_style={"textinfo": "value"},
             label_column=None,
