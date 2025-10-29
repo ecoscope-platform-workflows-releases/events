@@ -222,6 +222,7 @@ get_events_data = (
         include_details=False,
         include_updates=False,
         include_related_events=False,
+        include_display_values=True,
         **get_events_data_params,
     )
     .call()
@@ -595,8 +596,8 @@ events_bar_chart = (
     )
     .partial(
         x_axis="time",
-        y_axis="event_type",
-        category="event_type",
+        y_axis="event_type_display",
+        category="event_type_display",
         agg_function="count",
         color_column="event_type_colormap",
         plot_style={"xperiodalignment": "middle"},
@@ -726,7 +727,7 @@ rename_display_columns = (
         rename_columns={
             "serial_number": "Event Serial",
             "time": "Event Time",
-            "event_type": "Event Type",
+            "event_type_display": "Event Type",
             "reported_by_name": "Reported By",
         },
         **rename_display_columns_params,
@@ -959,7 +960,7 @@ grouped_events_pie_chart = (
         unpack_depth=1,
     )
     .partial(
-        value_column="event_type",
+        value_column="event_type_display",
         color_column="event_type_colormap",
         plot_style={"textinfo": "value"},
         label_column=None,
