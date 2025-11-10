@@ -1439,7 +1439,9 @@ grouped_fd_map_widget_merge = (
 # %%
 # parameters
 
-events_dashboard_params = dict()
+events_dashboard_params = dict(
+    warning=...,
+)
 
 # %%
 # call the task
