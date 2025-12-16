@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, RootModel, confloat, constr
+from pydantic import BaseModel, ConfigDict, Field, confloat, constr
 
 
 class WorkflowDetails(BaseModel):
@@ -228,12 +228,21 @@ class TimezoneInfo(BaseModel):
     utc: str = Field(..., title="Utc")
 
 
-class TemporalGrouper(RootModel[str]):
-    root: str = Field(..., title="Time")
+class TemporalGrouper(str, Enum):
+    field_Y = "%Y"
+    field_B = "%B"
+    field_Y__m = "%Y-%m"
+    field_j = "%j"
+    field_d = "%d"
+    field_A = "%A"
+    field_H = "%H"
+    field_Y__m__d = "%Y-%m-%d"
 
 
-class ValueGrouper(RootModel[str]):
-    root: str = Field(..., title="Category")
+class ValueGrouper(str, Enum):
+    event_category = "event_category"
+    event_type = "event_type"
+    reported_by_name = "reported_by_name"
 
 
 class BoundingBox(BaseModel):
@@ -326,7 +335,12 @@ class EventsMeshgrid(BaseModel):
     )
     auto_scale_or_custom_cell_size: Optional[
         Union[AutoScaleGridCellSize, CustomGridCellSize]
-    ] = Field({"auto_scale_or_custom": "Auto-scale"}, title="Grid Cell Size")
+    ] = Field(
+        default_factory=lambda: AutoScaleGridCellSize.model_validate(
+            {"auto_scale_or_custom": "Auto-scale"}
+        ),
+        title="Grid Cell Size",
+    )
     crs: Optional[str] = Field(
         "EPSG:3857",
         description="The coordinate reference system in which to perform the density calculation, must be a valid CRS authority code, for example ESRI:53042",
