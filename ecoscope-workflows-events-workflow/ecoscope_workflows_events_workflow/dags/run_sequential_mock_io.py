@@ -43,10 +43,6 @@ from ecoscope_workflows_core.tasks.results import gather_dashboard as gather_das
 from ecoscope_workflows_core.tasks.results import (
     merge_widget_views as merge_widget_views,
 )
-from ecoscope_workflows_core.tasks.skip import (
-    any_dependency_skipped as any_dependency_skipped,
-)
-from ecoscope_workflows_core.tasks.skip import any_is_empty_df as any_is_empty_df
 from ecoscope_workflows_core.tasks.skip import never as never
 from ecoscope_workflows_core.tasks.transformation import (
     add_temporal_index as add_temporal_index,
@@ -770,6 +766,7 @@ def main(params: Params):
         .partial(
             meshgrid=events_meshgrid,
             geometry_type="point",
+            sum_column=None,
             **(params_dict.get("grouped_events_feature_density") or {}),
         )
         .mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)

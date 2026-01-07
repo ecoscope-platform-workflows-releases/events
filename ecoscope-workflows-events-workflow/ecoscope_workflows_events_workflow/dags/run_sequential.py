@@ -750,6 +750,7 @@ def main(params: Params):
         .partial(
             meshgrid=events_meshgrid,
             geometry_type="point",
+            sum_column=None,
             **(params_dict.get("grouped_events_feature_density") or {}),
         )
         .mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
