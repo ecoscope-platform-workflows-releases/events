@@ -1155,6 +1155,7 @@ grouped_events_feature_density = (
     .partial(
         meshgrid=events_meshgrid,
         geometry_type="point",
+        sum_column=None,
         **grouped_events_feature_density_params,
     )
     .mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)

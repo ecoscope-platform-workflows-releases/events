@@ -11,7 +11,7 @@ import json
 import os
 import warnings  # 🧪
 
-from ecoscope_workflows_core.graph import DependsOn, DependsOnSequence, Graph, Node
+from ecoscope_workflows_core.graph import DependsOn, Graph, Node
 from ecoscope_workflows_core.tasks.config import (
     set_workflow_details as set_workflow_details,
 )
@@ -44,10 +44,6 @@ from ecoscope_workflows_core.tasks.results import gather_dashboard as gather_das
 from ecoscope_workflows_core.tasks.results import (
     merge_widget_views as merge_widget_views,
 )
-from ecoscope_workflows_core.tasks.skip import (
-    any_dependency_skipped as any_dependency_skipped,
-)
-from ecoscope_workflows_core.tasks.skip import any_is_empty_df as any_is_empty_df
 from ecoscope_workflows_core.tasks.skip import never as never
 from ecoscope_workflows_core.tasks.transformation import (
     add_temporal_index as add_temporal_index,
@@ -293,7 +289,9 @@ def main(params: Params):
             partial={
                 "df": DependsOn("get_events_data"),
                 "timezone": DependsOn("get_timezone"),
-                "columns": ["time"],
+                "columns": [
+                    "time",
+                ],
             }
             | (params_dict.get("convert_to_user_timezone") or {}),
             method="call",
@@ -314,7 +312,9 @@ def main(params: Params):
             partial={
                 "df": DependsOn("convert_to_user_timezone"),
                 "column_name": "reported_by",
-                "field_name_options": ["name"],
+                "field_name_options": [
+                    "name",
+                ],
                 "output_type": "str",
                 "output_column_name": "reported_by_name",
             }
@@ -518,7 +518,9 @@ def main(params: Params):
                 "category": "event_type_display",
                 "agg_function": "count",
                 "color_column": "event_type_colormap",
-                "plot_style": {"xperiodalignment": "middle"},
+                "plot_style": {
+                    "xperiodalignment": "middle",
+                },
                 "layout_style": None,
                 "widget_id": DependsOn("set_bar_chart_title"),
             }
@@ -608,8 +610,6 @@ def main(params: Params):
             )
             .set_executor("lithops"),
             partial={
-                "drop_columns": [],
-                "retain_columns": [],
                 "rename_columns": {
                     "serial_number": "Event Serial",
                     "time": "Event Time",
@@ -693,7 +693,9 @@ def main(params: Params):
             partial={
                 "title": None,
                 "tile_layers": DependsOn("base_map_defs"),
-                "north_arrow_style": {"placement": "top-left"},
+                "north_arrow_style": {
+                    "placement": "top-left",
+                },
                 "legend_style": {
                     "title": "Event Type",
                     "format_title": False,
@@ -791,7 +793,9 @@ def main(params: Params):
             partial={
                 "value_column": "event_type_display",
                 "color_column": "event_type_colormap",
-                "plot_style": {"textinfo": "value"},
+                "plot_style": {
+                    "textinfo": "value",
+                },
                 "label_column": None,
                 "layout_style": None,
                 "widget_id": DependsOn("set_pie_chart_title"),
@@ -905,6 +909,7 @@ def main(params: Params):
             partial={
                 "meshgrid": DependsOn("events_meshgrid"),
                 "geometry_type": "point",
+                "sum_column": None,
             }
             | (params_dict.get("grouped_events_feature_density") or {}),
             method="mapvalues",
@@ -1037,7 +1042,9 @@ def main(params: Params):
                     "label_column": "density",
                     "color_column": "density_colormap",
                 },
-                "tooltip_columns": ["density"],
+                "tooltip_columns": [
+                    "density",
+                ],
             }
             | (params_dict.get("grouped_fd_map_layer") or {}),
             method="mapvalues",
@@ -1062,7 +1069,9 @@ def main(params: Params):
             partial={
                 "title": None,
                 "tile_layers": DependsOn("base_map_defs"),
-                "north_arrow_style": {"placement": "top-left"},
+                "north_arrow_style": {
+                    "placement": "top-left",
+                },
                 "legend_style": {
                     "title": "Number Of Events",
                     "format_title": False,
@@ -1159,14 +1168,12 @@ def main(params: Params):
             .set_executor("lithops"),
             partial={
                 "details": DependsOn("workflow_details"),
-                "widgets": DependsOnSequence(
-                    [
-                        DependsOn("grouped_bar_plot_widget_merge"),
-                        DependsOn("grouped_events_map_widget_merge"),
-                        DependsOn("grouped_events_pie_widget_merge"),
-                        DependsOn("grouped_fd_map_widget_merge"),
-                    ],
-                ),
+                "widgets": [
+                    DependsOn("grouped_bar_plot_widget_merge"),
+                    DependsOn("grouped_events_map_widget_merge"),
+                    DependsOn("grouped_events_pie_widget_merge"),
+                    DependsOn("grouped_fd_map_widget_merge"),
+                ],
                 "groupers": DependsOn("groupers"),
                 "time_range": DependsOn("time_range"),
             }

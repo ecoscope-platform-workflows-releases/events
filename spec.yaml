@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.19.2
+    version: 0.20.0
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.19.2
+    version: 0.20.0
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   properties:
@@ -340,6 +340,7 @@ workflow:
         partial:
           meshgrid: ${{ workflow.events_meshgrid.return }}
           geometry_type: point
+          sum_column: null
         mapvalues:
           argnames: geodataframe
           argvalues: ${{ workflow.split_event_groups.return }}
