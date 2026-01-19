@@ -275,6 +275,7 @@ def main(params: Params):
             df=extract_reported_by,
             roi_gdf=None,
             roi_name=None,
+            reset_index=True,
             **(params_dict.get("filter_events") or {}),
         )
         .call()
