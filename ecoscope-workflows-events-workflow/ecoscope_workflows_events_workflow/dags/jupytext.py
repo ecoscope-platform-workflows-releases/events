@@ -383,7 +383,11 @@ filter_events = (
         unpack_depth=1,
     )
     .partial(
-        df=extract_reported_by, roi_gdf=None, roi_name=None, **filter_events_params
+        df=extract_reported_by,
+        roi_gdf=None,
+        roi_name=None,
+        reset_index=True,
+        **filter_events_params,
     )
     .call()
 )
