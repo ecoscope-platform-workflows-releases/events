@@ -49,9 +49,6 @@ from ecoscope_workflows_core.tasks.transformation import (
     extract_value_from_json_column as extract_value_from_json_column,
 )
 from ecoscope_workflows_core.tasks.transformation import map_columns as map_columns
-from ecoscope_workflows_core.tasks.transformation import (
-    map_values_with_unit as map_values_with_unit,
-)
 from ecoscope_workflows_core.tasks.transformation import sort_values as sort_values
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import (
     calculate_feature_density as calculate_feature_density,
@@ -76,6 +73,9 @@ from ecoscope_workflows_ext_ecoscope.tasks.results import (
 from ecoscope_workflows_ext_ecoscope.tasks.results import set_base_maps as set_base_maps
 from ecoscope_workflows_ext_ecoscope.tasks.skip import (
     all_geometry_are_none as all_geometry_are_none,
+)
+from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
+    apply_classification as apply_classification,
 )
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
     apply_color_map as apply_color_map,
@@ -1167,67 +1167,6 @@ grouped_events_feature_density = (
 
 
 # %% [markdown]
-# ## Grouped Feature Density Colormap
-
-# %%
-# parameters
-
-grouped_fd_colormap_params = dict()
-
-# %%
-# call the task
-
-
-grouped_fd_colormap = (
-    apply_color_map.set_task_instance_id("grouped_fd_colormap")
-    .handle_errors()
-    .with_tracing()
-    .skipif(
-        conditions=[
-            any_is_empty_df,
-            any_dependency_skipped,
-        ],
-        unpack_depth=1,
-    )
-    .partial(
-        input_column_name="density",
-        colormap="RdYlGn_r",
-        output_column_name="density_colormap",
-        **grouped_fd_colormap_params,
-    )
-    .mapvalues(argnames=["df"], argvalues=grouped_events_feature_density)
-)
-
-
-# %% [markdown]
-# ## Drop nan percentiles for map display
-
-# %%
-# parameters
-
-drop_nan_percentiles_params = dict()
-
-# %%
-# call the task
-
-
-drop_nan_percentiles = (
-    drop_nan_values_by_column.set_task_instance_id("drop_nan_percentiles")
-    .handle_errors()
-    .with_tracing()
-    .skipif(
-        conditions=[
-            any_is_empty_df,
-            any_dependency_skipped,
-        ],
-        unpack_depth=1,
-    )
-    .partial(column_name="density", **drop_nan_percentiles_params)
-    .mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
-)
-
-
-# %% [markdown]
 # ## Sort Density By Classification
 
 # %%
@@ -1256,24 +1195,52 @@ sort_grouped_density_values = (
         na_position="last",
         **sort_grouped_density_values_params,
     )
-    .mapvalues(argnames=["df"], argvalues=drop_nan_percentiles)
+    .mapvalues(argnames=["df"], argvalues=grouped_events_feature_density)
 )
 
 
 # %% [markdown]
-# ## Format Grouped Feature Density Labels
+# ## Drop nan percentiles for map display
 
 # %%
 # parameters
 
-grouped_feature_density_format_params = dict()
+drop_nan_values_params = dict()
 
 # %%
 # call the task
 
 
-grouped_feature_density_format = (
-    map_values_with_unit.set_task_instance_id("grouped_feature_density_format")
+drop_nan_values = (
+    drop_nan_values_by_column.set_task_instance_id("drop_nan_values")
+    .handle_errors()
+    .with_tracing()
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(column_name="density", **drop_nan_values_params)
+    .mapvalues(argnames=["df"], argvalues=sort_grouped_density_values)
+)
+
+
+# %% [markdown]
+# ## Classify Density Values
+
+# %%
+# parameters
+
+classify_fd_params = dict()
+
+# %%
+# call the task
+
+
+classify_fd = (
+    apply_classification.set_task_instance_id("classify_fd")
     .handle_errors()
     .with_tracing()
     .skipif(
@@ -1284,14 +1251,46 @@ grouped_feature_density_format = (
         unpack_depth=1,
     )
     .partial(
-        original_unit=None,
-        new_unit=None,
         input_column_name="density",
-        output_column_name="density",
-        decimal_places=0,
-        **grouped_feature_density_format_params,
+        output_column_name="density_bins",
+        classification_options={"scheme": "equal_interval", "k": 10},
+        label_options={"label_ranges": True, "label_decimals": 0},
+        **classify_fd_params,
     )
-    .mapvalues(argnames=["df"], argvalues=sort_grouped_density_values)
+    .mapvalues(argnames=["df"], argvalues=drop_nan_values)
+)
+
+
+# %% [markdown]
+# ## Grouped Feature Density Colormap
+
+# %%
+# parameters
+
+grouped_fd_colormap_params = dict()
+
+# %%
+# call the task
+
+
+grouped_fd_colormap = (
+    apply_color_map.set_task_instance_id("grouped_fd_colormap")
+    .handle_errors()
+    .with_tracing()
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(
+        input_column_name="density_bins",
+        colormap="RdYlGn_r",
+        output_column_name="density_colormap",
+        **grouped_fd_colormap_params,
+    )
+    .mapvalues(argnames=["df"], argvalues=classify_fd)
 )
 
 
@@ -1327,11 +1326,11 @@ grouped_fd_map_layer = (
             "get_line_width": 0,
             "opacity": 0.4,
         },
-        legend={"label_column": "density", "color_column": "density_colormap"},
+        legend={"label_column": "density_bins", "color_column": "density_colormap"},
         tooltip_columns=["density"],
         **grouped_fd_map_layer_params,
     )
-    .mapvalues(argnames=["geodataframe"], argvalues=grouped_feature_density_format)
+    .mapvalues(argnames=["geodataframe"], argvalues=grouped_fd_colormap)
 )
 
 
