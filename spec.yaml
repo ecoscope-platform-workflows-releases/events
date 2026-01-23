@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.21.0
+    version: 0.21.1
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.21.0
+    version: 0.21.1
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   properties:
@@ -345,24 +345,6 @@ workflow:
         mapvalues:
           argnames: geodataframe
           argvalues: ${{ workflow.split_event_groups.return }}
-      - name: Grouped Feature Density Colormap
-        id: grouped_fd_colormap
-        task: apply_color_map
-        partial:
-          input_column_name: density
-          colormap: RdYlGn_r
-          output_column_name: density_colormap
-        mapvalues:
-          argnames: df
-          argvalues: ${{ workflow.grouped_events_feature_density.return }}
-      - name: Drop nan percentiles for map display
-        id: drop_nan_percentiles
-        task: drop_nan_values_by_column
-        partial:
-          column_name: density
-        mapvalues:
-          argnames: df
-          argvalues: ${{ workflow.grouped_fd_colormap.return }}
       - name: Sort Density By Classification
         id: sort_grouped_density_values
         task: sort_values
@@ -372,19 +354,40 @@ workflow:
           na_position: last
         mapvalues:
           argnames: df
-          argvalues: ${{ workflow.drop_nan_percentiles.return }}
-      - name: Format Grouped Feature Density Labels
-        id: grouped_feature_density_format
-        task: map_values_with_unit
+          argvalues: ${{ workflow.grouped_events_feature_density.return }}
+      - name: Drop nan percentiles for map display
+        id: drop_nan_values
+        task: drop_nan_values_by_column
         partial:
-          original_unit: null
-          new_unit: null
-          input_column_name: density
-          output_column_name: density
-          decimal_places: 0
+          column_name: density
         mapvalues:
           argnames: df
           argvalues: ${{ workflow.sort_grouped_density_values.return }}
+      - name: Classify Density Values
+        id: classify_fd
+        task: apply_classification
+        partial:
+          input_column_name: density
+          output_column_name: density_bins
+          classification_options:
+            scheme: equal_interval
+            k: 10
+          label_options:
+            label_ranges: true
+            label_decimals: 0
+        mapvalues:
+          argnames: df
+          argvalues: ${{ workflow.drop_nan_values.return }}
+      - name: Grouped Feature Density Colormap
+        id: grouped_fd_colormap
+        task: apply_color_map
+        partial:
+          input_column_name: density_bins
+          colormap: RdYlGn_r
+          output_column_name: density_colormap
+        mapvalues:
+          argnames: df
+          argvalues: ${{ workflow.classify_fd.return }}
       - name: Create map layer from Feature Density
         id: grouped_fd_map_layer
         task: create_polygon_layer
@@ -399,13 +402,13 @@ workflow:
             get_line_width: 0
             opacity: 0.400000
           legend:
-            label_column: density
+            label_column: density_bins
             color_column: density_colormap
           tooltip_columns:
             - density
         mapvalues:
           argnames: geodataframe
-          argvalues: ${{ workflow.grouped_feature_density_format.return}}
+          argvalues: ${{ workflow.grouped_fd_colormap.return}}
       - name: Draw Ecomap from Feature Density
         id: grouped_fd_ecomap
         task: draw_ecomap
