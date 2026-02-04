@@ -103,6 +103,9 @@
               },
               {
                 "$ref": "#/$defs/TemporalGrouper"
+              },
+              {
+                "$ref": "#/$defs/SpatialGrouper"
               }
             ],
             "title": "Group by"
@@ -450,6 +453,10 @@
       ],
       "title": "TimezoneInfo",
       "type": "object"
+    },
+    "SpatialGrouper": {
+      "title": "Spatial Regions",
+      "type": "string"
     },
     "TemporalGrouper": {
       "oneOf": [

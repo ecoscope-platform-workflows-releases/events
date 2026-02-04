@@ -57,6 +57,9 @@ from ecoscope_workflows_ext_ecoscope.tasks.analysis import (
     create_meshgrid as create_meshgrid,
 )
 from ecoscope_workflows_ext_ecoscope.tasks.io import get_events as get_events
+from ecoscope_workflows_ext_ecoscope.tasks.io import (
+    get_spatial_features_group as get_spatial_features_group,
+)
 from ecoscope_workflows_ext_ecoscope.tasks.results import (
     create_point_layer as create_point_layer,
 )
@@ -75,6 +78,9 @@ from ecoscope_workflows_ext_ecoscope.tasks.skip import (
     all_geometry_are_none as all_geometry_are_none,
 )
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
+    add_spatial_index as add_spatial_index,
+)
+from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
     apply_classification as apply_classification,
 )
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
@@ -85,6 +91,12 @@ from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
 )
 from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
     drop_nan_values_by_column as drop_nan_values_by_column,
+)
+from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
+    extract_spatial_grouper_feature_group_ids as extract_spatial_grouper_feature_group_ids,
+)
+from ecoscope_workflows_ext_ecoscope.tasks.transformation import (
+    resolve_spatial_feature_groups_for_spatial_groupers as resolve_spatial_feature_groups_for_spatial_groupers,
 )
 
 # %% [markdown]
@@ -357,6 +369,95 @@ groupers = (
 
 
 # %% [markdown]
+# ##
+
+# %%
+# parameters
+
+spatial_group_ids_params = dict()
+
+# %%
+# call the task
+
+
+spatial_group_ids = (
+    extract_spatial_grouper_feature_group_ids.set_task_instance_id("spatial_group_ids")
+    .handle_errors()
+    .with_tracing()
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(groupers=groupers, **spatial_group_ids_params)
+    .call()
+)
+
+
+# %% [markdown]
+# ##
+
+# %%
+# parameters
+
+fetch_all_spatial_feature_groups_params = dict()
+
+# %%
+# call the task
+
+
+fetch_all_spatial_feature_groups = (
+    get_spatial_features_group.set_task_instance_id("fetch_all_spatial_feature_groups")
+    .handle_errors()
+    .with_tracing()
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(client=er_client_name, **fetch_all_spatial_feature_groups_params)
+    .map(argnames=["spatial_features_group_id"], argvalues=spatial_group_ids)
+)
+
+
+# %% [markdown]
+# ##
+
+# %%
+# parameters
+
+resolved_groupers_params = dict()
+
+# %%
+# call the task
+
+
+resolved_groupers = (
+    resolve_spatial_feature_groups_for_spatial_groupers.set_task_instance_id(
+        "resolved_groupers"
+    )
+    .handle_errors()
+    .with_tracing()
+    .skipif(
+        conditions=[
+            never,
+        ],
+        unpack_depth=1,
+    )
+    .partial(
+        groupers=groupers,
+        spatial_feature_groups=fetch_all_spatial_feature_groups,
+        **resolved_groupers_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
 # ## Event Location Filter
 
 # %%
@@ -419,10 +520,42 @@ events_add_temporal_index = (
     .partial(
         df=filter_events,
         time_col="time",
-        groupers=groupers,
+        groupers=resolved_groupers,
         cast_to_datetime=True,
         format="mixed",
         **events_add_temporal_index_params,
+    )
+    .call()
+)
+
+
+# %% [markdown]
+# ## Add spatial index to Events
+
+# %%
+# parameters
+
+events_add_spatial_index_params = dict()
+
+# %%
+# call the task
+
+
+events_add_spatial_index = (
+    add_spatial_index.set_task_instance_id("events_add_spatial_index")
+    .handle_errors()
+    .with_tracing()
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(
+        gdf=events_add_temporal_index,
+        groupers=resolved_groupers,
+        **events_add_spatial_index_params,
     )
     .call()
 )
@@ -452,7 +585,7 @@ events_colormap = (
         unpack_depth=1,
     )
     .partial(
-        df=events_add_temporal_index,
+        df=events_add_spatial_index,
         input_column_name="event_type",
         colormap="tab20b",
         output_column_name="event_type_colormap",
@@ -597,7 +730,9 @@ split_event_groups = (
         ],
         unpack_depth=1,
     )
-    .partial(df=events_colormap, groupers=groupers, **split_event_groups_params)
+    .partial(
+        df=events_colormap, groupers=resolved_groupers, **split_event_groups_params
+    )
     .call()
 )
 
@@ -1127,7 +1262,7 @@ events_meshgrid = (
         unpack_depth=1,
     )
     .partial(
-        aoi=events_add_temporal_index, intersecting_only=False, **events_meshgrid_params
+        aoi=events_add_spatial_index, intersecting_only=False, **events_meshgrid_params
     )
     .call()
 )
@@ -1499,7 +1634,7 @@ events_dashboard = (
             grouped_events_pie_widget_merge,
             grouped_fd_map_widget_merge,
         ],
-        groupers=groupers,
+        groupers=resolved_groupers,
         time_range=time_range,
         **events_dashboard_params,
     )
