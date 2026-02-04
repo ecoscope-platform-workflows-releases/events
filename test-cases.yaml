@@ -157,6 +157,60 @@ value-grouper:
         auto_scale_or_custom: "Auto-scale"
       crs: "EPSG:3857"
 
+spatial-grouper:
+  name: Spatial Grouper
+  description: A demonstration of the events workflow with spatial grouping.
+  params:
+    workflow_details:
+      name: "Events Dashboard"
+      description: "A dashboard for visualizing events."
+    er_client_name:
+      data_source:
+        name: "mep_dev"
+    groupers:
+      groupers:
+        - "efddee80-8072-4bb1-8078-b391c1b39dac"
+    time_range:
+      since: "2015-01-01T00:00:00"
+      until: "2015-12-31T23:59:59"
+      timezone:
+        label: "Africa/Nairobi (UTC+03:00)"
+        tzCode: "Africa/Nairobi"
+        name: "(UTC+03:00) Nairobi"
+        utc: "+03:00"
+    get_events_data:
+      event_types:
+        [
+          "hwc_rep",
+          "bird_sighting_rep",
+          "wildlife_sighting_rep",
+          "poacher_camp_rep",
+          "fire_rep",
+          "injured_animal_rep",
+        ]
+      include_null_geometry: false
+    events_bar_chart:
+      time_interval: "month"
+    filter_events:
+      bounding_box:
+        min_x: -180.0
+        max_x: 180.0
+        min_y: -90.0
+        max_y: 90.0
+      filter_point_coords: []
+    base_map_defs:
+      base_maps:
+        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+          opacity: 1.0
+        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          opacity: 0.5
+          max_zoom: 17
+          min_zoom: null
+    events_meshgrid:
+      auto_scale_or_custom_cell_size:
+        auto_scale_or_custom: "Auto-scale"
+      crs: "EPSG:3857"
+
 task-instance-error:
   name: Task Instance Error
   description: |

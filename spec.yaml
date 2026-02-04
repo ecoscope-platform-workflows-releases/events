@@ -1,14 +1,15 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.21.4
+    version: 0.22.0
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.21.4
+    version: 0.22.0
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   properties:
     get_events_data.properties.event_types.ecoscope:event_type: properties.er_client_name.properties.data_source.properties.name
+    groupers.properties.groupers.ecoscope:spatial_feature_group: properties.er_client_name.properties.data_source.properties.name
   $defs:
     ValueGrouper.oneOf:
       - const: event_category
@@ -96,6 +97,25 @@ workflow:
   - name: Group Data
     id: groupers
     task: set_groupers
+  - task: extract_spatial_grouper_feature_group_ids
+    id: spatial_group_ids
+    partial:
+      groupers: ${{ workflow.groupers.return }}
+  - task: get_spatial_features_group
+    id: fetch_all_spatial_feature_groups
+    partial:
+      client: ${{ workflow.er_client_name.return }}
+    map:
+      argnames: spatial_features_group_id
+      argvalues: ${{ workflow.spatial_group_ids.return }}
+  - task: resolve_spatial_feature_groups_for_spatial_groupers
+    id: resolved_groupers
+    skipif:
+      conditions:
+        - never
+    partial:
+      groupers: ${{ workflow.groupers.return }}
+      spatial_feature_groups: ${{ workflow.fetch_all_spatial_feature_groups.return }}
   - name: Event Location Filter
     id: filter_events
     task: apply_reloc_coord_filter
@@ -110,14 +130,20 @@ workflow:
     partial:
       df: ${{ workflow.filter_events.return }}
       time_col: time
-      groupers: ${{ workflow.groupers.return }}
+      groupers: ${{ workflow.resolved_groupers.return }}
       cast_to_datetime: true
       format: mixed
+  - name: Add spatial index to Events
+    id: events_add_spatial_index
+    task: add_spatial_index
+    partial:
+      gdf: ${{ workflow.events_add_temporal_index.return }}
+      groupers: ${{ workflow.resolved_groupers.return }}
   - name: Events Colormap
     id: events_colormap
     task: apply_color_map
     partial:
-      df: ${{ workflow.events_add_temporal_index.return }}
+      df: ${{ workflow.events_add_spatial_index.return }}
       input_column_name: event_type
       colormap: tab20b
       output_column_name: event_type_colormap
@@ -146,7 +172,7 @@ workflow:
     task: split_groups
     partial:
       df: ${{ workflow.events_colormap.return }}
-      groupers: ${{ workflow.groupers.return }}
+      groupers: ${{ workflow.resolved_groupers.return }}
   - title: Events Bar Chart
     type: task-group
     description: The bar chart shows how many events of different types occurred over time. Choose the time interval for the x-axis to control how event counts are summarized over time.
@@ -333,7 +359,7 @@ workflow:
             - any_dependency_skipped
             - all_geometry_are_none
         partial:
-          aoi: ${{ workflow.events_add_temporal_index.return }}
+          aoi: ${{ workflow.events_add_spatial_index.return }}
           intersecting_only: false
       - name: Grouped Events Feature Density
         id: grouped_events_feature_density
@@ -464,5 +490,5 @@ workflow:
         - ${{ workflow.grouped_events_map_widget_merge.return }}
         - ${{ workflow.grouped_events_pie_widget_merge.return }}
         - ${{ workflow.grouped_fd_map_widget_merge.return }}
-      groupers: ${{ workflow.groupers.return }}
+      groupers: ${{ workflow.resolved_groupers.return }}
       time_range: ${{ workflow.time_range.return}}
