@@ -516,7 +516,7 @@
       "oneOf": [
         {
           "const": "event_category",
-          "title": "Event Category"
+          "title": "Event Type Category"
         },
         {
           "const": "event_type",

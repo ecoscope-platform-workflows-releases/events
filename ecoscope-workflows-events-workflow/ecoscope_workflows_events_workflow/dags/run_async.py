@@ -698,6 +698,7 @@ def main(params: Params):
                     "event_type_display": "Event Type",
                     "reported_by_name": "Reported By",
                 },
+                "raise_if_not_found": True,
             }
             | (params_dict.get("rename_display_columns") or {}),
             method="mapvalues",
