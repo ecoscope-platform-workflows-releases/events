@@ -898,6 +898,7 @@ rename_display_columns = (
             "event_type_display": "Event Type",
             "reported_by_name": "Reported By",
         },
+        raise_if_not_found=True,
         **rename_display_columns_params,
     )
     .mapvalues(argnames=["df"], argvalues=split_event_groups)
