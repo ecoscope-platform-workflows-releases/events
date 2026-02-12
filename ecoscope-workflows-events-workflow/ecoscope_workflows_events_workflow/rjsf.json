@@ -390,7 +390,7 @@
       "required": [],
       "title": "Map Base Layers"
     },
-    "Event Density Map": {
+    "Event Count Map": {
       "type": "object",
       "description": "These settings generate a grid-based heatmap showing where events are concentrated.",
       "ecoscope:task_group": true,
@@ -417,7 +417,7 @@
               "default": "EPSG:3857",
               "title": "Coordinate Reference System",
               "type": "string",
-              "description": "The coordinate reference system in which to perform the density calculation, must be a valid CRS authority code, for example ESRI:53042",
+              "description": "The coordinate reference system in which to perform the calculation, must be a valid CRS authority code, for example ESRI:53042",
               "ecoscope:advanced": true
             }
           },
@@ -661,7 +661,7 @@
         }
       }
     },
-    "Event Density Map": {
+    "Event Count Map": {
       "events_meshgrid": {
         "ui:order": [
           "auto_scale_or_custom_cell_size",
@@ -702,7 +702,7 @@
       "filter_events",
       "Events Bar Chart",
       "base_map_defs",
-      "Event Density Map"
+      "Event Count Map"
     ],
     "base_map_defs": {
       "base_maps": {

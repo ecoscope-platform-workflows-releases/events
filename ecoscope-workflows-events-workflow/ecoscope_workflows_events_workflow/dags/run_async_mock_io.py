@@ -161,12 +161,13 @@ def main(params: Params):
         ],
         "grouped_events_pie_widget_merge": ["grouped_events_pie_chart_widgets"],
         "events_meshgrid": ["events_add_spatial_index"],
-        "grouped_events_feature_density": ["events_meshgrid", "split_event_groups"],
-        "sort_grouped_density_values": ["grouped_events_feature_density"],
-        "drop_nan_values": ["sort_grouped_density_values"],
+        "grouped_events_count_map": ["events_meshgrid", "split_event_groups"],
+        "sort_event_count_values": ["grouped_events_count_map"],
+        "drop_nan_values": ["sort_event_count_values"],
         "classify_fd": ["drop_nan_values"],
         "grouped_fd_colormap": ["classify_fd"],
-        "grouped_fd_map_layer": ["grouped_fd_colormap"],
+        "rename_density_output": ["grouped_fd_colormap"],
+        "grouped_fd_map_layer": ["rename_density_output"],
         "grouped_fd_ecomap": [
             "base_map_defs",
             "set_fd_map_title",
@@ -574,7 +575,7 @@ def main(params: Params):
             )
             .set_executor("lithops"),
             partial={
-                "var": "Density Map",
+                "var": "Event Count Map",
             }
             | (params_dict.get("set_fd_map_title") or {}),
             method="call",
@@ -994,9 +995,9 @@ def main(params: Params):
             | (params_dict.get("events_meshgrid") or {}),
             method="call",
         ),
-        "grouped_events_feature_density": Node(
+        "grouped_events_count_map": Node(
             async_task=calculate_feature_density.validate()
-            .set_task_instance_id("grouped_events_feature_density")
+            .set_task_instance_id("grouped_events_count_map")
             .handle_errors()
             .with_tracing()
             .skipif(
@@ -1012,16 +1013,16 @@ def main(params: Params):
                 "geometry_type": "point",
                 "sum_column": None,
             }
-            | (params_dict.get("grouped_events_feature_density") or {}),
+            | (params_dict.get("grouped_events_count_map") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["geodataframe"],
                 "argvalues": DependsOn("split_event_groups"),
             },
         ),
-        "sort_grouped_density_values": Node(
+        "sort_event_count_values": Node(
             async_task=sort_values.validate()
-            .set_task_instance_id("sort_grouped_density_values")
+            .set_task_instance_id("sort_event_count_values")
             .handle_errors()
             .with_tracing()
             .skipif(
@@ -1037,11 +1038,11 @@ def main(params: Params):
                 "ascending": True,
                 "na_position": "last",
             }
-            | (params_dict.get("sort_grouped_density_values") or {}),
+            | (params_dict.get("sort_event_count_values") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["df"],
-                "argvalues": DependsOn("grouped_events_feature_density"),
+                "argvalues": DependsOn("grouped_events_count_map"),
             },
         ),
         "drop_nan_values": Node(
@@ -1064,7 +1065,7 @@ def main(params: Params):
             method="mapvalues",
             kwargs={
                 "argnames": ["df"],
-                "argvalues": DependsOn("sort_grouped_density_values"),
+                "argvalues": DependsOn("sort_event_count_values"),
             },
         ),
         "classify_fd": Node(
@@ -1124,6 +1125,32 @@ def main(params: Params):
                 "argvalues": DependsOn("classify_fd"),
             },
         ),
+        "rename_density_output": Node(
+            async_task=map_columns.validate()
+            .set_task_instance_id("rename_density_output")
+            .handle_errors()
+            .with_tracing()
+            .skipif(
+                conditions=[
+                    any_is_empty_df,
+                    any_dependency_skipped,
+                ],
+                unpack_depth=1,
+            )
+            .set_executor("lithops"),
+            partial={
+                "rename_columns": {
+                    "density": "Count",
+                },
+                "raise_if_not_found": True,
+            }
+            | (params_dict.get("rename_density_output") or {}),
+            method="mapvalues",
+            kwargs={
+                "argnames": ["df"],
+                "argvalues": DependsOn("grouped_fd_colormap"),
+            },
+        ),
         "grouped_fd_map_layer": Node(
             async_task=create_polygon_layer.validate()
             .set_task_instance_id("grouped_fd_map_layer")
@@ -1149,14 +1176,14 @@ def main(params: Params):
                     "color_column": "density_colormap",
                 },
                 "tooltip_columns": [
-                    "density",
+                    "Count",
                 ],
             }
             | (params_dict.get("grouped_fd_map_layer") or {}),
             method="mapvalues",
             kwargs={
                 "argnames": ["geodataframe"],
-                "argvalues": DependsOn("grouped_fd_colormap"),
+                "argvalues": DependsOn("rename_density_output"),
             },
         ),
         "grouped_fd_ecomap": Node(

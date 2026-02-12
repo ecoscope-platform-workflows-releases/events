@@ -346,12 +346,12 @@ class EventsMeshgrid(BaseModel):
     )
     crs: str | None = Field(
         "EPSG:3857",
-        description="The coordinate reference system in which to perform the density calculation, must be a valid CRS authority code, for example ESRI:53042",
+        description="The coordinate reference system in which to perform the calculation, must be a valid CRS authority code, for example ESRI:53042",
         title="Coordinate Reference System",
     )
 
 
-class EventDensityMap(BaseModel):
+class EventCountMap(BaseModel):
     events_meshgrid: EventsMeshgrid | None = Field(None, title="")
 
 
@@ -377,8 +377,8 @@ class FormData(BaseModel):
         description="The bar chart shows how many events of different types occurred over time. Choose the time interval for the x-axis to control how event counts are summarized over time.",
     )
     base_map_defs: BaseMapDefs | None = Field(None, title="Map Base Layers")
-    Event_Density_Map: EventDensityMap | None = Field(
+    Event_Count_Map: EventCountMap | None = Field(
         None,
-        alias="Event Density Map",
+        alias="Event Count Map",
         description="These settings generate a grid-based heatmap showing where events are concentrated.",
     )
