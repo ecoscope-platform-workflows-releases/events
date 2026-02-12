@@ -680,7 +680,7 @@ set_pie_chart_title = (
 
 
 # %% [markdown]
-# ## Set Feature Denisty Map Title
+# ## Set Event Count Map Title
 
 # %%
 # parameters
@@ -702,7 +702,7 @@ set_fd_map_title = (
         ],
         unpack_depth=1,
     )
-    .partial(var="Density Map", **set_fd_map_title_params)
+    .partial(var="Event Count Map", **set_fd_map_title_params)
     .call()
 )
 
@@ -1270,19 +1270,19 @@ events_meshgrid = (
 
 
 # %% [markdown]
-# ## Grouped Events Feature Density
+# ## Calculate Event Counts
 
 # %%
 # parameters
 
-grouped_events_feature_density_params = dict()
+grouped_events_count_map_params = dict()
 
 # %%
 # call the task
 
 
-grouped_events_feature_density = (
-    calculate_feature_density.set_task_instance_id("grouped_events_feature_density")
+grouped_events_count_map = (
+    calculate_feature_density.set_task_instance_id("grouped_events_count_map")
     .handle_errors()
     .with_tracing()
     .skipif(
@@ -1296,26 +1296,26 @@ grouped_events_feature_density = (
         meshgrid=events_meshgrid,
         geometry_type="point",
         sum_column=None,
-        **grouped_events_feature_density_params,
+        **grouped_events_count_map_params,
     )
     .mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
 )
 
 
 # %% [markdown]
-# ## Sort Density By Classification
+# ## Sort Event Counts By Classification
 
 # %%
 # parameters
 
-sort_grouped_density_values_params = dict()
+sort_event_count_values_params = dict()
 
 # %%
 # call the task
 
 
-sort_grouped_density_values = (
-    sort_values.set_task_instance_id("sort_grouped_density_values")
+sort_event_count_values = (
+    sort_values.set_task_instance_id("sort_event_count_values")
     .handle_errors()
     .with_tracing()
     .skipif(
@@ -1329,14 +1329,14 @@ sort_grouped_density_values = (
         column_name="density",
         ascending=True,
         na_position="last",
-        **sort_grouped_density_values_params,
+        **sort_event_count_values_params,
     )
-    .mapvalues(argnames=["df"], argvalues=grouped_events_feature_density)
+    .mapvalues(argnames=["df"], argvalues=grouped_events_count_map)
 )
 
 
 # %% [markdown]
-# ## Drop nan percentiles for map display
+# ## Drop nan values for map display
 
 # %%
 # parameters
@@ -1359,12 +1359,12 @@ drop_nan_values = (
         unpack_depth=1,
     )
     .partial(column_name="density", **drop_nan_values_params)
-    .mapvalues(argnames=["df"], argvalues=sort_grouped_density_values)
+    .mapvalues(argnames=["df"], argvalues=sort_event_count_values)
 )
 
 
 # %% [markdown]
-# ## Classify Density Values
+# ## Classify Event Count Values
 
 # %%
 # parameters
@@ -1398,7 +1398,7 @@ classify_fd = (
 
 
 # %% [markdown]
-# ## Grouped Feature Density Colormap
+# ## Event Count Colormap
 
 # %%
 # parameters
@@ -1431,7 +1431,41 @@ grouped_fd_colormap = (
 
 
 # %% [markdown]
-# ## Create map layer from Feature Density
+# ##
+
+# %%
+# parameters
+
+rename_density_output_params = dict()
+
+# %%
+# call the task
+
+
+rename_density_output = (
+    map_columns.set_task_instance_id("rename_density_output")
+    .handle_errors()
+    .with_tracing()
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(
+        drop_columns=[],
+        retain_columns=[],
+        rename_columns={"density": "Count"},
+        raise_if_not_found=True,
+        **rename_density_output_params,
+    )
+    .mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
+)
+
+
+# %% [markdown]
+# ## Create map layer from Event Counts
 
 # %%
 # parameters
@@ -1463,15 +1497,15 @@ grouped_fd_map_layer = (
             "opacity": 0.4,
         },
         legend={"label_column": "density_bins", "color_column": "density_colormap"},
-        tooltip_columns=["density"],
+        tooltip_columns=["Count"],
         **grouped_fd_map_layer_params,
     )
-    .mapvalues(argnames=["geodataframe"], argvalues=grouped_fd_colormap)
+    .mapvalues(argnames=["geodataframe"], argvalues=rename_density_output)
 )
 
 
 # %% [markdown]
-# ## Draw Ecomap from Feature Density
+# ## Draw Ecomap from Event Counts
 
 # %%
 # parameters
@@ -1514,7 +1548,7 @@ grouped_fd_ecomap = (
 
 
 # %% [markdown]
-# ## Persist Feature Density Ecomap as Text
+# ## Persist Event Count Ecomap as Text
 
 # %%
 # parameters
@@ -1548,7 +1582,7 @@ grouped_fd_ecomap_html_url = (
 
 
 # %% [markdown]
-# ## Create Feature Density Map Widget
+# ## Create Event Count Map Widget
 
 # %%
 # parameters
@@ -1575,7 +1609,7 @@ grouped_fd_map_widget = (
 
 
 # %% [markdown]
-# ## Merge Feature Density Widget Views
+# ## Merge Event Count Widget Views
 
 # %%
 # parameters

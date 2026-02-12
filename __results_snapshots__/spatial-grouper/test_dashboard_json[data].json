@@ -63,7 +63,7 @@
           "data": "str",
           "id": 3,
           "is_filtered": true,
-          "title": "Density Map",
+          "title": "Event Count Map",
           "widget_type": "map"
         }
       ],
@@ -93,7 +93,7 @@
           "data": "str",
           "id": 3,
           "is_filtered": true,
-          "title": "Density Map",
+          "title": "Event Count Map",
           "widget_type": "map"
         }
       ]

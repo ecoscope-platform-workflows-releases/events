@@ -1,10 +1,10 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.22.3
+    version: 0.22.5
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.22.3
+    version: 0.22.5
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   properties:
@@ -22,7 +22,7 @@ rjsf-overrides:
     get_events_data.event_types.ui:options.displayLabel: false
     filter_events.filter_point_coords.items.ui:options.label: false
     base_map_defs.base_maps.items.ui:options.label: false
-    Event Density Map.events_meshgrid.auto_scale_or_custom_cell_size:
+    Event Count Map.events_meshgrid.auto_scale_or_custom_cell_size:
       anyOf:
         - ui:help: Auto-scale for an optimized grid cell size based the workflow data or Customize to set a specific grid cell size.
           ui:options:
@@ -162,11 +162,11 @@ workflow:
     task: set_string_var
     partial:
       var: Events Pie Chart
-  - name: Set Feature Denisty Map Title
+  - name: Set Event Count Map Title
     id: set_fd_map_title
     task: set_string_var
     partial:
-      var: Density Map
+      var: Event Count Map
   - name: Split Events by Group
     id: split_event_groups
     task: split_groups
@@ -347,7 +347,7 @@ workflow:
     task: merge_widget_views
     partial:
       widgets: ${{ workflow.grouped_events_pie_chart_widgets.return }}
-  - title: Event Density Map
+  - title: Event Count Map
     type: task-group
     description: These settings generate a grid-based heatmap showing where events are concentrated.
     tasks:
@@ -362,8 +362,8 @@ workflow:
         partial:
           aoi: ${{ workflow.events_add_spatial_index.return }}
           intersecting_only: false
-      - name: Grouped Events Feature Density
-        id: grouped_events_feature_density
+      - name: Calculate Event Counts
+        id: grouped_events_count_map
         task: calculate_feature_density
         partial:
           meshgrid: ${{ workflow.events_meshgrid.return }}
@@ -372,8 +372,8 @@ workflow:
         mapvalues:
           argnames: geodataframe
           argvalues: ${{ workflow.split_event_groups.return }}
-      - name: Sort Density By Classification
-        id: sort_grouped_density_values
+      - name: Sort Event Counts By Classification
+        id: sort_event_count_values
         task: sort_values
         partial:
           column_name: density
@@ -381,16 +381,16 @@ workflow:
           na_position: last
         mapvalues:
           argnames: df
-          argvalues: ${{ workflow.grouped_events_feature_density.return }}
-      - name: Drop nan percentiles for map display
+          argvalues: ${{ workflow.grouped_events_count_map.return }}
+      - name: Drop nan values for map display
         id: drop_nan_values
         task: drop_nan_values_by_column
         partial:
           column_name: density
         mapvalues:
           argnames: df
-          argvalues: ${{ workflow.sort_grouped_density_values.return }}
-      - name: Classify Density Values
+          argvalues: ${{ workflow.sort_event_count_values.return }}
+      - name: Classify Event Count Values
         id: classify_fd
         task: apply_classification
         partial:
@@ -405,7 +405,7 @@ workflow:
         mapvalues:
           argnames: df
           argvalues: ${{ workflow.drop_nan_values.return }}
-      - name: Grouped Feature Density Colormap
+      - name: Event Count Colormap
         id: grouped_fd_colormap
         task: apply_color_map
         partial:
@@ -415,7 +415,18 @@ workflow:
         mapvalues:
           argnames: df
           argvalues: ${{ workflow.classify_fd.return }}
-      - name: Create map layer from Feature Density
+      - id: rename_density_output
+        task: map_columns
+        partial:
+          drop_columns: []
+          retain_columns: []
+          rename_columns:
+            density: Count
+          raise_if_not_found: true
+        mapvalues:
+          argnames: df
+          argvalues: ${{ workflow.grouped_fd_colormap.return }}
+      - name: Create map layer from Event Counts
         id: grouped_fd_map_layer
         task: create_polygon_layer
         skipif:
@@ -432,11 +443,11 @@ workflow:
             label_column: density_bins
             color_column: density_colormap
           tooltip_columns:
-            - density
+            - Count
         mapvalues:
           argnames: geodataframe
-          argvalues: ${{ workflow.grouped_fd_colormap.return}}
-      - name: Draw Ecomap from Feature Density
+          argvalues: ${{ workflow.rename_density_output.return}}
+      - name: Draw Ecomap from Event Counts
         id: grouped_fd_ecomap
         task: draw_ecomap
         partial:
@@ -454,7 +465,7 @@ workflow:
         mapvalues:
           argnames: geo_layers
           argvalues: ${{ workflow.grouped_fd_map_layer.return }}
-      - name: Persist Feature Density Ecomap as Text
+      - name: Persist Event Count Ecomap as Text
         id: grouped_fd_ecomap_html_url
         task: persist_text
         partial:
@@ -463,7 +474,7 @@ workflow:
         mapvalues:
           argnames: text
           argvalues: ${{ workflow.grouped_fd_ecomap.return }}
-      - name: Create Feature Density Map Widget
+      - name: Create Event Count Map Widget
         id: grouped_fd_map_widget
         task: create_map_widget_single_view
         skipif:
@@ -476,7 +487,7 @@ workflow:
             - view
             - data
           argvalues: ${{ workflow.grouped_fd_ecomap_html_url.return }}
-      - name: Merge Feature Density Widget Views
+      - name: Merge Event Count Widget Views
         id: grouped_fd_map_widget_merge
         task: merge_widget_views
         partial:

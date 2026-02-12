@@ -460,7 +460,7 @@ def main(params: Params):
             ],
             unpack_depth=1,
         )
-        .partial(var="Density Map", **(params_dict.get("set_fd_map_title") or {}))
+        .partial(var="Event Count Map", **(params_dict.get("set_fd_map_title") or {}))
         .call()
     )
 
@@ -823,9 +823,9 @@ def main(params: Params):
         .call()
     )
 
-    grouped_events_feature_density = (
+    grouped_events_count_map = (
         calculate_feature_density.validate()
-        .set_task_instance_id("grouped_events_feature_density")
+        .set_task_instance_id("grouped_events_count_map")
         .handle_errors()
         .with_tracing()
         .skipif(
@@ -839,14 +839,14 @@ def main(params: Params):
             meshgrid=events_meshgrid,
             geometry_type="point",
             sum_column=None,
-            **(params_dict.get("grouped_events_feature_density") or {}),
+            **(params_dict.get("grouped_events_count_map") or {}),
         )
         .mapvalues(argnames=["geodataframe"], argvalues=split_event_groups)
     )
 
-    sort_grouped_density_values = (
+    sort_event_count_values = (
         sort_values.validate()
-        .set_task_instance_id("sort_grouped_density_values")
+        .set_task_instance_id("sort_event_count_values")
         .handle_errors()
         .with_tracing()
         .skipif(
@@ -860,9 +860,9 @@ def main(params: Params):
             column_name="density",
             ascending=True,
             na_position="last",
-            **(params_dict.get("sort_grouped_density_values") or {}),
+            **(params_dict.get("sort_event_count_values") or {}),
         )
-        .mapvalues(argnames=["df"], argvalues=grouped_events_feature_density)
+        .mapvalues(argnames=["df"], argvalues=grouped_events_count_map)
     )
 
     drop_nan_values = (
@@ -878,7 +878,7 @@ def main(params: Params):
             unpack_depth=1,
         )
         .partial(column_name="density", **(params_dict.get("drop_nan_values") or {}))
-        .mapvalues(argnames=["df"], argvalues=sort_grouped_density_values)
+        .mapvalues(argnames=["df"], argvalues=sort_event_count_values)
     )
 
     classify_fd = (
@@ -924,6 +924,28 @@ def main(params: Params):
         .mapvalues(argnames=["df"], argvalues=classify_fd)
     )
 
+    rename_density_output = (
+        map_columns.validate()
+        .set_task_instance_id("rename_density_output")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            drop_columns=[],
+            retain_columns=[],
+            rename_columns={"density": "Count"},
+            raise_if_not_found=True,
+            **(params_dict.get("rename_density_output") or {}),
+        )
+        .mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
+    )
+
     grouped_fd_map_layer = (
         create_polygon_layer.validate()
         .set_task_instance_id("grouped_fd_map_layer")
@@ -944,10 +966,10 @@ def main(params: Params):
                 "opacity": 0.4,
             },
             legend={"label_column": "density_bins", "color_column": "density_colormap"},
-            tooltip_columns=["density"],
+            tooltip_columns=["Count"],
             **(params_dict.get("grouped_fd_map_layer") or {}),
         )
-        .mapvalues(argnames=["geodataframe"], argvalues=grouped_fd_colormap)
+        .mapvalues(argnames=["geodataframe"], argvalues=rename_density_output)
     )
 
     grouped_fd_ecomap = (

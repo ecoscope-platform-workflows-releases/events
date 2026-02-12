@@ -42,7 +42,7 @@
           "data": null,
           "id": 3,
           "is_filtered": false,
-          "title": "Density Map",
+          "title": "Event Count Map",
           "widget_type": "map"
         }
       ]
