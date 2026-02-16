@@ -1,5 +1,5 @@
 {
-  "error": "Task instance 'split_event_groups' raised ValueError('Value grouper '%1234' is neither a column nor an index in the DataFrame')",
+  "error": "Task instance 'events_meshgrid' raised ValueError('Custom grid cell size is too small for the extent of the area of interest')",
   "result": null,
   "trace": "str"
 }

@@ -471,64 +471,91 @@
       "type": "object"
     },
     "SpatialGrouper": {
-      "title": "Spatial Regions",
-      "type": "string"
+      "properties": {
+        "spatial_index_name": {
+          "title": "Spatial Regions",
+          "type": "string"
+        }
+      },
+      "required": [
+        "spatial_index_name"
+      ],
+      "title": "Spatial",
+      "type": "object"
     },
     "TemporalGrouper": {
-      "oneOf": [
-        {
-          "const": "%Y",
-          "title": "Year (example: 2024)"
-        },
-        {
-          "const": "%B",
-          "title": "Month (example: September)"
-        },
-        {
-          "const": "%Y-%m",
-          "title": "Year and Month (example: 2023-01)"
-        },
-        {
-          "const": "%j",
-          "title": "Day of the year as a number (example: 365)"
-        },
-        {
-          "const": "%d",
-          "title": "Day of the month as a number (example: 31)"
-        },
-        {
-          "const": "%A",
-          "title": "Day of the week (example: Sunday)"
-        },
-        {
-          "const": "%H",
-          "title": "Hour (24-hour clock) as number (example: 22)"
-        },
-        {
-          "const": "%Y-%m-%d",
-          "title": "Date (example: 2025-01-31)"
+      "properties": {
+        "temporal_index": {
+          "oneOf": [
+            {
+              "const": "%Y",
+              "title": "Year (example: 2024)"
+            },
+            {
+              "const": "%B",
+              "title": "Month (example: September)"
+            },
+            {
+              "const": "%Y-%m",
+              "title": "Year and Month (example: 2023-01)"
+            },
+            {
+              "const": "%j",
+              "title": "Day of the year as a number (example: 365)"
+            },
+            {
+              "const": "%d",
+              "title": "Day of the month as a number (example: 31)"
+            },
+            {
+              "const": "%A",
+              "title": "Day of the week (example: Sunday)"
+            },
+            {
+              "const": "%H",
+              "title": "Hour (24-hour clock) as number (example: 22)"
+            },
+            {
+              "const": "%Y-%m-%d",
+              "title": "Date (example: 2025-01-31)"
+            }
+          ],
+          "title": "Time",
+          "type": "string"
         }
+      },
+      "required": [
+        "temporal_index"
       ],
       "title": "Time",
-      "type": "string"
+      "type": "object"
     },
     "ValueGrouper": {
-      "oneOf": [
-        {
-          "const": "event_category",
-          "title": "Event Type Category"
-        },
-        {
-          "const": "event_type",
-          "title": "Event Type"
-        },
-        {
-          "const": "reported_by_name",
-          "title": "Reported By Name"
+      "properties": {
+        "index_name": {
+          "oneOf": [
+            {
+              "const": "event_category",
+              "title": "Event Type Category"
+            },
+            {
+              "const": "event_type",
+              "title": "Event Type"
+            },
+            {
+              "const": "reported_by_name",
+              "title": "Reported By Name"
+            }
+          ],
+          "title": "Category",
+          "type": "string"
         }
+      },
+      "required": [
+        "index_name"
       ],
       "title": "Category",
-      "type": "string"
+      "type": "object"
     },
     "BoundingBox": {
       "properties": {
@@ -704,6 +731,29 @@
       "base_map_defs",
       "Event Count Map"
     ],
+    "groupers": {
+      "groupers": {
+        "items": {
+          "anyOf": [
+            {
+              "ui:options": {
+                "label": false
+              }
+            },
+            {
+              "ui:options": {
+                "label": false
+              }
+            },
+            {
+              "ui:options": {
+                "label": false
+              }
+            }
+          ]
+        }
+      }
+    },
     "base_map_defs": {
       "base_maps": {
         "items": {

@@ -63,7 +63,7 @@ month-grouper:
         name: "mep_dev"
     groupers:
       groupers:
-        - "%B"
+        - temporal_index: "%B"
     time_range:
       since: "2015-01-01T00:00:00"
       until: "2015-12-31T23:59:59"
@@ -115,9 +115,9 @@ value-grouper:
         name: "mep_dev"
     groupers:
       groupers:
-        - "event_category"
-        - "event_type"
-        - "reported_by_name"
+        - index_name: "event_category"
+        - index_name: "event_type"
+        - index_name: "reported_by_name"
     time_range:
       since: "2015-01-01T00:00:00"
       until: "2015-12-31T23:59:59"
@@ -169,7 +169,7 @@ spatial-grouper:
         name: "mep_dev"
     groupers:
       groupers:
-        - "efddee80-8072-4bb1-8078-b391c1b39dac"
+        - spatial_index_name: "SpatialGrouperTest"
     time_range:
       since: "2015-01-01T00:00:00"
       until: "2015-12-31T23:59:59"
@@ -215,7 +215,7 @@ task-instance-error:
   name: Task Instance Error
   description: |
     A demonstration of configuration that would raise a task instance error.
-    Specifically, the grouper selection "%1234" will result in a value error..
+    Specifically, `grid_cell_size` is set to a value small enough to cause a memory-allocation error due to the number of grid cells.
   raises: true
   expected_status_code: 500
   params:
@@ -226,8 +226,7 @@ task-instance-error:
       data_source:
         name: "mep_dev"
     groupers:
-      groupers:
-        - "%1234"
+      groupers: []
     time_range:
       since: "2015-01-01T00:00:00"
       until: "2015-12-31T23:59:59"
@@ -256,5 +255,6 @@ task-instance-error:
           opacity: 0.5
     events_meshgrid:
       auto_scale_or_custom_cell_size:
-        auto_scale_or_custom: "Auto-scale"
+        auto_scale_or_custom: "Customize"
+        grid_cell_size: 0.2
       crs: "EPSG:3857"
