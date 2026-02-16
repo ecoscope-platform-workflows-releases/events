@@ -4,7 +4,7 @@
     "filters": {
       "schema": {
         "properties": {
-          "SpatialGrouper_efddee80-8072-4bb1-8078-b391c1b39dac": {
+          "SpatialGrouper_SpatialGrouperTest": {
             "default": "Central",
             "oneOf": [
               {
@@ -22,7 +22,7 @@
         },
         "type": "object",
         "uiSchema": {
-          "SpatialGrouper_efddee80-8072-4bb1-8078-b391c1b39dac": {
+          "SpatialGrouper_SpatialGrouperTest": {
             "ui:title": "SpatialGrouperTest",
             "ui:widget": "select"
           }
@@ -37,7 +37,7 @@
       "title": "Events Dashboard"
     },
     "views": {
-      "{\"SpatialGrouper_efddee80-8072-4bb1-8078-b391c1b39dac\": \"Central\"}": [
+      "{\"SpatialGrouper_SpatialGrouperTest\": \"Central\"}": [
         {
           "data": "str",
           "id": 0,
@@ -67,7 +67,7 @@
           "widget_type": "map"
         }
       ],
-      "{\"SpatialGrouper_efddee80-8072-4bb1-8078-b391c1b39dac\": \"West\"}": [
+      "{\"SpatialGrouper_SpatialGrouperTest\": \"West\"}": [
         {
           "data": "str",
           "id": 0,
