@@ -1,15 +1,23 @@
 id: events
 requirements:
   - name: ecoscope-workflows-core
-    version: 0.22.11
+    version: 0.22.13
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-ecoscope
-    version: 0.22.11
+    version: 0.22.13
     channel: https://repo.prefix.dev/ecoscope-workflows/
 rjsf-overrides:
   properties:
-    get_events_data.properties.event_types.ecoscope:event_type: properties.er_client_name.properties.data_source.properties.name
-    groupers.properties.groupers.ecoscope:spatial_feature_group: properties.er_client_name.properties.data_source.properties.name
+    get_events_data.properties.event_types.ecoscope:transform:
+      - transformer: EarthRangerEnumResolver
+        transformer_kws:
+          type: event_type
+          depends_on: properties.er_client_name.properties.data_source.properties.name
+    groupers.properties.groupers.ecoscope:transform:
+      - transformer: EarthRangerEnumResolver
+        transformer_kws:
+          type: spatial_feature_group
+          depends_on: properties.er_client_name.properties.data_source.properties.name
   $defs:
     ValueGrouper.properties.index_name.oneOf:
       - const: event_category
