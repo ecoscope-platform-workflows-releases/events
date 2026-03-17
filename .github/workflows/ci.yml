@@ -34,7 +34,7 @@ jobs:
           echo "release_dir=${dirs[0]%/}" >> $GITHUB_OUTPUT
 
           # Fail if no test cases defined
-          keys=$(yq -o=json 'keys' test-cases.yaml)
+          keys=$(yq -o=json -I=0 'keys' test-cases.yaml)
           if [ "$keys" = "[]" ] || [ "$keys" = "null" ]; then
             echo "::error::test-cases.yaml has no test cases defined" && exit 1
           fi
