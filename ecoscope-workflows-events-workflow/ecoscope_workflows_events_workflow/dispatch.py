@@ -2,15 +2,16 @@
 
 
 import traceback
+from typing import Any
 
-from .params import Params
 from .response import ResponseModel
 
 
 def dispatch(
     execution_mode: str,  # TODO: literal type
     mock_io: bool,
-    params: Params,
+    params: dict[str, Any],
+    validate_params_schema: bool = True,
 ) -> ResponseModel:
     match execution_mode, mock_io:
         case ("sequential", True):
@@ -25,7 +26,9 @@ def dispatch(
             raise ValueError(f"Invalid execution mode: {execution_mode}")
 
     try:
-        result = dispatcher(params=params)
+        result = dispatcher(
+            params=params, validate_params_schema=validate_params_schema
+        )
         response = ResponseModel(result=result)
         response.model_dump_json()  # eagerly validate JSON-serializability
     except Exception as e:
