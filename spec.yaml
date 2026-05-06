@@ -3,6 +3,10 @@ requirements:
   - name: ecoscope-platform
     version: 2.11.3
     channel: https://repo.prefix.dev/ecoscope-workflows/
+  - name: wt-contracts
+    git: https://github.com/wildlife-dynamics/wt.git
+    branch: cs/issue-125
+    subdirectory: wt-contracts
 rjsf-overrides:
   properties:
     get_events_data.properties.event_types.ecoscope:transform:
