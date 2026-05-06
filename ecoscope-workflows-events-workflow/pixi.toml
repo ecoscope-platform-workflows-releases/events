@@ -46,6 +46,11 @@ channel = "https://conda.anaconda.org/conda-forge/"
 version = ">=0.1.2,<1.0.0"
 channel = "https://repo.prefix.dev/ecoscope-workflows/"
 
+[pypi-dependencies.wt-contracts]
+git = "https://github.com/wildlife-dynamics/wt.git"
+branch = "cs/issue-125"
+subdirectory = "wt-contracts"
+
 [feature.runner.dependencies.wt-runner-gcp]
 version = ">=0.1.5,<1.0.0"
 channel = "https://repo.prefix.dev/ecoscope-workflows/"

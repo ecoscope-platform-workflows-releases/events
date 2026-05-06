@@ -8,7 +8,7 @@
 artifacts_sha256_basic: 
   c161e5552116e68292193d9d36d98f72ae71e5574e4aa8770ae944572b57104d
 artifacts_sha256_strict: 
-  c97426e44a49c9f33bd0293c36bfbe52437b596e46aa04e1774d2b1651448ab3
+  657844dc3f15f240e2c5fa569257c11032dbd7e1d3ed19a345c1ec6531b332c8
 installed_requirements:
 - channel: https://repo.prefix.dev/ecoscope-workflows/
   name: ecoscope-platform
