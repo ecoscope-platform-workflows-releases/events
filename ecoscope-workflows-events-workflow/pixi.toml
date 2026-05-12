@@ -44,17 +44,14 @@ channel = "https://conda.anaconda.org/conda-forge/"
 
 [pypi-dependencies.wt-contracts]
 git = "https://github.com/wildlife-dynamics/wt"
-rev = "23997222551333fbc1cb2fda0a44dfbe76d5afe7"
 subdirectory = "wt-contracts"
 
 [pypi-dependencies.wt-registry]
 git = "https://github.com/wildlife-dynamics/wt"
-rev = "23997222551333fbc1cb2fda0a44dfbe76d5afe7"
 subdirectory = "wt-registry"
 
 [pypi-dependencies.wt-task-gcp]
 git = "https://github.com/wildlife-dynamics/wt"
-rev = "23997222551333fbc1cb2fda0a44dfbe76d5afe7"
 subdirectory = "wt-task-gcp"
 
 [feature.runner.dependencies.python]
@@ -63,22 +60,18 @@ channel = "https://conda.anaconda.org/conda-forge/"
 
 [feature.runner.pypi-dependencies.wt-contracts]
 git = "https://github.com/wildlife-dynamics/wt"
-rev = "23997222551333fbc1cb2fda0a44dfbe76d5afe7"
 subdirectory = "wt-contracts"
 
 [feature.runner.pypi-dependencies.wt-invokers-gcp]
 git = "https://github.com/wildlife-dynamics/wt"
-rev = "23997222551333fbc1cb2fda0a44dfbe76d5afe7"
 subdirectory = "wt-invokers-gcp"
 
 [feature.runner.pypi-dependencies.wt-task-gcp]
 git = "https://github.com/wildlife-dynamics/wt"
-rev = "23997222551333fbc1cb2fda0a44dfbe76d5afe7"
 subdirectory = "wt-task-gcp"
 
 [feature.runner.pypi-dependencies.wt-runner-gcp]
 git = "https://github.com/wildlife-dynamics/wt"
-rev = "23997222551333fbc1cb2fda0a44dfbe76d5afe7"
 subdirectory = "wt-runner-gcp"
 
 [feature.runner.tasks]
