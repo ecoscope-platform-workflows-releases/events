@@ -45,7 +45,6 @@ all-grouper:
         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           opacity: 0.5
           max_zoom: 17
-          min_zoom: null
     events_meshgrid:
       auto_scale_or_custom_cell_size:
         auto_scale_or_custom: "Auto-scale"
@@ -205,7 +204,6 @@ spatial-grouper:
         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           opacity: 0.5
           max_zoom: 17
-          min_zoom: null
     events_meshgrid:
       auto_scale_or_custom_cell_size:
         auto_scale_or_custom: "Auto-scale"
