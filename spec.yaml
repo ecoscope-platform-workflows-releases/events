@@ -486,7 +486,7 @@ workflow:
         task: groupbykey
         partial:
           iterables:
-            - ${{ workflow.rename_density_output.return }}
+            - ${{ workflow.event_count_crs.return }}
             - ${{ workflow.persist_event_count_parquet.return }}
       - name: Create map layer from Event Counts
         id: grouped_fd_map_layer
