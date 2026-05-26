@@ -1,8 +1,11 @@
 id: events
 requirements:
-  - name: ecoscope-platform
-    version: 2.13.0
-    channel: https://repo.prefix.dev/ecoscope-workflows/
+  - name: ecoscope
+    # git: https://github.com/wildlife-dynamics/ecoscope
+    # branch: am/bottleneck-tasks
+    path: /home/alex/Code/ecoscope__worktrees/am-pydeck-geoarrow-layers
+    extras: [analysis,mapping,plotting,platform]
+    editable: true
   # ecoscope-platform already declares this exact pydeck dependency. it is
   # re-stated here as a workaround for a known issue. for further detail, see:
   # https://github.com/wildlife-dynamics/wt/issues/167#issuecomment-4451993697
@@ -256,6 +259,26 @@ workflow:
   - name: Map Base Layers
     id: base_map_defs
     task: set_base_maps
+  - name: Persist events to parquet
+    id: persist_events_parquet
+    task: persist_arrow
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}          
+      filename: null
+    mapvalues:
+      argnames: df
+      argvalues: ${{ workflow.rename_display_columns.return }}
+  - name: Combine patrol events gdf and data url
+    id: combine_events_gdf_and_url
+    skipif:
+      conditions:
+        - all_keyed_iterables_are_skips
+      unpack_depth: 1
+    task: groupbykey
+    partial:
+      iterables:
+        - ${{ workflow.rename_display_columns.return }}
+        - ${{ workflow.persist_events_parquet.return }}
   - name: Create map layer from grouped Events
     id: grouped_events_map_layer
     task: create_point_layer
@@ -266,24 +289,27 @@ workflow:
         - all_geometry_are_none
     partial:
       layer_style:
-        fill_color_column: event_type_colormap
+        get_fill_color: event_type_colormap
         get_radius: 5
       legend:
         label_column: Event Type
         color_column: event_type_colormap
+      zoom: false
       tooltip_columns:
         - Event Serial
         - Event Time
         - Event Type
         - Reported By
     mapvalues:
-      argnames: geodataframe
-      argvalues: ${{ workflow.rename_display_columns.return }}
+      argnames: [geodataframe, data_url]
+      argvalues: ${{ workflow.combine_events_gdf_and_url.return }}
   - name: Draw Ecomap from grouped Events
     id: grouped_events_ecomap
     task: draw_ecomap
     partial:
+      output_type: json
       title: null
+      view_state: null
       tile_layers: ${{ workflow.base_map_defs.return }}
       north_arrow_style:
         placement: top-left
@@ -297,18 +323,9 @@ workflow:
     mapvalues:
       argnames: geo_layers
       argvalues: ${{ workflow.grouped_events_map_layer.return }}
-  - name: Persist grouped Events Ecomap as Text
-    id: grouped_events_ecomap_html_url
-    task: persist_text
-    partial:
-      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      filename_suffix: v2
-    mapvalues:
-      argnames: text
-      argvalues: ${{ workflow.grouped_events_ecomap.return }}
   - name: Create grouped Events Map Widget
     id: grouped_events_map_widget
-    task: create_map_widget_single_view
+    task: create_map_v2_widget_single_view
     skipif:
       conditions:
         - never
@@ -318,7 +335,7 @@ workflow:
       argnames:
         - view
         - data
-      argvalues: ${{ workflow.grouped_events_ecomap_html_url.return }}
+      argvalues: ${{ workflow.grouped_events_ecomap.return }}
   - name: Merge Events Map Widget Views
     id: grouped_events_map_widget_merge
     task: merge_widget_views
@@ -444,6 +461,35 @@ workflow:
         mapvalues:
           argnames: df
           argvalues: ${{ workflow.grouped_fd_colormap.return }}
+      # calculate_feature_density by default outputs in EPSG:3857
+      - name: Convert patrol td crs
+        id: event_count_crs
+        task: convert_crs
+        partial:
+          crs: "EPSG:4326"
+        mapvalues:
+          argnames: df
+          argvalues: ${{ workflow.rename_density_output.return }}
+      - name: Persist event count to parquet
+        id: persist_event_count_parquet
+        task: persist_arrow
+        partial:
+          root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}          
+          filename: null
+        mapvalues:
+          argnames: df
+          argvalues: ${{ workflow.event_count_crs.return }}
+      - name: Combine event count gdf and data url
+        id: combine_events_count_gdf_and_url
+        skipif:
+          conditions:
+            - all_keyed_iterables_are_skips
+          unpack_depth: 1
+        task: groupbykey
+        partial:
+          iterables:
+            - ${{ workflow.rename_density_output.return }}
+            - ${{ workflow.persist_event_count_parquet.return }}
       - name: Create map layer from Event Counts
         id: grouped_fd_map_layer
         task: create_polygon_layer
@@ -454,7 +500,7 @@ workflow:
             - all_geometry_are_none
         partial:
           layer_style:
-            fill_color_column: density_colormap
+            get_fill_color: density_colormap
             get_line_width: 0
             opacity: 0.400000
           legend:
@@ -463,13 +509,15 @@ workflow:
           tooltip_columns:
             - Count
         mapvalues:
-          argnames: geodataframe
-          argvalues: ${{ workflow.rename_density_output.return}}
+          argnames: [geodataframe, data_url]
+          argvalues: ${{ workflow.combine_events_count_gdf_and_url.return}}
       - name: Draw Ecomap from Event Counts
         id: grouped_fd_ecomap
         task: draw_ecomap
         partial:
+          output_type: json
           title: null
+          view_state: null
           tile_layers: ${{ workflow.base_map_defs.return }}
           north_arrow_style:
             placement: top-left
@@ -483,18 +531,9 @@ workflow:
         mapvalues:
           argnames: geo_layers
           argvalues: ${{ workflow.grouped_fd_map_layer.return }}
-      - name: Persist Event Count Ecomap as Text
-        id: grouped_fd_ecomap_html_url
-        task: persist_text
-        partial:
-          root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-          filename_suffix: v2
-        mapvalues:
-          argnames: text
-          argvalues: ${{ workflow.grouped_fd_ecomap.return }}
       - name: Create Event Count Map Widget
         id: grouped_fd_map_widget
-        task: create_map_widget_single_view
+        task: create_map_v2_widget_single_view
         skipif:
           conditions:
             - never
@@ -504,7 +543,7 @@ workflow:
           argnames:
             - view
             - data
-          argvalues: ${{ workflow.grouped_fd_ecomap_html_url.return }}
+          argvalues: ${{ workflow.grouped_fd_ecomap.return }}
       - name: Merge Event Count Widget Views
         id: grouped_fd_map_widget_merge
         task: merge_widget_views
