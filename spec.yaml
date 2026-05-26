@@ -281,7 +281,7 @@ workflow:
         - ${{ workflow.persist_events_parquet.return }}
   - name: Create map layer from grouped Events
     id: grouped_events_map_layer
-    task: create_point_layer
+    task: create_geoarrow_scatterplot_layer
     skipif:
       conditions:
         - any_is_empty_df
@@ -305,14 +305,12 @@ workflow:
       argvalues: ${{ workflow.combine_events_gdf_and_url.return }}
   - name: Draw Ecomap from grouped Events
     id: grouped_events_ecomap
-    task: draw_ecomap
+    task: draw_map
     partial:
       output_type: json
       title: null
       view_state: null
       tile_layers: ${{ workflow.base_map_defs.return }}
-      north_arrow_style:
-        placement: top-left
       legend_style:
         title: Event Type
         format_title: false
@@ -492,7 +490,7 @@ workflow:
             - ${{ workflow.persist_event_count_parquet.return }}
       - name: Create map layer from Event Counts
         id: grouped_fd_map_layer
-        task: create_polygon_layer
+        task: create_geoarrow_polygon_layer
         skipif:
           conditions:
             - any_is_empty_df
@@ -513,14 +511,12 @@ workflow:
           argvalues: ${{ workflow.combine_events_count_gdf_and_url.return}}
       - name: Draw Ecomap from Event Counts
         id: grouped_fd_ecomap
-        task: draw_ecomap
+        task: draw_map
         partial:
           output_type: json
           title: null
           view_state: null
           tile_layers: ${{ workflow.base_map_defs.return }}
-          north_arrow_style:
-            placement: top-left
           legend_style:
             title: Number Of Events
             format_title: false
