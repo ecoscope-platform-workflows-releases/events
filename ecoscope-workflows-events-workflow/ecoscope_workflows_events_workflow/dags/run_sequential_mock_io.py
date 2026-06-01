@@ -51,17 +51,21 @@ from ecoscope.platform.tasks.analysis import (
 )
 from ecoscope.platform.tasks.analysis import create_meshgrid as create_meshgrid
 from ecoscope.platform.tasks.config import set_string_var as set_string_var
+from ecoscope.platform.tasks.groupby import groupbykey as groupbykey
 from ecoscope.platform.tasks.groupby import split_groups as split_groups
 from ecoscope.platform.tasks.io import persist_text as persist_text
+from ecoscope.platform.tasks.io._persist import persist_arrow as persist_arrow
 from ecoscope.platform.tasks.results import (
-    create_map_widget_single_view as create_map_widget_single_view,
+    create_map_v2_widget_single_view as create_map_v2_widget_single_view,
 )
 from ecoscope.platform.tasks.results import (
     create_plot_widget_single_view as create_plot_widget_single_view,
 )
 from ecoscope.platform.tasks.results import create_point_layer as create_point_layer
 from ecoscope.platform.tasks.results import create_polygon_layer as create_polygon_layer
-from ecoscope.platform.tasks.results import draw_ecomap as draw_ecomap
+from ecoscope.platform.tasks.results._pydeck import create_geoarrow_polygon_layer as create_geoarrow_polygon_layer
+from ecoscope.platform.tasks.results._pydeck import create_geoarrow_scatterplot_layer as create_geoarrow_scatterplot_layer
+from ecoscope.platform.tasks.results._pydeck import draw_map as draw_map
 from ecoscope.platform.tasks.results import draw_pie_chart as draw_pie_chart
 from ecoscope.platform.tasks.results import (
     draw_time_series_bar_chart as draw_time_series_bar_chart,
@@ -70,6 +74,9 @@ from ecoscope.platform.tasks.results import gather_dashboard as gather_dashboard
 from ecoscope.platform.tasks.results import merge_widget_views as merge_widget_views
 from ecoscope.platform.tasks.results import set_base_maps as set_base_maps
 from ecoscope.platform.tasks.skip import all_geometry_are_none as all_geometry_are_none
+from ecoscope.platform.tasks.skip import (
+    all_keyed_iterables_are_skips as all_keyed_iterables_are_skips,
+)
 from ecoscope.platform.tasks.skip import never as never
 from ecoscope.platform.tasks.transformation import (
     add_spatial_index as add_spatial_index,
@@ -84,6 +91,7 @@ from ecoscope.platform.tasks.transformation import apply_color_map as apply_colo
 from ecoscope.platform.tasks.transformation import (
     apply_reloc_coord_filter as apply_reloc_coord_filter,
 )
+from ecoscope.platform.tasks.transformation import convert_crs as convert_crs
 from ecoscope.platform.tasks.transformation import (
     drop_nan_values_by_column as drop_nan_values_by_column,
 )
@@ -634,8 +642,48 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    persist_events_parquet = (
+        task(persist_arrow)
+        .validate()
+        .set_task_instance_id("persist_events_parquet")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+            filename=None,
+            **(params.get("persist_events_parquet") or {}),
+        )
+        .mapvalues(argnames=["df"], argvalues=rename_display_columns)
+    )
+
+    combine_events_gdf_and_url = (
+        task(groupbykey)
+        .validate()
+        .set_task_instance_id("combine_events_gdf_and_url")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                all_keyed_iterables_are_skips,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            iterables=[rename_display_columns, persist_events_parquet],
+            **(params.get("combine_events_gdf_and_url") or {}),
+        )
+        .call()
+    )
+
     grouped_events_map_layer = (
-        task(create_point_layer)
+        task(create_geoarrow_scatterplot_layer)
         .validate()
         .set_task_instance_id("grouped_events_map_layer")
         .handle_errors()
@@ -649,19 +697,22 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
+            layer_style={"get_fill_color": "event_type_colormap", "get_radius": 5},
             legend={
                 "label_column": "Event Type",
                 "color_column": "event_type_colormap",
             },
+            zoom=False,
             tooltip_columns=["Event Serial", "Event Time", "Event Type", "Reported By"],
             **(params.get("grouped_events_map_layer") or {}),
         )
-        .mapvalues(argnames=["geodataframe"], argvalues=rename_display_columns)
+        .mapvalues(
+            argnames=["geodataframe", "data_url"], argvalues=combine_events_gdf_and_url
+        )
     )
 
     grouped_events_ecomap = (
-        task(draw_ecomap)
+        task(draw_map)
         .validate()
         .set_task_instance_id("grouped_events_ecomap")
         .handle_errors()
@@ -674,9 +725,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
+            output_type="json",
             title=None,
+            view_state=None,
             tile_layers=base_map_defs,
-            north_arrow_style={"placement": "top-left"},
             legend_style={
                 "title": "Event Type",
                 "format_title": False,
@@ -690,29 +742,8 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .mapvalues(argnames=["geo_layers"], argvalues=grouped_events_map_layer)
     )
 
-    grouped_events_ecomap_html_url = (
-        task(persist_text)
-        .validate()
-        .set_task_instance_id("grouped_events_ecomap_html_url")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            filename_suffix="v2",
-            **(params.get("grouped_events_ecomap_html_url") or {}),
-        )
-        .mapvalues(argnames=["text"], argvalues=grouped_events_ecomap)
-    )
-
     grouped_events_map_widget = (
-        task(create_map_widget_single_view)
+        task(create_map_v2_widget_single_view)
         .validate()
         .set_task_instance_id("grouped_events_map_widget")
         .handle_errors()
@@ -727,7 +758,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             title=set_events_map_title,
             **(params.get("grouped_events_map_widget") or {}),
         )
-        .map(argnames=["view", "data"], argvalues=grouped_events_ecomap_html_url)
+        .map(argnames=["view", "data"], argvalues=grouped_events_ecomap)
     )
 
     grouped_events_map_widget_merge = (
@@ -986,8 +1017,65 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
     )
 
+    event_count_crs = (
+        task(convert_crs)
+        .validate()
+        .set_task_instance_id("event_count_crs")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(crs="EPSG:4326", **(params.get("event_count_crs") or {}))
+        .mapvalues(argnames=["df"], argvalues=rename_density_output)
+    )
+
+    persist_event_count_parquet = (
+        task(persist_arrow)
+        .validate()
+        .set_task_instance_id("persist_event_count_parquet")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
+            filename=None,
+            **(params.get("persist_event_count_parquet") or {}),
+        )
+        .mapvalues(argnames=["df"], argvalues=event_count_crs)
+    )
+
+    combine_events_count_gdf_and_url = (
+        task(groupbykey)
+        .validate()
+        .set_task_instance_id("combine_events_count_gdf_and_url")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                all_keyed_iterables_are_skips,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            iterables=[event_count_crs, persist_event_count_parquet],
+            **(params.get("combine_events_count_gdf_and_url") or {}),
+        )
+        .call()
+    )
+
     grouped_fd_map_layer = (
-        task(create_polygon_layer)
+        task(create_geoarrow_polygon_layer)
         .validate()
         .set_task_instance_id("grouped_fd_map_layer")
         .handle_errors()
@@ -1002,7 +1090,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             layer_style={
-                "fill_color_column": "density_colormap",
+                "get_fill_color": "density_colormap",
                 "get_line_width": 0,
                 "opacity": 0.4,
             },
@@ -1010,11 +1098,14 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             tooltip_columns=["Count"],
             **(params.get("grouped_fd_map_layer") or {}),
         )
-        .mapvalues(argnames=["geodataframe"], argvalues=rename_density_output)
+        .mapvalues(
+            argnames=["geodataframe", "data_url"],
+            argvalues=combine_events_count_gdf_and_url,
+        )
     )
 
     grouped_fd_ecomap = (
-        task(draw_ecomap)
+        task(draw_map)
         .validate()
         .set_task_instance_id("grouped_fd_ecomap")
         .handle_errors()
@@ -1027,9 +1118,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
+            output_type="json",
             title=None,
+            view_state=None,
             tile_layers=base_map_defs,
-            north_arrow_style={"placement": "top-left"},
             legend_style={
                 "title": "Number Of Events",
                 "format_title": False,
@@ -1043,29 +1135,8 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .mapvalues(argnames=["geo_layers"], argvalues=grouped_fd_map_layer)
     )
 
-    grouped_fd_ecomap_html_url = (
-        task(persist_text)
-        .validate()
-        .set_task_instance_id("grouped_fd_ecomap_html_url")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            filename_suffix="v2",
-            **(params.get("grouped_fd_ecomap_html_url") or {}),
-        )
-        .mapvalues(argnames=["text"], argvalues=grouped_fd_ecomap)
-    )
-
     grouped_fd_map_widget = (
-        task(create_map_widget_single_view)
+        task(create_map_v2_widget_single_view)
         .validate()
         .set_task_instance_id("grouped_fd_map_widget")
         .handle_errors()
@@ -1077,7 +1148,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(title=set_fd_map_title, **(params.get("grouped_fd_map_widget") or {}))
-        .map(argnames=["view", "data"], argvalues=grouped_fd_ecomap_html_url)
+        .map(argnames=["view", "data"], argvalues=grouped_fd_ecomap)
     )
 
     grouped_fd_map_widget_merge = (
