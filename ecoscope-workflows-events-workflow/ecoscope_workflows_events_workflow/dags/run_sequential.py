@@ -21,23 +21,29 @@ from ecoscope.platform.tasks.io import (
 )
 from ecoscope.platform.tasks.io import persist_text as persist_text
 from ecoscope.platform.tasks.io import set_er_connection as set_er_connection
-from ecoscope.platform.tasks.io._persist import persist_arrow as persist_arrow
 from ecoscope.platform.tasks.results import (
     create_map_v2_widget_single_view as create_map_v2_widget_single_view,
 )
 from ecoscope.platform.tasks.results import (
     create_plot_widget_single_view as create_plot_widget_single_view,
 )
-from ecoscope.platform.tasks.results import create_point_layer as create_point_layer
-from ecoscope.platform.tasks.results import create_polygon_layer as create_polygon_layer
-from ecoscope.platform.tasks.results import draw_ecomap as draw_ecomap
+from ecoscope.platform.tasks.results import draw_map as draw_map
 from ecoscope.platform.tasks.results import draw_pie_chart as draw_pie_chart
 from ecoscope.platform.tasks.results import (
     draw_time_series_bar_chart as draw_time_series_bar_chart,
 )
 from ecoscope.platform.tasks.results import gather_dashboard as gather_dashboard
 from ecoscope.platform.tasks.results import merge_widget_views as merge_widget_views
+from ecoscope.platform.tasks.results import (
+    persist_geoarrow_for_pydeck as persist_geoarrow_for_pydeck,
+)
 from ecoscope.platform.tasks.results import set_base_maps as set_base_maps
+from ecoscope.platform.tasks.results._pydeck import (
+    create_geoarrow_polygon_layer as create_geoarrow_polygon_layer,
+)
+from ecoscope.platform.tasks.results._pydeck import (
+    create_geoarrow_scatterplot_layer as create_geoarrow_scatterplot_layer,
+)
 from ecoscope.platform.tasks.skip import all_geometry_are_none as all_geometry_are_none
 from ecoscope.platform.tasks.skip import (
     all_keyed_iterables_are_skips as all_keyed_iterables_are_skips,
@@ -623,7 +629,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     persist_events_parquet = (
-        task(persist_arrow)
+        task(persist_geoarrow_for_pydeck)
         .validate()
         .set_task_instance_id("persist_events_parquet")
         .handle_errors()
@@ -640,7 +646,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             filename=None,
             **(params.get("persist_events_parquet") or {}),
         )
-        .mapvalues(argnames=["df"], argvalues=rename_display_columns)
+        .mapvalues(argnames=["gdf"], argvalues=rename_display_columns)
     )
 
     combine_events_gdf_and_url = (
@@ -692,7 +698,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     grouped_events_ecomap = (
-        task(draw_ecomap)
+        task(draw_map)
         .validate()
         .set_task_instance_id("grouped_events_ecomap")
         .handle_errors()
@@ -709,7 +715,6 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             title=None,
             view_state=None,
             tile_layers=base_map_defs,
-            north_arrow_style={"placement": "top-left"},
             legend_style={
                 "title": "Event Type",
                 "format_title": False,
@@ -1016,7 +1021,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     persist_event_count_parquet = (
-        task(persist_arrow)
+        task(persist_geoarrow_for_pydeck)
         .validate()
         .set_task_instance_id("persist_event_count_parquet")
         .handle_errors()
@@ -1033,7 +1038,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             filename=None,
             **(params.get("persist_event_count_parquet") or {}),
         )
-        .mapvalues(argnames=["df"], argvalues=event_count_crs)
+        .mapvalues(argnames=["gdf"], argvalues=event_count_crs)
     )
 
     combine_events_count_gdf_and_url = (
@@ -1049,7 +1054,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            iterables=[rename_density_output, persist_event_count_parquet],
+            iterables=[event_count_crs, persist_event_count_parquet],
             **(params.get("combine_events_count_gdf_and_url") or {}),
         )
         .call()
@@ -1086,7 +1091,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     grouped_fd_ecomap = (
-        task(draw_ecomap)
+        task(draw_map)
         .validate()
         .set_task_instance_id("grouped_fd_ecomap")
         .handle_errors()
@@ -1103,7 +1108,6 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             title=None,
             view_state=None,
             tile_layers=base_map_defs,
-            north_arrow_style={"placement": "top-left"},
             legend_style={
                 "title": "Number Of Events",
                 "format_title": False,

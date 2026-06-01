@@ -1,11 +1,9 @@
 id: events
 requirements:
   - name: ecoscope
-    # git: https://github.com/wildlife-dynamics/ecoscope
-    # branch: am/bottleneck-tasks
-    path: /home/alex/Code/ecoscope__worktrees/am-pydeck-geoarrow-layers
+    git: https://github.com/wildlife-dynamics/ecoscope
+    branch: am/pydeck-geoarrow-layers
     extras: [analysis,mapping,plotting,platform]
-    editable: true
   # ecoscope-platform already declares this exact pydeck dependency. it is
   # re-stated here as a workaround for a known issue. for further detail, see:
   # https://github.com/wildlife-dynamics/wt/issues/167#issuecomment-4451993697
@@ -261,12 +259,12 @@ workflow:
     task: set_base_maps
   - name: Persist events to parquet
     id: persist_events_parquet
-    task: persist_arrow
+    task: persist_geoarrow_for_pydeck
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}          
       filename: null
     mapvalues:
-      argnames: df
+      argnames: gdf
       argvalues: ${{ workflow.rename_display_columns.return }}
   - name: Combine patrol events gdf and data url
     id: combine_events_gdf_and_url
@@ -470,12 +468,12 @@ workflow:
           argvalues: ${{ workflow.rename_density_output.return }}
       - name: Persist event count to parquet
         id: persist_event_count_parquet
-        task: persist_arrow
+        task: persist_geoarrow_for_pydeck
         partial:
           root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}          
           filename: null
         mapvalues:
-          argnames: df
+          argnames: gdf
           argvalues: ${{ workflow.event_count_crs.return }}
       - name: Combine event count gdf and data url
         id: combine_events_count_gdf_and_url
