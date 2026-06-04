@@ -93,182 +93,1504 @@
     "views": {
       "{\"event_category\": \"monitoring\", \"event_type\": \"fire_rep\", \"reported_by_name\": \"eco_1\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": {
+            "initialViewState": {
+              "bearing": 0,
+              "latitude": -2.5040734467564647,
+              "longitude": 38.71170275188613,
+              "pitch": 0,
+              "zoom": 7.0
+            },
+            "layers": [
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 1.0,
+                "tileSize": 256,
+                "widgetId": "Events Map"
+              },
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 0.5,
+                "tileSize": 256,
+                "widgetId": "Events Map"
+              },
+              {
+                "@@type": "GeoArrowScatterplotLayer",
+                "autoHighlight": false,
+                "billboard": false,
+                "data": "tmpfile",
+                "elevationScale": 1,
+                "filled": true,
+                "getFillColor": "event_type_colormap",
+                "getLineWidth": 1,
+                "getRadius": 5.0,
+                "id": "GeoArrowScatterplotLayer-0",
+                "lineWidthMinPixels": 0,
+                "lineWidthScale": 1,
+                "lineWidthUnits": "pixels",
+                "opacity": 1,
+                "pickable": true,
+                "radiusMinPixels": 0,
+                "radiusScale": 1,
+                "radiusUnits": "pixels",
+                "stroked": false
+              }
+            ],
+            "mapProvider": "carto",
+            "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
+            "parameters": {
+              "depthTest": false
+            },
+            "views": {
+              "@@type": "MapView",
+              "controller": true,
+              "repeat": true
+            },
+            "widgets": [
+              {
+                "@@type": "NorthArrowWidget",
+                "id": "uuid",
+                "placement": "top-left",
+                "style": {
+                  "transform": "scale(0.8)"
+                }
+              },
+              {
+                "@@type": "ScaleWidget",
+                "id": "uuid",
+                "placement": "bottom-left"
+              },
+              {
+                "@@type": "SaveImageWidget",
+                "id": "uuid",
+                "placement": "top-right"
+              },
+              {
+                "@@type": "LegendWidget",
+                "id": "uuid",
+                "legendValues": [
+                  {
+                    "title": "Legend",
+                    "values": [
+                      {
+                        "color": "rgba(140, 109, 49, 1.0)",
+                        "label": "Fire"
+                      }
+                    ]
+                  }
+                ],
+                "placement": "bottom-right"
+              },
+              {
+                "@@type": "TooltipWidget",
+                "id": "TooltipWidget",
+                "layerColumns": {
+                  "GeoArrowScatterplotLayer-0": [
+                    "Event Serial",
+                    "Event Time",
+                    "Event Type",
+                    "Reported By"
+                  ]
+                }
+              }
+            ]
+          },
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": {
+            "initialViewState": {
+              "bearing": 0,
+              "latitude": -2.5025763746786662,
+              "longitude": 38.702633917009706,
+              "pitch": 0,
+              "zoom": 7.0
+            },
+            "layers": [
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 1.0,
+                "tileSize": 256,
+                "widgetId": "Event Count Map"
+              },
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 0.5,
+                "tileSize": 256,
+                "widgetId": "Event Count Map"
+              },
+              {
+                "@@type": "GeoArrowPolygonLayer",
+                "antialiasing": true,
+                "autoHighlight": false,
+                "billboard": false,
+                "data": "tmpfile",
+                "extruded": false,
+                "filled": true,
+                "getFillColor": "density_colormap",
+                "getLineWidth": 0.0,
+                "id": "GeoArrowPolygonLayer-0",
+                "lineJointRounded": false,
+                "lineMiterLimit": 4,
+                "lineWidthMinPixels": 0,
+                "lineWidthScale": 1,
+                "lineWidthUnits": "pixels",
+                "opacity": 0.4,
+                "pickable": true,
+                "stroked": false,
+                "wireframe": true
+              }
+            ],
+            "mapProvider": "carto",
+            "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
+            "parameters": {
+              "depthTest": false
+            },
+            "views": {
+              "@@type": "MapView",
+              "controller": true,
+              "repeat": true
+            },
+            "widgets": [
+              {
+                "@@type": "NorthArrowWidget",
+                "id": "uuid",
+                "placement": "top-left",
+                "style": {
+                  "transform": "scale(0.8)"
+                }
+              },
+              {
+                "@@type": "ScaleWidget",
+                "id": "uuid",
+                "placement": "bottom-left"
+              },
+              {
+                "@@type": "SaveImageWidget",
+                "id": "uuid",
+                "placement": "top-right"
+              },
+              {
+                "@@type": "LegendWidget",
+                "id": "uuid",
+                "legendValues": [
+                  {
+                    "title": "Legend",
+                    "values": [
+                      {
+                        "color": "rgba(0, 104, 55, 1.0)",
+                        "label": "1"
+                      },
+                      {
+                        "color": "rgba(255, 255, 191, 1.0)",
+                        "label": "2"
+                      },
+                      {
+                        "color": "rgba(165, 0, 38, 1.0)",
+                        "label": "3"
+                      }
+                    ]
+                  }
+                ],
+                "placement": "bottom-right"
+              },
+              {
+                "@@type": "TooltipWidget",
+                "id": "TooltipWidget",
+                "layerColumns": {
+                  "GeoArrowPolygonLayer-0": [
+                    "Count"
+                  ]
+                }
+              }
+            ]
+          },
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         }
       ],
       "{\"event_category\": \"monitoring\", \"event_type\": \"hwc_rep\", \"reported_by_name\": \"eco_1\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": {
+            "initialViewState": {
+              "bearing": 0,
+              "latitude": -2.5149664095287747,
+              "longitude": 38.70367117088055,
+              "pitch": 0,
+              "zoom": 7.0
+            },
+            "layers": [
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 1.0,
+                "tileSize": 256,
+                "widgetId": "Events Map"
+              },
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 0.5,
+                "tileSize": 256,
+                "widgetId": "Events Map"
+              },
+              {
+                "@@type": "GeoArrowScatterplotLayer",
+                "autoHighlight": false,
+                "billboard": false,
+                "data": "tmpfile",
+                "elevationScale": 1,
+                "filled": true,
+                "getFillColor": "event_type_colormap",
+                "getLineWidth": 1,
+                "getRadius": 5.0,
+                "id": "GeoArrowScatterplotLayer-0",
+                "lineWidthMinPixels": 0,
+                "lineWidthScale": 1,
+                "lineWidthUnits": "pixels",
+                "opacity": 1,
+                "pickable": true,
+                "radiusMinPixels": 0,
+                "radiusScale": 1,
+                "radiusUnits": "pixels",
+                "stroked": false
+              }
+            ],
+            "mapProvider": "carto",
+            "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
+            "parameters": {
+              "depthTest": false
+            },
+            "views": {
+              "@@type": "MapView",
+              "controller": true,
+              "repeat": true
+            },
+            "widgets": [
+              {
+                "@@type": "NorthArrowWidget",
+                "id": "uuid",
+                "placement": "top-left",
+                "style": {
+                  "transform": "scale(0.8)"
+                }
+              },
+              {
+                "@@type": "ScaleWidget",
+                "id": "uuid",
+                "placement": "bottom-left"
+              },
+              {
+                "@@type": "SaveImageWidget",
+                "id": "uuid",
+                "placement": "top-right"
+              },
+              {
+                "@@type": "LegendWidget",
+                "id": "uuid",
+                "legendValues": [
+                  {
+                    "title": "Legend",
+                    "values": [
+                      {
+                        "color": "rgba(132, 60, 57, 1.0)",
+                        "label": "Human Wildlife Contact"
+                      }
+                    ]
+                  }
+                ],
+                "placement": "bottom-right"
+              },
+              {
+                "@@type": "TooltipWidget",
+                "id": "TooltipWidget",
+                "layerColumns": {
+                  "GeoArrowScatterplotLayer-0": [
+                    "Event Serial",
+                    "Event Time",
+                    "Event Type",
+                    "Reported By"
+                  ]
+                }
+              }
+            ]
+          },
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": {
+            "initialViewState": {
+              "bearing": 0,
+              "latitude": -2.515212383127473,
+              "longitude": 38.702633917009706,
+              "pitch": 0,
+              "zoom": 7.0
+            },
+            "layers": [
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 1.0,
+                "tileSize": 256,
+                "widgetId": "Event Count Map"
+              },
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 0.5,
+                "tileSize": 256,
+                "widgetId": "Event Count Map"
+              },
+              {
+                "@@type": "GeoArrowPolygonLayer",
+                "antialiasing": true,
+                "autoHighlight": false,
+                "billboard": false,
+                "data": "tmpfile",
+                "extruded": false,
+                "filled": true,
+                "getFillColor": "density_colormap",
+                "getLineWidth": 0.0,
+                "id": "GeoArrowPolygonLayer-0",
+                "lineJointRounded": false,
+                "lineMiterLimit": 4,
+                "lineWidthMinPixels": 0,
+                "lineWidthScale": 1,
+                "lineWidthUnits": "pixels",
+                "opacity": 0.4,
+                "pickable": true,
+                "stroked": false,
+                "wireframe": true
+              }
+            ],
+            "mapProvider": "carto",
+            "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
+            "parameters": {
+              "depthTest": false
+            },
+            "views": {
+              "@@type": "MapView",
+              "controller": true,
+              "repeat": true
+            },
+            "widgets": [
+              {
+                "@@type": "NorthArrowWidget",
+                "id": "uuid",
+                "placement": "top-left",
+                "style": {
+                  "transform": "scale(0.8)"
+                }
+              },
+              {
+                "@@type": "ScaleWidget",
+                "id": "uuid",
+                "placement": "bottom-left"
+              },
+              {
+                "@@type": "SaveImageWidget",
+                "id": "uuid",
+                "placement": "top-right"
+              },
+              {
+                "@@type": "LegendWidget",
+                "id": "uuid",
+                "legendValues": [
+                  {
+                    "title": "Legend",
+                    "values": [
+                      {
+                        "color": "rgba(0, 104, 55, 1.0)",
+                        "label": "1"
+                      },
+                      {
+                        "color": "rgba(165, 0, 38, 1.0)",
+                        "label": "2"
+                      }
+                    ]
+                  }
+                ],
+                "placement": "bottom-right"
+              },
+              {
+                "@@type": "TooltipWidget",
+                "id": "TooltipWidget",
+                "layerColumns": {
+                  "GeoArrowPolygonLayer-0": [
+                    "Count"
+                  ]
+                }
+              }
+            ]
+          },
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         }
       ],
       "{\"event_category\": \"monitoring\", \"event_type\": \"injured_animal_rep\", \"reported_by_name\": \"eco_1\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": {
+            "initialViewState": {
+              "bearing": 0,
+              "latitude": -2.5066216801374863,
+              "longitude": 38.6804066888683,
+              "pitch": 0,
+              "zoom": 7.0
+            },
+            "layers": [
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 1.0,
+                "tileSize": 256,
+                "widgetId": "Events Map"
+              },
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 0.5,
+                "tileSize": 256,
+                "widgetId": "Events Map"
+              },
+              {
+                "@@type": "GeoArrowScatterplotLayer",
+                "autoHighlight": false,
+                "billboard": false,
+                "data": "tmpfile",
+                "elevationScale": 1,
+                "filled": true,
+                "getFillColor": "event_type_colormap",
+                "getLineWidth": 1,
+                "getRadius": 5.0,
+                "id": "GeoArrowScatterplotLayer-0",
+                "lineWidthMinPixels": 0,
+                "lineWidthScale": 1,
+                "lineWidthUnits": "pixels",
+                "opacity": 1,
+                "pickable": true,
+                "radiusMinPixels": 0,
+                "radiusScale": 1,
+                "radiusUnits": "pixels",
+                "stroked": false
+              }
+            ],
+            "mapProvider": "carto",
+            "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
+            "parameters": {
+              "depthTest": false
+            },
+            "views": {
+              "@@type": "MapView",
+              "controller": true,
+              "repeat": true
+            },
+            "widgets": [
+              {
+                "@@type": "NorthArrowWidget",
+                "id": "uuid",
+                "placement": "top-left",
+                "style": {
+                  "transform": "scale(0.8)"
+                }
+              },
+              {
+                "@@type": "ScaleWidget",
+                "id": "uuid",
+                "placement": "bottom-left"
+              },
+              {
+                "@@type": "SaveImageWidget",
+                "id": "uuid",
+                "placement": "top-right"
+              },
+              {
+                "@@type": "LegendWidget",
+                "id": "uuid",
+                "legendValues": [
+                  {
+                    "title": "Legend",
+                    "values": [
+                      {
+                        "color": "rgba(99, 121, 57, 1.0)",
+                        "label": "Injured Animal"
+                      }
+                    ]
+                  }
+                ],
+                "placement": "bottom-right"
+              },
+              {
+                "@@type": "TooltipWidget",
+                "id": "TooltipWidget",
+                "layerColumns": {
+                  "GeoArrowScatterplotLayer-0": [
+                    "Event Serial",
+                    "Event Time",
+                    "Event Type",
+                    "Reported By"
+                  ]
+                }
+              }
+            ]
+          },
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": {
+            "initialViewState": {
+              "bearing": 0,
+              "latitude": -2.5025763746786662,
+              "longitude": 38.68999012938573,
+              "pitch": 0,
+              "zoom": 7.0
+            },
+            "layers": [
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 1.0,
+                "tileSize": 256,
+                "widgetId": "Event Count Map"
+              },
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 0.5,
+                "tileSize": 256,
+                "widgetId": "Event Count Map"
+              },
+              {
+                "@@type": "GeoArrowPolygonLayer",
+                "antialiasing": true,
+                "autoHighlight": false,
+                "billboard": false,
+                "data": "tmpfile",
+                "extruded": false,
+                "filled": true,
+                "getFillColor": "density_colormap",
+                "getLineWidth": 0.0,
+                "id": "GeoArrowPolygonLayer-0",
+                "lineJointRounded": false,
+                "lineMiterLimit": 4,
+                "lineWidthMinPixels": 0,
+                "lineWidthScale": 1,
+                "lineWidthUnits": "pixels",
+                "opacity": 0.4,
+                "pickable": true,
+                "stroked": false,
+                "wireframe": true
+              }
+            ],
+            "mapProvider": "carto",
+            "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
+            "parameters": {
+              "depthTest": false
+            },
+            "views": {
+              "@@type": "MapView",
+              "controller": true,
+              "repeat": true
+            },
+            "widgets": [
+              {
+                "@@type": "NorthArrowWidget",
+                "id": "uuid",
+                "placement": "top-left",
+                "style": {
+                  "transform": "scale(0.8)"
+                }
+              },
+              {
+                "@@type": "ScaleWidget",
+                "id": "uuid",
+                "placement": "bottom-left"
+              },
+              {
+                "@@type": "SaveImageWidget",
+                "id": "uuid",
+                "placement": "top-right"
+              },
+              {
+                "@@type": "LegendWidget",
+                "id": "uuid",
+                "legendValues": [
+                  {
+                    "title": "Legend",
+                    "values": [
+                      {
+                        "color": "rgba(0, 104, 55, 1.0)",
+                        "label": "1"
+                      },
+                      {
+                        "color": "rgba(165, 0, 38, 1.0)",
+                        "label": "2"
+                      }
+                    ]
+                  }
+                ],
+                "placement": "bottom-right"
+              },
+              {
+                "@@type": "TooltipWidget",
+                "id": "TooltipWidget",
+                "layerColumns": {
+                  "GeoArrowPolygonLayer-0": [
+                    "Count"
+                  ]
+                }
+              }
+            ]
+          },
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         }
       ],
       "{\"event_category\": \"monitoring\", \"event_type\": \"wildlife_sighting_rep\", \"reported_by_name\": \"eco_1\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": {
+            "initialViewState": {
+              "bearing": 0,
+              "latitude": -2.5142434338425863,
+              "longitude": 38.72110228823455,
+              "pitch": 0,
+              "zoom": 7.0
+            },
+            "layers": [
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 1.0,
+                "tileSize": 256,
+                "widgetId": "Events Map"
+              },
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 0.5,
+                "tileSize": 256,
+                "widgetId": "Events Map"
+              },
+              {
+                "@@type": "GeoArrowScatterplotLayer",
+                "autoHighlight": false,
+                "billboard": false,
+                "data": "tmpfile",
+                "elevationScale": 1,
+                "filled": true,
+                "getFillColor": "event_type_colormap",
+                "getLineWidth": 1,
+                "getRadius": 5.0,
+                "id": "GeoArrowScatterplotLayer-0",
+                "lineWidthMinPixels": 0,
+                "lineWidthScale": 1,
+                "lineWidthUnits": "pixels",
+                "opacity": 1,
+                "pickable": true,
+                "radiusMinPixels": 0,
+                "radiusScale": 1,
+                "radiusUnits": "pixels",
+                "stroked": false
+              }
+            ],
+            "mapProvider": "carto",
+            "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
+            "parameters": {
+              "depthTest": false
+            },
+            "views": {
+              "@@type": "MapView",
+              "controller": true,
+              "repeat": true
+            },
+            "widgets": [
+              {
+                "@@type": "NorthArrowWidget",
+                "id": "uuid",
+                "placement": "top-left",
+                "style": {
+                  "transform": "scale(0.8)"
+                }
+              },
+              {
+                "@@type": "ScaleWidget",
+                "id": "uuid",
+                "placement": "bottom-left"
+              },
+              {
+                "@@type": "SaveImageWidget",
+                "id": "uuid",
+                "placement": "top-right"
+              },
+              {
+                "@@type": "LegendWidget",
+                "id": "uuid",
+                "legendValues": [
+                  {
+                    "title": "Legend",
+                    "values": [
+                      {
+                        "color": "rgba(222, 158, 214, 1.0)",
+                        "label": "Wildlife Sighting"
+                      }
+                    ]
+                  }
+                ],
+                "placement": "bottom-right"
+              },
+              {
+                "@@type": "TooltipWidget",
+                "id": "TooltipWidget",
+                "layerColumns": {
+                  "GeoArrowScatterplotLayer-0": [
+                    "Event Serial",
+                    "Event Time",
+                    "Event Type",
+                    "Reported By"
+                  ]
+                }
+              }
+            ]
+          },
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": {
+            "initialViewState": {
+              "bearing": 0,
+              "latitude": -2.515212383127473,
+              "longitude": 38.72792149225768,
+              "pitch": 0,
+              "zoom": 7.0
+            },
+            "layers": [
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 1.0,
+                "tileSize": 256,
+                "widgetId": "Event Count Map"
+              },
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 0.5,
+                "tileSize": 256,
+                "widgetId": "Event Count Map"
+              },
+              {
+                "@@type": "GeoArrowPolygonLayer",
+                "antialiasing": true,
+                "autoHighlight": false,
+                "billboard": false,
+                "data": "tmpfile",
+                "extruded": false,
+                "filled": true,
+                "getFillColor": "density_colormap",
+                "getLineWidth": 0.0,
+                "id": "GeoArrowPolygonLayer-0",
+                "lineJointRounded": false,
+                "lineMiterLimit": 4,
+                "lineWidthMinPixels": 0,
+                "lineWidthScale": 1,
+                "lineWidthUnits": "pixels",
+                "opacity": 0.4,
+                "pickable": true,
+                "stroked": false,
+                "wireframe": true
+              }
+            ],
+            "mapProvider": "carto",
+            "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
+            "parameters": {
+              "depthTest": false
+            },
+            "views": {
+              "@@type": "MapView",
+              "controller": true,
+              "repeat": true
+            },
+            "widgets": [
+              {
+                "@@type": "NorthArrowWidget",
+                "id": "uuid",
+                "placement": "top-left",
+                "style": {
+                  "transform": "scale(0.8)"
+                }
+              },
+              {
+                "@@type": "ScaleWidget",
+                "id": "uuid",
+                "placement": "bottom-left"
+              },
+              {
+                "@@type": "SaveImageWidget",
+                "id": "uuid",
+                "placement": "top-right"
+              },
+              {
+                "@@type": "LegendWidget",
+                "id": "uuid",
+                "legendValues": [
+                  {
+                    "title": "Legend",
+                    "values": [
+                      {
+                        "color": "rgba(0, 104, 55, 1.0)",
+                        "label": "1"
+                      },
+                      {
+                        "color": "rgba(165, 0, 38, 1.0)",
+                        "label": "2"
+                      }
+                    ]
+                  }
+                ],
+                "placement": "bottom-right"
+              },
+              {
+                "@@type": "TooltipWidget",
+                "id": "TooltipWidget",
+                "layerColumns": {
+                  "GeoArrowPolygonLayer-0": [
+                    "Count"
+                  ]
+                }
+              }
+            ]
+          },
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         }
       ],
       "{\"event_category\": \"security\", \"event_type\": \"poacher_camp_rep\", \"reported_by_name\": \"eco_1\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": {
+            "initialViewState": {
+              "bearing": 0,
+              "latitude": -2.500578316893362,
+              "longitude": 38.67044422120638,
+              "pitch": 0,
+              "zoom": 7.0
+            },
+            "layers": [
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 1.0,
+                "tileSize": 256,
+                "widgetId": "Events Map"
+              },
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 0.5,
+                "tileSize": 256,
+                "widgetId": "Events Map"
+              },
+              {
+                "@@type": "GeoArrowScatterplotLayer",
+                "autoHighlight": false,
+                "billboard": false,
+                "data": "tmpfile",
+                "elevationScale": 1,
+                "filled": true,
+                "getFillColor": "event_type_colormap",
+                "getLineWidth": 1,
+                "getRadius": 5.0,
+                "id": "GeoArrowScatterplotLayer-0",
+                "lineWidthMinPixels": 0,
+                "lineWidthScale": 1,
+                "lineWidthUnits": "pixels",
+                "opacity": 1,
+                "pickable": true,
+                "radiusMinPixels": 0,
+                "radiusScale": 1,
+                "radiusUnits": "pixels",
+                "stroked": false
+              }
+            ],
+            "mapProvider": "carto",
+            "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
+            "parameters": {
+              "depthTest": false
+            },
+            "views": {
+              "@@type": "MapView",
+              "controller": true,
+              "repeat": true
+            },
+            "widgets": [
+              {
+                "@@type": "NorthArrowWidget",
+                "id": "uuid",
+                "placement": "top-left",
+                "style": {
+                  "transform": "scale(0.8)"
+                }
+              },
+              {
+                "@@type": "ScaleWidget",
+                "id": "uuid",
+                "placement": "bottom-left"
+              },
+              {
+                "@@type": "SaveImageWidget",
+                "id": "uuid",
+                "placement": "top-right"
+              },
+              {
+                "@@type": "LegendWidget",
+                "id": "uuid",
+                "legendValues": [
+                  {
+                    "title": "Legend",
+                    "values": [
+                      {
+                        "color": "rgba(123, 65, 115, 1.0)",
+                        "label": "Poachers Camp"
+                      }
+                    ]
+                  }
+                ],
+                "placement": "bottom-right"
+              },
+              {
+                "@@type": "TooltipWidget",
+                "id": "TooltipWidget",
+                "layerColumns": {
+                  "GeoArrowScatterplotLayer-0": [
+                    "Event Serial",
+                    "Event Time",
+                    "Event Type",
+                    "Reported By"
+                  ]
+                }
+              }
+            ]
+          },
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": {
+            "initialViewState": {
+              "bearing": 0,
+              "latitude": -2.5025763746786662,
+              "longitude": 38.66470255413776,
+              "pitch": 0,
+              "zoom": 7.0
+            },
+            "layers": [
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 1.0,
+                "tileSize": 256,
+                "widgetId": "Event Count Map"
+              },
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 0.5,
+                "tileSize": 256,
+                "widgetId": "Event Count Map"
+              },
+              {
+                "@@type": "GeoArrowPolygonLayer",
+                "antialiasing": true,
+                "autoHighlight": false,
+                "billboard": false,
+                "data": "tmpfile",
+                "extruded": false,
+                "filled": true,
+                "getFillColor": "density_colormap",
+                "getLineWidth": 0.0,
+                "id": "GeoArrowPolygonLayer-0",
+                "lineJointRounded": false,
+                "lineMiterLimit": 4,
+                "lineWidthMinPixels": 0,
+                "lineWidthScale": 1,
+                "lineWidthUnits": "pixels",
+                "opacity": 0.4,
+                "pickable": true,
+                "stroked": false,
+                "wireframe": true
+              }
+            ],
+            "mapProvider": "carto",
+            "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
+            "parameters": {
+              "depthTest": false
+            },
+            "views": {
+              "@@type": "MapView",
+              "controller": true,
+              "repeat": true
+            },
+            "widgets": [
+              {
+                "@@type": "NorthArrowWidget",
+                "id": "uuid",
+                "placement": "top-left",
+                "style": {
+                  "transform": "scale(0.8)"
+                }
+              },
+              {
+                "@@type": "ScaleWidget",
+                "id": "uuid",
+                "placement": "bottom-left"
+              },
+              {
+                "@@type": "SaveImageWidget",
+                "id": "uuid",
+                "placement": "top-right"
+              },
+              {
+                "@@type": "LegendWidget",
+                "id": "uuid",
+                "legendValues": [
+                  {
+                    "title": "Legend",
+                    "values": [
+                      {
+                        "color": "rgba(0, 104, 55, 1.0)",
+                        "label": "1"
+                      },
+                      {
+                        "color": "rgba(255, 255, 191, 1.0)",
+                        "label": "2"
+                      },
+                      {
+                        "color": "rgba(165, 0, 38, 1.0)",
+                        "label": "3"
+                      }
+                    ]
+                  }
+                ],
+                "placement": "bottom-right"
+              },
+              {
+                "@@type": "TooltipWidget",
+                "id": "TooltipWidget",
+                "layerColumns": {
+                  "GeoArrowPolygonLayer-0": [
+                    "Count"
+                  ]
+                }
+              }
+            ]
+          },
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         }
       ],
       "{\"event_category\": \"testing\", \"event_type\": \"bird_sighting_rep\", \"reported_by_name\": \"eco_1\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": {
+            "initialViewState": {
+              "bearing": 0,
+              "latitude": -2.4973181206788104,
+              "longitude": 38.68808480995017,
+              "pitch": 0,
+              "zoom": 7.0
+            },
+            "layers": [
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 1.0,
+                "tileSize": 256,
+                "widgetId": "Events Map"
+              },
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 0.5,
+                "tileSize": 256,
+                "widgetId": "Events Map"
+              },
+              {
+                "@@type": "GeoArrowScatterplotLayer",
+                "autoHighlight": false,
+                "billboard": false,
+                "data": "tmpfile",
+                "elevationScale": 1,
+                "filled": true,
+                "getFillColor": "event_type_colormap",
+                "getLineWidth": 1,
+                "getRadius": 5.0,
+                "id": "GeoArrowScatterplotLayer-0",
+                "lineWidthMinPixels": 0,
+                "lineWidthScale": 1,
+                "lineWidthUnits": "pixels",
+                "opacity": 1,
+                "pickable": true,
+                "radiusMinPixels": 0,
+                "radiusScale": 1,
+                "radiusUnits": "pixels",
+                "stroked": false
+              }
+            ],
+            "mapProvider": "carto",
+            "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
+            "parameters": {
+              "depthTest": false
+            },
+            "views": {
+              "@@type": "MapView",
+              "controller": true,
+              "repeat": true
+            },
+            "widgets": [
+              {
+                "@@type": "NorthArrowWidget",
+                "id": "uuid",
+                "placement": "top-left",
+                "style": {
+                  "transform": "scale(0.8)"
+                }
+              },
+              {
+                "@@type": "ScaleWidget",
+                "id": "uuid",
+                "placement": "bottom-left"
+              },
+              {
+                "@@type": "SaveImageWidget",
+                "id": "uuid",
+                "placement": "top-right"
+              },
+              {
+                "@@type": "LegendWidget",
+                "id": "uuid",
+                "legendValues": [
+                  {
+                    "title": "Legend",
+                    "values": [
+                      {
+                        "color": "rgba(57, 59, 121, 1.0)",
+                        "label": "Bird Sighting"
+                      }
+                    ]
+                  }
+                ],
+                "placement": "bottom-right"
+              },
+              {
+                "@@type": "TooltipWidget",
+                "id": "TooltipWidget",
+                "layerColumns": {
+                  "GeoArrowScatterplotLayer-0": [
+                    "Event Serial",
+                    "Event Time",
+                    "Event Type",
+                    "Reported By"
+                  ]
+                }
+              }
+            ]
+          },
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": {
+            "initialViewState": {
+              "bearing": 0,
+              "latitude": -2.5025763746786662,
+              "longitude": 38.68999012938573,
+              "pitch": 0,
+              "zoom": 7.0
+            },
+            "layers": [
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 1.0,
+                "tileSize": 256,
+                "widgetId": "Event Count Map"
+              },
+              {
+                "@@type": "TiledBitmapLayer",
+                "data": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                "id": "uuid",
+                "maxZoom": 20,
+                "minZoom": 0,
+                "opacity": 0.5,
+                "tileSize": 256,
+                "widgetId": "Event Count Map"
+              },
+              {
+                "@@type": "GeoArrowPolygonLayer",
+                "antialiasing": true,
+                "autoHighlight": false,
+                "billboard": false,
+                "data": "tmpfile",
+                "extruded": false,
+                "filled": true,
+                "getFillColor": "density_colormap",
+                "getLineWidth": 0.0,
+                "id": "GeoArrowPolygonLayer-0",
+                "lineJointRounded": false,
+                "lineMiterLimit": 4,
+                "lineWidthMinPixels": 0,
+                "lineWidthScale": 1,
+                "lineWidthUnits": "pixels",
+                "opacity": 0.4,
+                "pickable": true,
+                "stroked": false,
+                "wireframe": true
+              }
+            ],
+            "mapProvider": "carto",
+            "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
+            "parameters": {
+              "depthTest": false
+            },
+            "views": {
+              "@@type": "MapView",
+              "controller": true,
+              "repeat": true
+            },
+            "widgets": [
+              {
+                "@@type": "NorthArrowWidget",
+                "id": "uuid",
+                "placement": "top-left",
+                "style": {
+                  "transform": "scale(0.8)"
+                }
+              },
+              {
+                "@@type": "ScaleWidget",
+                "id": "uuid",
+                "placement": "bottom-left"
+              },
+              {
+                "@@type": "SaveImageWidget",
+                "id": "uuid",
+                "placement": "top-right"
+              },
+              {
+                "@@type": "LegendWidget",
+                "id": "uuid",
+                "legendValues": [
+                  {
+                    "title": "Legend",
+                    "values": [
+                      {
+                        "color": "rgba(0, 104, 55, 1.0)",
+                        "label": "1"
+                      },
+                      {
+                        "color": "rgba(165, 0, 38, 1.0)",
+                        "label": "2"
+                      }
+                    ]
+                  }
+                ],
+                "placement": "bottom-right"
+              },
+              {
+                "@@type": "TooltipWidget",
+                "id": "TooltipWidget",
+                "layerColumns": {
+                  "GeoArrowPolygonLayer-0": [
+                    "Count"
+                  ]
+                }
+              }
+            ]
+          },
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         }
       ]
     }
