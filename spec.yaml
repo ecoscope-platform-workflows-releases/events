@@ -1,7 +1,7 @@
 id: events
 requirements:
   - name: ecoscope-platform
-    version: 2.14.0
+    version: 2.15.0
     channel: https://repo.prefix.dev/ecoscope-workflows/
   # ecoscope-platform already declares this exact pydeck dependency. it is
   # re-stated here as a workaround for a known issue. for further detail, see:
@@ -259,6 +259,11 @@ workflow:
   - name: Persist events to parquet
     id: persist_events_parquet
     task: persist_geoarrow_for_pydeck
+    skipif:
+      conditions:
+        - any_is_empty_df
+        - any_dependency_skipped
+        - all_geometry_are_none
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}          
       filename: null
@@ -269,7 +274,7 @@ workflow:
     id: combine_events_gdf_and_url
     skipif:
       conditions:
-        - all_keyed_iterables_are_skips
+        - any_keyed_iterables_are_skips
       unpack_depth: 1
     task: groupbykey
     partial:
@@ -468,6 +473,11 @@ workflow:
       - name: Persist event count to parquet
         id: persist_event_count_parquet
         task: persist_geoarrow_for_pydeck
+        skipif:
+          conditions:
+            - any_is_empty_df
+            - any_dependency_skipped
+            - all_geometry_are_none
         partial:
           root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}          
           filename: null
@@ -478,7 +488,7 @@ workflow:
         id: combine_events_count_gdf_and_url
         skipif:
           conditions:
-            - all_keyed_iterables_are_skips
+            - any_keyed_iterables_are_skips
           unpack_depth: 1
         task: groupbykey
         partial:
