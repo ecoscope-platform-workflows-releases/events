@@ -79,28 +79,28 @@
     "views": {
       "{\"TemporalGrouper_%B\": \"April\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -109,28 +109,28 @@
       ],
       "{\"TemporalGrouper_%B\": \"August\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -139,28 +139,28 @@
       ],
       "{\"TemporalGrouper_%B\": \"December\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -169,28 +169,28 @@
       ],
       "{\"TemporalGrouper_%B\": \"February\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -199,28 +199,28 @@
       ],
       "{\"TemporalGrouper_%B\": \"January\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -229,28 +229,28 @@
       ],
       "{\"TemporalGrouper_%B\": \"July\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -259,28 +259,28 @@
       ],
       "{\"TemporalGrouper_%B\": \"June\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -289,28 +289,28 @@
       ],
       "{\"TemporalGrouper_%B\": \"March\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -319,28 +319,28 @@
       ],
       "{\"TemporalGrouper_%B\": \"May\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -349,28 +349,28 @@
       ],
       "{\"TemporalGrouper_%B\": \"November\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -379,28 +379,28 @@
       ],
       "{\"TemporalGrouper_%B\": \"October\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -409,28 +409,28 @@
       ],
       "{\"TemporalGrouper_%B\": \"September\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
