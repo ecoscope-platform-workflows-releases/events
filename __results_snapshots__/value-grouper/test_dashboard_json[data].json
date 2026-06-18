@@ -93,28 +93,28 @@
     "views": {
       "{\"event_category\": \"monitoring\", \"event_type\": \"fire_rep\", \"reported_by_name\": \"eco_1\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -123,28 +123,28 @@
       ],
       "{\"event_category\": \"monitoring\", \"event_type\": \"hwc_rep\", \"reported_by_name\": \"eco_1\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -153,28 +153,28 @@
       ],
       "{\"event_category\": \"monitoring\", \"event_type\": \"injured_animal_rep\", \"reported_by_name\": \"eco_1\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -183,28 +183,28 @@
       ],
       "{\"event_category\": \"monitoring\", \"event_type\": \"wildlife_sighting_rep\", \"reported_by_name\": \"eco_1\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -213,28 +213,28 @@
       ],
       "{\"event_category\": \"security\", \"event_type\": \"poacher_camp_rep\", \"reported_by_name\": \"eco_1\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",
@@ -243,28 +243,28 @@
       ],
       "{\"event_category\": \"testing\", \"event_type\": \"bird_sighting_rep\", \"reported_by_name\": \"eco_1\"}": [
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 0,
           "is_filtered": true,
           "title": "Events Bar Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 1,
           "is_filtered": true,
           "title": "Events Map",
           "widget_type": "map"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 2,
           "is_filtered": true,
           "title": "Events Pie Chart",
           "widget_type": "graph"
         },
         {
-          "data": "str",
+          "data": "tmpfile",
           "id": 3,
           "is_filtered": true,
           "title": "Event Count Map",

@@ -505,7 +505,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             agg_function="count",
             color_column="event_type_colormap",
             plot_style={"xperiodalignment": "middle"},
-            layout_style=None,
+            layout_style={
+                "yaxis": {"title": "Count of Events by Type"},
+                "xaxis": {"title": "Time"},
+            },
             widget_id=set_bar_chart_title,
             **(params.get("events_bar_chart") or {}),
         )
