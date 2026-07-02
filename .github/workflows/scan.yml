@@ -1,0 +1,48 @@
+name: Scan
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["**"]
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install pixi
+        run: curl -fsSL https://pixi.sh/install.sh | bash && echo "$HOME/.pixi/bin" >> $GITHUB_PATH
+      - name: Find release directory
+        id: find_release_dir
+        run: |
+          shopt -s nullglob
+          dirs=(*-workflow/)
+          if [ ${#dirs[@]} -eq 0 ]; then
+            echo "Error: no *-workflow directory found" >&2; exit 1
+          elif [ ${#dirs[@]} -gt 1 ]; then
+            echo "Error: multiple *-workflow directories found: ${dirs[*]}" >&2; exit 1
+          fi
+          echo "name=${dirs[0]%/}" >> $GITHUB_OUTPUT
+      - name: Install pixi environment
+        run: pixi install --manifest-path ${{ steps.find_release_dir.outputs.name }}/pixi.toml --locked -e default
+      - name: Download syft
+        uses: anchore/sbom-action/download-syft@v0
+      - name: Generate SBOM
+        run: |
+          syft ${{ steps.find_release_dir.outputs.name }}/.pixi/envs/default \
+            --select-catalogers=+conda-meta-cataloger,+cargo-auditable-binary-cataloger \
+            --output spdx-json=sbom.spdx.json
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
+      - name: Scan SBOM for vulnerabilities
+        uses: anchore/scan-action@v7
+        with:
+          sbom: sbom.spdx.json
+          fail-build: true
+          severity-cutoff: high
