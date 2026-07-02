@@ -62,7 +62,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: Get workflow id
         id: get_workflow_id
-        run: echo workflow_I=$(yq .id spec.yaml) >> $GITHUB_OUTPUT
+        run: echo workflow_id=$(yq .id spec.yaml) >> $GITHUB_OUTPUT
 
   test:
     needs: parse-test-cases
