@@ -40,8 +40,6 @@ jobs:
           if git tag -l | grep -q "${{ steps.create_tag.outputs.result }}"; then
             echo "Tag ${{ steps.create_tag.outputs.result }} already exists. Exiting."
             exit 1
-          elif [[ "${{ steps.create_tag.outputs.result }}" == "v0.0.0" ]]; then 
-            echo "Tag ${{ steps.create_tag.outputs.result }} is not allowed. Did you forget --update?"
           else
             echo "Tag ${{ steps.create_tag.outputs.result }} does not exist. Proceeding."
           fi
@@ -51,6 +49,12 @@ jobs:
             echo "Tag ${{ steps.create_tag.outputs.result }} is valid, because it adheres to vMAJ.MIN.PATCH format."
           else
             echo "Tag ${{ steps.create_tag.outputs.result }} is not valid. It must adhere to vMAJ.MIN.PATCH format."
+            exit 1
+          fi
+      - name: Validate tag IS not 0.0.0
+        run: |
+          if [[ "${{ steps.create_tag.outputs.result }}" == "v0.0.0" ]]; then 
+            echo "Tag ${{ steps.create_tag.outputs.result }} is not allowed. Did you forget --update?"
             exit 1
           fi
       - name: If this is a PR to a patch branch, ensure the patch version is not 0
