@@ -4,6 +4,7 @@ on:
   pull_request:
     types: [opened, reopened, synchronize, closed]
     branches:
+      - 'main'
       - 'ecoscope-web'
       - 'patch-*'
 
@@ -39,6 +40,8 @@ jobs:
           if git tag -l | grep -q "${{ steps.create_tag.outputs.result }}"; then
             echo "Tag ${{ steps.create_tag.outputs.result }} already exists. Exiting."
             exit 1
+          elif [[ "${{ steps.create_tag.outputs.result }}" == "v0.0.0" ]]; then 
+            echo "Tag ${{ steps.create_tag.outputs.result }} is not allowed. Did you forget --update?"
           else
             echo "Tag ${{ steps.create_tag.outputs.result }} does not exist. Proceeding."
           fi
@@ -63,7 +66,7 @@ jobs:
 
   cut-release:
     needs: generate-tag
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && github.base_ref != 'main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
