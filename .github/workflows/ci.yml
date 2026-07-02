@@ -17,7 +17,7 @@ jobs:
       case_flags: ${{ steps.parse.outputs.case_flags }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Parse test cases
         id: parse
         run: |
@@ -59,7 +59,7 @@ jobs:
       workflow_id: ${{ steps.get_workflow_id.outputs.workflow_id }}
     
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Get workflow id
         id: get_workflow_id
         run: echo workflow_id=$(yq .id spec.yaml) >> $GITHUB_OUTPUT
@@ -73,7 +73,7 @@ jobs:
         case: ${{ fromJSON(needs.parse-test-cases.outputs.cases) }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install pixi
         run: curl -fsSL https://pixi.sh/install.sh | bash && echo "$HOME/.pixi/bin" >> $GITHUB_PATH
       - name: Set CI variables
@@ -132,7 +132,7 @@ jobs:
       group: snapshot-update-${{ github.head_ref }}
       cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.head_ref }}
       - name: Install pixi
