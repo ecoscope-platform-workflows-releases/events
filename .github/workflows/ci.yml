@@ -170,20 +170,20 @@ jobs:
 
       - name: Check for differences in generated files
         run: |
-          GENERATED_DIR="${{ needs.parse-test-cases.outputs.release_dir }}"
-          EXCLUDE_PATTERNS=":(exclude)${GENERATED_DIR}/pixi.lock :(exclude)${GENERATED_DIR}/README.md :(exclude)${GENERATED_DIR}/VERSION.yaml :(exclude)${GENERATED_DIR}/graph.png"
+          WORKFLOW_DIR_NAME="${{ needs.parse-test-cases.outputs.release_dir }}"
+          EXCLUDE_PATTERNS=":(exclude)${WORKFLOW_DIR_NAME}/pixi.lock :(exclude)${WORKFLOW_DIR_NAME}/README.md :(exclude)${WORKFLOW_DIR_NAME}/VERSION.yaml :(exclude)${WORKFLOW_DIR_NAME}/graph.png"
 
-          echo "Checking for differences in ${GENERATED_DIR}"
+          echo "Checking for differences in ${WORKFLOW_DIR_NAME}"
 
-          if [ ! -d "${GENERATED_DIR}" ]; then
-            echo "::error::Generated directory ${GENERATED_DIR} does not exist!"
+          if [ ! -d "${WORKFLOW_DIR_NAME}" ]; then
+            echo "::error::Generated directory ${WORKFLOW_DIR_NAME} does not exist!"
             exit 1
           fi
 
           # Exclude auto-generated files: pixi.lock (dependency resolution), VERSION.yaml (auto-versioned), graph.png (binary)
-          if ! git diff --exit-code -- "${GENERATED_DIR}" ${EXCLUDE_PATTERNS}; then
+          if ! git diff --exit-code -- "${WORKFLOW_DIR_NAME}" ${EXCLUDE_PATTERNS}; then
             echo ""
-            echo "::error::Generated files differ from committed files in ${GENERATED_DIR}"
+            echo "::error::Generated files differ from committed files in ${WORKFLOW_DIR_NAME}"
             echo "::error::Please run the compilation locally and commit the changes."
             exit 1
           else
@@ -192,15 +192,15 @@ jobs:
 
       - name: Validate excluded files exist
         run: |
-          GENERATED_DIR="${{ needs.parse-test-cases.outputs.release_dir }}"
+          WORKFLOW_DIR_NAME="${{ needs.parse-test-cases.outputs.release_dir }}"
           errors=0
 
           for file in pixi.lock VERSION.yaml README.md; do
-            if [ ! -f "${GENERATED_DIR}/${file}" ]; then
-              echo "::error::${GENERATED_DIR}/${file} does not exist!"
+            if [ ! -f "${WORKFLOW_DIR_NAME}/${file}" ]; then
+              echo "::error::${WORKFLOW_DIR_NAME}/${file} does not exist!"
               errors=$((errors + 1))
             else
-              echo "OK: ${GENERATED_DIR}/${file}"
+              echo "OK: ${WORKFLOW_DIR_NAME}/${file}"
             fi
           done
 
