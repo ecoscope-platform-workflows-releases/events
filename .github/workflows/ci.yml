@@ -55,32 +55,131 @@ jobs:
 
   test:
     needs: parse-test-cases
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest]
         case: ${{ fromJSON(needs.parse-test-cases.outputs.cases) }}
+        include:
+          - os: ubuntu-latest
+            workdir: .
+            pixi_task: test-app-sequential-mock-io
+          # The workdir mirrors where ecoscope-desktop installs templates on
+          # Windows, so this leg runs at the same depth production does:
+          #
+          #   %LOCALAPPDATA%\ecoscope-desktop\data\templates\<org>-<repo>\
+          #
+          # from DESKTOP_DIR_ROOT/DESKTOP_DIR_WORKFLOW_TEMPLATES in
+          # ecoscope-web's src/utils/desktop.utils.ts. That app builds the
+          # template id as `${orgName}-${repoName}`, so the last segment comes
+          # from the github context rather than a literal, and the depth here
+          # tracks the repo's own name. C:\Users\<9-char-user> and
+          # D:\a\events\events are both 18 chars, so the checkout root lands
+          # at 108 -- production's exact depth.
+          #
+          # That puts site-packages at 177 (production: 180, the 3 chars being
+          # `test` vs the `default` env production installs), so any dependency
+          # file with an 83+ char relative path crosses MAX_PATH and needs
+          # long-path support to import. ecoscope-web does no long-path
+          # handling of its own -- no detached-environments, no \\?\ prefixes
+          # -- so it relies entirely on the registry setting, and so does this.
+          #
+          # Depth is bounded above, not just below: rattler links package files
+          # with a long-path-safe writer but persists conda-meta metadata via a
+          # tempfile that is not, so install dies with "os error 3" once a
+          # conda-meta path crosses 260. The longest conda-meta name in the
+          # win-64 lock is 56 chars, landing at 227 here. Users with names
+          # longer than ~40 chars would exceed that in production too.
+          #
+          # test_iframes screenshots widgets in a headless browser; the PNG
+          # snapshots are Linux-generated and don't render identically on
+          # Windows, so deselect it there.
+          - os: windows-latest
+            workdir: AppData/Local/ecoscope-desktop/data/templates/${{ github.repository_owner }}-${{ github.event.repository.name }}
+            # Windows exercises the CLI rather than the app: that's how
+            # workflows actually run on Windows, and the app harness upstream
+            # passes results_url as a bare `c:/...` path, which obstore reads
+            # as scheme "c". The CLI takes ECOSCOPE_WORKFLOWS_RESULTS, which
+            # cli.py already requires to be a file:// URL.
+            pixi_task: test-cli-sequential-mock-io
+            extra_pytest_args: --deselect tests/test_results.py::test_iframes
 
     steps:
-      - uses: actions/checkout@v7
-      - name: Install pixi
-        run: curl -fsSL https://pixi.sh/install.sh | bash && echo "$HOME/.pixi/bin" >> $GITHUB_PATH
-      - name: Set CI variables
+      - name: Ensure long-path support
+        if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          echo "RELEASE_DIR=${{ needs.parse-test-cases.outputs.release_dir }}" >> $GITHUB_ENV
-      - name: Test
+          # The runner image already sets LongPathsEnabled=1 (see
+          # images/windows/scripts/build/Configure-BaseImage.ps1 in
+          # actions/runner-images), so this write is normally a no-op. It is
+          # here so the precondition holds on runners that aren't the hosted
+          # windows-latest image, and so the assert below catches a silent
+          # failure rather than surfacing as a confusing import error later.
+          $key = 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem'
+          $before = (Get-ItemProperty -Path $key -Name LongPathsEnabled -ErrorAction SilentlyContinue).LongPathsEnabled
+          Write-Host "LongPathsEnabled (runner image default): $before"
+          Set-ItemProperty -Path $key -Name LongPathsEnabled -Value 1 -Type DWord
+          $after = (Get-ItemProperty -Path $key -Name LongPathsEnabled).LongPathsEnabled
+          Write-Host "LongPathsEnabled (now): $after"
+          if ($after -ne 1) { throw "LongPathsEnabled is '$after', expected 1" }
+          # This one is load-bearing: the image does NOT set core.longpaths,
+          # and Git for Windows ignores the registry key in favour of its own
+          # config. The checkout below is ~274 chars at its deepest tracked
+          # file, so without this git fails with "Filename too long".
+          git config --global core.longpaths true
+      - uses: actions/checkout@v7
+        with:
+          path: ${{ matrix.workdir }}
+      - uses: prefix-dev/setup-pixi@v0.9.6
+        with:
+          run-install: false
+      - name: Install environment
+        working-directory: ${{ matrix.workdir }}
         run: >-
-          pixi run --manifest-path $RELEASE_DIR/pixi.toml
+          pixi install
+          --manifest-path ${{ needs.parse-test-cases.outputs.release_dir }}/pixi.toml
           --locked -e test
-          test-app-sequential-mock-io
+      - name: Assert the checkout clears MAX_PATH
+        # Without this the long-path leg could silently degrade into an
+        # ordinary test run if the nesting above ever stops being deep enough.
+        if: runner.os == 'Windows'
+        shell: python
+        env:
+          WORKDIR: ${{ matrix.workdir }}
+        run: |
+          import os, sys
+
+          root = os.path.abspath(os.environ["WORKDIR"])
+          paths = [os.path.join(d, f) for d, _, fs in os.walk(root) for f in fs]
+          over = sorted((p for p in paths if len(p) > 260), key=len, reverse=True)
+          print(f"checkout root ({len(root)} chars): {root}")
+          print(f"{len(over)} of {len(paths)} files exceed 260 chars")
+          for p in over[:5]:
+              print(f"  {len(p):4} {p}")
+          if not over:
+              sys.exit(
+                  "::error::no file under the checkout exceeds 260 chars; the env "
+                  "is not deep enough for this leg to exercise long-path support"
+              )
+      - name: Test
+        working-directory: ${{ matrix.workdir }}
+        run: >-
+          pixi run
+          --manifest-path ${{ needs.parse-test-cases.outputs.release_dir }}/pixi.toml
+          --locked -e test
+          ${{ matrix.pixi_task }}
           --case ${{ matrix.case }}
+          ${{ matrix.extra_pytest_args }}
       - name: Upload failed snapshot diffs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: failed-snapshot-diffs-${{ matrix.case }}
-          path: __diff_output__/
-          if-no-files-found: error
+          name: failed-snapshot-diffs-${{ matrix.os }}-${{ matrix.case }}
+          path: ${{ matrix.workdir }}/__diff_output__/
+          # Not every test failure is a snapshot mismatch, so an empty
+          # __diff_output__ is normal and shouldn't add a second red X.
+          if-no-files-found: warn
 
   docker:
     needs: parse-test-cases
