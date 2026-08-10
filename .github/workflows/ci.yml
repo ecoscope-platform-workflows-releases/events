@@ -64,6 +64,7 @@ jobs:
         include:
           - os: ubuntu-latest
             workdir: .
+            pixi_task: test-app-sequential-mock-io
           # Windows checks out into a deeply nested directory so the pixi env's
           # own files land past MAX_PATH (260). That reproduces what users hit
           # when this repo is cloned somewhere deep on disk: without long-path
@@ -76,6 +77,12 @@ jobs:
           # Windows, so deselect it there.
           - os: windows-latest
             workdir: long-path-regression-guard-000/long-path-regression-guard-001/long-path-regression-guard-002/long-path-regression-guard-003/long-path-regression-guard-004
+            # Windows exercises the CLI rather than the app: that's how
+            # workflows actually run on Windows, and the app harness upstream
+            # passes results_url as a bare `c:/...` path, which obstore reads
+            # as scheme "c". The CLI takes ECOSCOPE_WORKFLOWS_RESULTS, which
+            # cli.py already requires to be a file:// URL.
+            pixi_task: test-cli-sequential-mock-io
             extra_pytest_args: --deselect tests/test_results.py::test_iframes
 
     steps:
@@ -142,7 +149,7 @@ jobs:
           pixi run
           --manifest-path ${{ needs.parse-test-cases.outputs.release_dir }}/pixi.toml
           --locked -e test
-          test-app-sequential-mock-io
+          ${{ matrix.pixi_task }}
           --case ${{ matrix.case }}
           ${{ matrix.extra_pytest_args }}
       - name: Upload failed snapshot diffs
@@ -151,7 +158,9 @@ jobs:
         with:
           name: failed-snapshot-diffs-${{ matrix.os }}-${{ matrix.case }}
           path: ${{ matrix.workdir }}/__diff_output__/
-          if-no-files-found: error
+          # Not every test failure is a snapshot mismatch, so an empty
+          # __diff_output__ is normal and shouldn't add a second red X.
+          if-no-files-found: warn
 
   docker:
     needs: parse-test-cases
