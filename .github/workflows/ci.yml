@@ -62,18 +62,82 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         case: ${{ fromJSON(needs.parse-test-cases.outputs.cases) }}
         include:
+          - os: ubuntu-latest
+            workdir: .
+          # Windows checks out into a deeply nested directory so the pixi env's
+          # own files land past MAX_PATH (260). That reproduces what users hit
+          # when this repo is cloned somewhere deep on disk: without long-path
+          # support, resolving site-packages fails and python can't import.
+          # The job asserts long-path support is on, so a green run proves the
+          # code works in that layout *given the registry fix*.
+          #
           # test_iframes screenshots widgets in a headless browser; the PNG
           # snapshots are Linux-generated and don't render identically on
           # Windows, so deselect it there.
           - os: windows-latest
+            workdir: long-path-regression-guard-000/long-path-regression-guard-001/long-path-regression-guard-002/long-path-regression-guard-003/long-path-regression-guard-004
             extra_pytest_args: --deselect tests/test_results.py::test_iframes
 
     steps:
+      - name: Ensure long-path support
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # The runner image already sets LongPathsEnabled=1 (see
+          # images/windows/scripts/build/Configure-BaseImage.ps1 in
+          # actions/runner-images), so this write is normally a no-op. It is
+          # here so the precondition holds on runners that aren't the hosted
+          # windows-latest image, and so the assert below catches a silent
+          # failure rather than surfacing as a confusing import error later.
+          $key = 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem'
+          $before = (Get-ItemProperty -Path $key -Name LongPathsEnabled -ErrorAction SilentlyContinue).LongPathsEnabled
+          Write-Host "LongPathsEnabled (runner image default): $before"
+          Set-ItemProperty -Path $key -Name LongPathsEnabled -Value 1 -Type DWord
+          $after = (Get-ItemProperty -Path $key -Name LongPathsEnabled).LongPathsEnabled
+          Write-Host "LongPathsEnabled (now): $after"
+          if ($after -ne 1) { throw "LongPathsEnabled is '$after', expected 1" }
+          # This one is load-bearing: the image does NOT set core.longpaths,
+          # and Git for Windows ignores the registry key in favour of its own
+          # config. The checkout below is ~274 chars at its deepest tracked
+          # file, so without this git fails with "Filename too long".
+          git config --global core.longpaths true
       - uses: actions/checkout@v7
+        with:
+          path: ${{ matrix.workdir }}
       - uses: prefix-dev/setup-pixi@v0.9.6
         with:
           run-install: false
+      - name: Install environment
+        working-directory: ${{ matrix.workdir }}
+        run: >-
+          pixi install
+          --manifest-path ${{ needs.parse-test-cases.outputs.release_dir }}/pixi.toml
+          --locked -e test
+      - name: Assert the checkout clears MAX_PATH
+        # Without this the long-path leg could silently degrade into an
+        # ordinary test run if the nesting above ever stops being deep enough.
+        if: runner.os == 'Windows'
+        shell: python
+        env:
+          WORKDIR: ${{ matrix.workdir }}
+        run: |
+          import os, sys
+
+          root = os.path.abspath(os.environ["WORKDIR"])
+          longest = max(
+              (os.path.join(d, f) for d, _, fs in os.walk(root) for f in fs),
+              key=len,
+              default=root,
+          )
+          print(f"checkout root ({len(root)} chars): {root}")
+          print(f"longest path  ({len(longest)} chars): {longest}")
+          if len(longest) <= 260:
+              sys.exit(
+                  f"::error::longest path is {len(longest)} chars; it must exceed "
+                  "260 for this leg to exercise long-path support"
+              )
       - name: Test
+        working-directory: ${{ matrix.workdir }}
         run: >-
           pixi run
           --manifest-path ${{ needs.parse-test-cases.outputs.release_dir }}/pixi.toml
@@ -86,7 +150,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: failed-snapshot-diffs-${{ matrix.os }}-${{ matrix.case }}
-          path: __diff_output__/
+          path: ${{ matrix.workdir }}/__diff_output__/
           if-no-files-found: error
 
   docker:
