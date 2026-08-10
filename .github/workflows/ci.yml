@@ -55,30 +55,37 @@ jobs:
 
   test:
     needs: parse-test-cases
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest]
         case: ${{ fromJSON(needs.parse-test-cases.outputs.cases) }}
+        include:
+          # test_iframes screenshots widgets in a headless browser; the PNG
+          # snapshots are Linux-generated and don't render identically on
+          # Windows, so deselect it there.
+          - os: windows-latest
+            extra_pytest_args: --deselect tests/test_results.py::test_iframes
 
     steps:
       - uses: actions/checkout@v7
-      - name: Install pixi
-        run: curl -fsSL https://pixi.sh/install.sh | bash && echo "$HOME/.pixi/bin" >> $GITHUB_PATH
-      - name: Set CI variables
-        run: |
-          echo "RELEASE_DIR=${{ needs.parse-test-cases.outputs.release_dir }}" >> $GITHUB_ENV
+      - uses: prefix-dev/setup-pixi@v0.9.6
+        with:
+          run-install: false
       - name: Test
         run: >-
-          pixi run --manifest-path $RELEASE_DIR/pixi.toml
+          pixi run
+          --manifest-path ${{ needs.parse-test-cases.outputs.release_dir }}/pixi.toml
           --locked -e test
           test-app-sequential-mock-io
           --case ${{ matrix.case }}
+          ${{ matrix.extra_pytest_args }}
       - name: Upload failed snapshot diffs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: failed-snapshot-diffs-${{ matrix.case }}
+          name: failed-snapshot-diffs-${{ matrix.os }}-${{ matrix.case }}
           path: __diff_output__/
           if-no-files-found: error
 
