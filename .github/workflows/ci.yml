@@ -65,18 +65,38 @@ jobs:
           - os: ubuntu-latest
             workdir: .
             pixi_task: test-app-sequential-mock-io
-          # Windows checks out into a deeply nested directory so the pixi env's
-          # own files land past MAX_PATH (260). That reproduces what users hit
-          # when this repo is cloned somewhere deep on disk: without long-path
-          # support, resolving site-packages fails and python can't import.
-          # The job asserts long-path support is on, so a green run proves the
-          # code works in that layout *given the registry fix*.
+          # The workdir mirrors where ecoscope-desktop installs templates on
+          # Windows, so this leg runs at the same depth production does:
+          #
+          #   %LOCALAPPDATA%\ecoscope-desktop\data\templates\<org>-<repo>\
+          #
+          # from DESKTOP_DIR_ROOT/DESKTOP_DIR_WORKFLOW_TEMPLATES in
+          # ecoscope-web's src/utils/desktop.utils.ts. That app builds the
+          # template id as `${orgName}-${repoName}`, so the last segment comes
+          # from the github context rather than a literal, and the depth here
+          # tracks the repo's own name. C:\Users\<9-char-user> and
+          # D:\a\events\events are both 18 chars, so the checkout root lands
+          # at 108 -- production's exact depth.
+          #
+          # That puts site-packages at 177 (production: 180, the 3 chars being
+          # `test` vs the `default` env production installs), so any dependency
+          # file with an 83+ char relative path crosses MAX_PATH and needs
+          # long-path support to import. ecoscope-web does no long-path
+          # handling of its own -- no detached-environments, no \\?\ prefixes
+          # -- so it relies entirely on the registry setting, and so does this.
+          #
+          # Depth is bounded above, not just below: rattler links package files
+          # with a long-path-safe writer but persists conda-meta metadata via a
+          # tempfile that is not, so install dies with "os error 3" once a
+          # conda-meta path crosses 260. The longest conda-meta name in the
+          # win-64 lock is 56 chars, landing at 227 here. Users with names
+          # longer than ~40 chars would exceed that in production too.
           #
           # test_iframes screenshots widgets in a headless browser; the PNG
           # snapshots are Linux-generated and don't render identically on
           # Windows, so deselect it there.
           - os: windows-latest
-            workdir: long-path-regression-guard-000/long-path-regression-guard-001/long-path-regression-guard-002/long-path-regression-guard-003/long-path-regression-guard-004
+            workdir: AppData/Local/ecoscope-desktop/data/templates/${{ github.repository_owner }}-${{ github.event.repository.name }}
             # Windows exercises the CLI rather than the app: that's how
             # workflows actually run on Windows, and the app harness upstream
             # passes results_url as a bare `c:/...` path, which obstore reads
@@ -131,17 +151,16 @@ jobs:
           import os, sys
 
           root = os.path.abspath(os.environ["WORKDIR"])
-          longest = max(
-              (os.path.join(d, f) for d, _, fs in os.walk(root) for f in fs),
-              key=len,
-              default=root,
-          )
+          paths = [os.path.join(d, f) for d, _, fs in os.walk(root) for f in fs]
+          over = sorted((p for p in paths if len(p) > 260), key=len, reverse=True)
           print(f"checkout root ({len(root)} chars): {root}")
-          print(f"longest path  ({len(longest)} chars): {longest}")
-          if len(longest) <= 260:
+          print(f"{len(over)} of {len(paths)} files exceed 260 chars")
+          for p in over[:5]:
+              print(f"  {len(p):4} {p}")
+          if not over:
               sys.exit(
-                  f"::error::longest path is {len(longest)} chars; it must exceed "
-                  "260 for this leg to exercise long-path support"
+                  "::error::no file under the checkout exceeds 260 chars; the env "
+                  "is not deep enough for this leg to exercise long-path support"
               )
       - name: Test
         working-directory: ${{ matrix.workdir }}
