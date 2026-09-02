@@ -1,7 +1,7 @@
 id: events
 requirements:
   - name: ecoscope-platform
-    version: 2.18.1
+    version: 2.20.0
     channel: https://repo.prefix.dev/ecoscope-workflows/
   # ecoscope-platform already declares this exact pydeck dependency. it is
   # re-stated here as a workaround for a known issue. for further detail, see:
@@ -112,6 +112,7 @@ workflow:
         - name
       output_type: str
       output_column_name: reported_by_name
+      fan_out: false
   - name: Group Data
     id: groupers
     task: set_groupers
