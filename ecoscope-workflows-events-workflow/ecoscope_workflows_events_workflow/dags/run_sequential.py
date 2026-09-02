@@ -238,6 +238,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             field_name_options=["name"],
             output_type="str",
             output_column_name="reported_by_name",
+            fan_out=False,
             **(params.get("extract_reported_by") or {}),
         )
         .call()
