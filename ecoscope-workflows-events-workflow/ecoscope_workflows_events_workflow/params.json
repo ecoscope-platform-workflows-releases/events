@@ -79,6 +79,35 @@
           "type": "array",
           "description": "Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types."
         },
+        "event_states": {
+          "default": null,
+          "items": {
+            "type": "string",
+            "oneOf": [
+              {
+                "const": "new",
+                "title": "New"
+              },
+              {
+                "const": "active",
+                "title": "Active"
+              },
+              {
+                "const": "resolved",
+                "title": "Resolved"
+              },
+              {
+                "const": "review",
+                "title": "Review"
+              }
+            ]
+          },
+          "title": "Event State",
+          "type": "array",
+          "description": "Choose to analyze events with a certain state. If left empty, events of all states will be analyzed",
+          "uniqueItems": true,
+          "ecoscope:advanced": true
+        },
         "include_null_geometry": {
           "default": true,
           "title": "Include Events Without a Geometry (point or polygon)",
@@ -180,6 +209,27 @@
       ],
       "type": "object",
       "title": ""
+    },
+    "rename_display_columns": {
+      "additionalProperties": false,
+      "properties": {
+        "duplicate_strategy": {
+          "default": "suffix",
+          "enum": [
+            "suffix",
+            "skip",
+            "overwrite",
+            "error"
+          ],
+          "title": "Duplicate Strategy",
+          "type": "string",
+          "description": "Strategy for handling a rename whose new name is already taken. 'suffix': append _1, _2, etc. to the new name; 'skip': skip the rename, leaving the column under its original name; 'overwrite': replace the existing column; 'error': raise ValueError.",
+          "ecoscope:advanced": true
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Rename columns for map tooltip display"
     },
     "base_map_defs": {
       "additionalProperties": false,
@@ -397,6 +447,27 @@
           "title": "Coordinate Reference System",
           "type": "string",
           "description": "The coordinate reference system in which to perform the calculation, must be a valid CRS authority code, for example ESRI:53042",
+          "ecoscope:advanced": true
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": ""
+    },
+    "rename_density_output": {
+      "additionalProperties": false,
+      "properties": {
+        "duplicate_strategy": {
+          "default": "suffix",
+          "enum": [
+            "suffix",
+            "skip",
+            "overwrite",
+            "error"
+          ],
+          "title": "Duplicate Strategy",
+          "type": "string",
+          "description": "Strategy for handling a rename whose new name is already taken. 'suffix': append _1, _2, etc. to the new name; 'skip': skip the rename, leaving the column under its original name; 'overwrite': replace the existing column; 'error': raise ValueError.",
           "ecoscope:advanced": true
         }
       },
@@ -630,6 +701,7 @@
     "get_events_data": {
       "ui:order": [
         "event_types",
+        "event_states",
         "include_null_geometry",
         "force_point_geometry"
       ]
@@ -654,8 +726,10 @@
       "groupers",
       "filter_events",
       "events_bar_chart",
+      "rename_display_columns",
       "base_map_defs",
-      "events_meshgrid"
+      "events_meshgrid",
+      "rename_density_output"
     ]
   },
   "additionalProperties": false
