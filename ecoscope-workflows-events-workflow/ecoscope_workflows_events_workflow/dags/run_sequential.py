@@ -610,6 +610,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
                 "reported_by_name": "Reported By",
             },
             raise_if_not_found=True,
+            duplicate_strategy="overwrite",
             **(params.get("rename_display_columns") or {}),
         )
         .mapvalues(argnames=["df"], argvalues=split_event_groups)
@@ -1003,6 +1004,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             retain_columns=[],
             rename_columns={"density": "Count"},
             raise_if_not_found=True,
+            duplicate_strategy="overwrite",
             **(params.get("rename_density_output") or {}),
         )
         .mapvalues(argnames=["df"], argvalues=grouped_fd_colormap)
