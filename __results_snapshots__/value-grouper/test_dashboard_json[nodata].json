@@ -29,7 +29,7 @@
           "id": 1,
           "is_filtered": false,
           "title": "Events Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         },
         {
           "data": null,
@@ -43,7 +43,7 @@
           "id": 3,
           "is_filtered": false,
           "title": "Event Count Map",
-          "widget_type": "map"
+          "widget_type": "map_v2"
         }
       ]
     }
