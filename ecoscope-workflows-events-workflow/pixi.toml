@@ -43,13 +43,29 @@ channel = "https://conda.anaconda.org/conda-forge/"
 version = ">=1.20.0,<2.0.0"
 channel = "https://conda.anaconda.org/conda-forge/"
 
-[dependencies.wt-task-gcp]
-version = ">=0.1.3,<1.0.0"
-channel = "https://repo.prefix.dev/ecoscope-workflows/"
+[pypi-dependencies.wt-task-gcp]
+git = "https://github.com/wildlife-dynamics/wt"
+rev = "963d7c54fdc935cc851fcea9a1851864c6b3aed0"
+subdirectory = "wt-task-gcp"
 
-[feature.runner.dependencies.wt-runner-gcp]
-version = ">=0.3.1,<1.0.0"
-channel = "https://repo.prefix.dev/ecoscope-workflows/"
+[pypi-dependencies.wt-registry]
+git = "https://github.com/wildlife-dynamics/wt"
+rev = "963d7c54fdc935cc851fcea9a1851864c6b3aed0"
+subdirectory = "wt-registry"
+
+[feature.runner.dependencies.python]
+version = ">=3.10,<3.14"
+channel = "https://conda.anaconda.org/conda-forge/"
+
+[feature.runner.pypi-dependencies.wt-runner-gcp]
+git = "https://github.com/wildlife-dynamics/wt"
+rev = "963d7c54fdc935cc851fcea9a1851864c6b3aed0"
+subdirectory = "wt-runner-gcp"
+
+[feature.runner.pypi-dependencies.wt-task-gcp]
+git = "https://github.com/wildlife-dynamics/wt"
+rev = "963d7c54fdc935cc851fcea9a1851864c6b3aed0"
+subdirectory = "wt-task-gcp"
 
 [feature.runner.tasks]
 

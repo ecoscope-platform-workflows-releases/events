@@ -68,6 +68,14 @@ jobs:
       - name: Set CI variables
         run: |
           echo "RELEASE_DIR=${{ needs.parse-test-cases.outputs.release_dir }}" >> $GITHUB_ENV
+      - name: Probe which wt-invokers runs (wildlife-dynamics/wt#277)
+        run: >-
+          pixi run --manifest-path $RELEASE_DIR/pixi.toml
+          --locked -e test
+          python -c "import json, importlib.metadata as md, wt_invokers._subprocess as s;
+          d = md.distribution('wt-invokers');
+          print('wt-invokers', d.version, json.loads(d.read_text('direct_url.json') or '{}'));
+          print('SubprocessInvokerBase from', s.__file__)"
       - name: Test
         run: >-
           pixi run --manifest-path $RELEASE_DIR/pixi.toml

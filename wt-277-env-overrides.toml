@@ -1,0 +1,13 @@
+# Regression collateral for wildlife-dynamics/wt#277: build every wt-* package
+# from the PR's head commit instead of the released conda packages, so CI runs
+# the PR's wt-runner -> LocalSubprocessInvoker path. Mirrors wt's
+# tests/reverse_integration/wt-compiler-env-overrides.toml, with git sources in
+# place of monorepo paths.
+
+[feature.default.pypi-dependencies]
+wt-task-gcp = { git = "https://github.com/wildlife-dynamics/wt", rev = "963d7c54fdc935cc851fcea9a1851864c6b3aed0", subdirectory = "wt-task-gcp" }
+wt-registry = { git = "https://github.com/wildlife-dynamics/wt", rev = "963d7c54fdc935cc851fcea9a1851864c6b3aed0", subdirectory = "wt-registry" }
+
+[feature.runner.pypi-dependencies]
+wt-runner-gcp = { git = "https://github.com/wildlife-dynamics/wt", rev = "963d7c54fdc935cc851fcea9a1851864c6b3aed0", subdirectory = "wt-runner-gcp" }
+wt-task-gcp   = { git = "https://github.com/wildlife-dynamics/wt", rev = "963d7c54fdc935cc851fcea9a1851864c6b3aed0", subdirectory = "wt-task-gcp" }
