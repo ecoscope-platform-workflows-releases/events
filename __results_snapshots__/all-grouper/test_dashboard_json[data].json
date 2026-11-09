@@ -79,7 +79,7 @@
                 "elevationScale": 1,
                 "filled": true,
                 "getFillColor": "event_type_colormap",
-                "getLineWidth": 1,
+                "getLineWidth": 1.0,
                 "getRadius": 5.0,
                 "id": "GeoArrowScatterplotLayer-0",
                 "lineWidthMinPixels": 0,
